@@ -47,8 +47,7 @@ def download_bili_safe(args):
     try: download_bili(args)
     except Exception as ex: print(ex)
 
-def download_bili(args):
-    id = args.id
+def download_bili_single(id, args):
     to_audio = args.audio
     av = ''
     bv = ''
@@ -96,3 +95,7 @@ def download_bili(args):
         vc.audio.write_audiofile(fname)
         vc.reader.close()
         os.unlink(tmp_fname)
+
+def download_bili(args):
+    ids = args.id.split(',')
+    for id in ids: download_bili_single(id, args)
