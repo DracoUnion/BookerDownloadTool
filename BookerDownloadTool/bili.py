@@ -49,6 +49,10 @@ def download_bili_safe(args):
 
 def download_bili_single(id, args):
     to_audio = args.audio
+    sp = args.start_page
+    ep = args.end_page
+    opath = args.output_dir
+    safe_mkdir(opath)
     av = ''
     bv = ''
     if id.lower().startswith('av'):
@@ -65,20 +69,19 @@ def download_bili_single(id, args):
     bv = j['data']['bvid']
     author = fname_escape(j['data']['owner']['name'])
     title1 = fname_escape(j['data']['title'])
-    for it in j['data']['pages']:
+    for it in j['data']['pages'][sp-1:ep]:
         cid = it['cid']
         pg = it['page']
         title2 = fname_escape(it['part'])
-        title = title1 if title1 == title2 \
-                else f'{title1} P{pg} - {title2}'
+        title = f'{title1} - P{pg}' if title1 == title2 \
+            else f'{title1} - P{pg}：{title2}'
         print(title, author)
         name = f'{title} - {author} - {bv}'
-        fname = f'out/{name}.mp3' if to_audio else f'out/{name}.flv'
+        ext = 'mp3' if to_audio else 'flv'
+        fname = path.join(opath, name + '.' + ext)
         if path.isfile(fname):
             print(f'{fname} 已存在')
             continue
-        try: os.mkdir('out')
-        except: pass
         url = f'https://api.bilibili.com/x/player/playurl?cid={cid}&otype=json&bvid={bv}&aid={av}'
         j = requests.get(url, headers=bili_hdrs).json()
         if j['code'] != 0:
