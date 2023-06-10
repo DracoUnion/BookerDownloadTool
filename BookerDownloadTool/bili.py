@@ -5,22 +5,37 @@ import sys
 from os import path
 from moviepy.editor import VideoFileClip
 from io import BytesIO
+import traceback
 import tempfile
 import uuid
 from urllib.parse import quote_plus
+from concurrent.futures import ThreadPoolExecutor
 from .util import *
+
+def tr_download_meta_bili(aid, res, idx)
+    print(f'aid: {aid}')
+    url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
+    text = requests.get(url, headers=bili_hdrs).text \
+            .replace('\r', '') \
+            .replace('\n', ' ')
+    res[idx] = text
+    
+def tr_download_meta_bili_safe(*args, **kw):
+    try: tr_download_meta_bili(*args, **kw)
+    except: traceback.print_exc()
 
 def download_meta_bili(args):
     st = int(args.start)
     ed = int(args.end)
     ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
-    for i in range(st, ed + 1):
-        print(f'aid: {i}')
-        url = f'https://api.bilibili.com/x/web-interface/view?aid={i}'
-        text = requests.get(url, headers=bili_hdrs).text \
-            .replace('\r', '') \
-            .replace('\n', ' ')
-        ofile.write(text + '\n')
+    res = [''] * (ed - st + 1)
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    for i, aid in enumerate(range(st, ed + 1)):
+        h = pool.submit(tr_download_meta_bili_safe, id, res, i)
+        hdls.append(h)
+    for h in hdls: h.result()
+    ofile.write('\n'.join(res) + '\n')
     ofile.close()
 
 def batch_home_bili(args):
