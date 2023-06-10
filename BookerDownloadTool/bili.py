@@ -12,7 +12,7 @@ from urllib.parse import quote_plus
 from concurrent.futures import ThreadPoolExecutor
 from .util import *
 
-def tr_download_meta_bili(aid, res, idx)
+def tr_download_meta_bili(aid, res, idx):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     text = requests.get(url, headers=bili_hdrs).text \
