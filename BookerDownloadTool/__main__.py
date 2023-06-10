@@ -53,6 +53,7 @@ def main():
     bili_meta_parser = subparsers.add_parser("bili-meta", help="download bilibili meta")
     bili_meta_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
     bili_meta_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
+    bili_meta_parser.add_argument("-t", "--threads", type=int, default=16, help="thread num")
     bili_meta_parser.set_defaults(func=download_meta_bili)
 
     ln_parser = subparsers.add_parser("ln", help="download lightnovel")
