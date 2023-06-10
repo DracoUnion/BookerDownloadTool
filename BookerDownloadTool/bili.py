@@ -10,6 +10,19 @@ import uuid
 from urllib.parse import quote_plus
 from .util import *
 
+def download_meta_bili(args):
+    st = int(args.start)
+    ed = int(args.end)
+    ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
+    for i in range(st, ed + 1)
+        print(f'aid: {i}')
+        url = f'https://api.bilibili.com/x/web-interface/view?aid={i}'
+        text = requests.get(url, headers=bili_hdrs).text \
+            .replace('\r', '') \
+            .replace('\n', ' ')
+        ofile.write(text + '\n')
+    ofile.close()
+
 def batch_home_bili(args):
     mid = args.mid
     st = args.start
