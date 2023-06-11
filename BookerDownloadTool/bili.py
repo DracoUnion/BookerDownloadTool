@@ -10,20 +10,21 @@ import tempfile
 import uuid
 from urllib.parse import quote_plus
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 from .util import *
 import time
 
-def tr_download_meta_bili(aid, res, idx, arg):
+def tr_download_meta_bili(aid, ofile, lk, arg):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
-    while i in range(args.retry):
+    for i in range(args.retry):
         text = requests.get(url, headers=bili_hdrs).text \
                 .replace('\r', '') \
                 .replace('\n', ' ')
         time.sleep(args.wait)
         if '"message":"请求被拦截"' not in text: 
             break
-    res[idx] = text
+    with lk: ofile.write(text + '\n')
         
     
 def tr_download_meta_bili_safe(*args, **kw):
@@ -34,14 +35,13 @@ def download_meta_bili(args):
     st = int(args.start)
     ed = int(args.end)
     ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
-    res = [''] * (ed - st + 1)
+    lk = Lock()
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, res, i, args)
+        h = pool.submit(tr_download_meta_bili_safe, aid, ofile, lk, args)
         hdls.append(h)
     for h in hdls: h.result()
-    ofile.write('\n'.join(res) + '\n')
     ofile.close()
 
 def batch_home_bili(args):
