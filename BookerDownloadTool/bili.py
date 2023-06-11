@@ -39,6 +39,7 @@ def download_meta_bili(args):
     res = [''] * (ed - st + 1)
     cur = 0
     def write_back(idx, text):
+        nonlocal cur
         res[idx] = text
         with lk: 
             while res[cur] and cur < len(res):
