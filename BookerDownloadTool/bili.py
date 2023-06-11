@@ -14,7 +14,7 @@ from threading import Lock
 from .util import *
 import time
 
-def tr_download_meta_bili(aid, ofile, lk, args):
+def tr_download_meta_bili(aid, write_back, args):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     for i in range(args.retry):
@@ -24,7 +24,7 @@ def tr_download_meta_bili(aid, ofile, lk, args):
         time.sleep(args.wait)
         if '"message":"请求被拦截"' not in text: 
             break
-    with lk: ofile.write(text + '\n')
+    write_back(idx, text)
         
     
 def tr_download_meta_bili_safe(*args, **kw):
@@ -36,10 +36,17 @@ def download_meta_bili(args):
     ed = int(args.end)
     ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
     lk = Lock()
+    res = [''] * (ed - st + 1)
+    cur = 0
+    def write_back(idx, text):
+        res[idx] = text
+        with lk: while res[cur] and cur < len(res):
+            ofile.write(res[cur] + '\n')
+            cur += 1
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, ofile, lk, args)
+        h = pool.submit(tr_download_meta_bili_safe, aid, write_back, args)
         hdls.append(h)
     for h in hdls: h.result()
     ofile.close()
