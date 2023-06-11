@@ -14,7 +14,7 @@ from threading import Lock
 from .util import *
 import time
 
-def tr_download_meta_bili(aid, ofile, lk, arg):
+def tr_download_meta_bili(aid, ofile, lk, args):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     for i in range(args.retry):
