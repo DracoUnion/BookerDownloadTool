@@ -38,7 +38,7 @@ def download_meta_bili(args):
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, res, i, arg)
+        h = pool.submit(tr_download_meta_bili_safe, aid, res, i, args)
         hdls.append(h)
     for h in hdls: h.result()
     ofile.write('\n'.join(res) + '\n')
