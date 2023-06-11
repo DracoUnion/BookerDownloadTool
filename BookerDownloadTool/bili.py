@@ -11,14 +11,20 @@ import uuid
 from urllib.parse import quote_plus
 from concurrent.futures import ThreadPoolExecutor
 from .util import *
+import time
 
-def tr_download_meta_bili(aid, res, idx):
+def tr_download_meta_bili(aid, res, idx, arg):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
-    text = requests.get(url, headers=bili_hdrs).text \
-            .replace('\r', '') \
-            .replace('\n', ' ')
+    while i in range(args.retry):
+        text = requests.get(url, headers=bili_hdrs).text \
+                .replace('\r', '') \
+                .replace('\n', ' ')
+        time.sleep(args.wait)
+        if '"message":"请求被拦截"' not in text: 
+            break
     res[idx] = text
+        
     
 def tr_download_meta_bili_safe(*args, **kw):
     try: tr_download_meta_bili(*args, **kw)
@@ -32,7 +38,7 @@ def download_meta_bili(args):
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, res, i)
+        h = pool.submit(tr_download_meta_bili_safe, aid, res, i, arg)
         hdls.append(h)
     for h in hdls: h.result()
     ofile.write('\n'.join(res) + '\n')
