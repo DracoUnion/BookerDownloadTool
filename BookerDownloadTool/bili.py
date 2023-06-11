@@ -14,7 +14,7 @@ from threading import Lock
 from .util import *
 import time
 
-def tr_download_meta_bili(aid, write_back, args):
+def tr_download_meta_bili(aid, write_back, idx, args):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     for i in range(args.retry):
@@ -47,7 +47,7 @@ def download_meta_bili(args):
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, write_back, args)
+        h = pool.submit(tr_download_meta_bili_safe, aid, write_back, i, args)
         hdls.append(h)
     for h in hdls: h.result()
     ofile.close()
