@@ -40,9 +40,10 @@ def download_meta_bili(args):
     cur = 0
     def write_back(idx, text):
         res[idx] = text
-        with lk: while res[cur] and cur < len(res):
-            ofile.write(res[cur] + '\n')
-            cur += 1
+        with lk: 
+            while res[cur] and cur < len(res):
+                ofile.write(res[cur] + '\n')
+                cur += 1
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
