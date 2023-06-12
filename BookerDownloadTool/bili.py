@@ -18,9 +18,13 @@ def tr_download_meta_bili(aid, write_back, idx, args):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     for i in range(args.retry):
-        text = requests.get(url, headers=bili_hdrs).text \
-                .replace('\r', '') \
-                .replace('\n', ' ')
+        text = request_retry(
+            'GET', url, 
+            headers=bili_hdrs,
+            retry=args.retry,
+        ).text \
+            .replace('\r', '') \
+            .replace('\n', ' ')
         time.sleep(args.wait)
         if '"message":"请求被拦截"' not in text: 
             break
