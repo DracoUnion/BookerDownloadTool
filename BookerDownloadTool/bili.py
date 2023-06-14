@@ -46,7 +46,7 @@ def download_meta_bili(args):
         nonlocal cur
         res[idx] = text
         with lk: 
-            while res[cur] and cur < len(res):
+            while cur < len(res) and res[cur]:
                 ofile.write(res[cur] + '\n')
                 cur += 1
     pool = ThreadPoolExecutor(args.threads)
