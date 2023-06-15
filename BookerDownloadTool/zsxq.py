@@ -147,7 +147,7 @@ def download_zsxq(args):
         url = f'https://api.zsxq.com/v2/groups/{gid}/topics?scope=all&count=20&end_time={quote_plus(ed)}'
         # print(url)
         j = req_zsxq_retry(url)
-        j.setdefault('resp_data', [])
+        j.setdefault('resp_data', {'topics': []})
         j['resp_data']['topics'] = [
             it for it in j['resp_data']['topics']
             if conv_time_str(it['create_time']) >= st_fmt2
