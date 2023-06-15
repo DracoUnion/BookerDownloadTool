@@ -11,7 +11,7 @@ from EpubCrawler.config import config
 import argparse
 from GenEpub import gen_epub
 from urllib.parse import quote_plus
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 config['optiMode'] = 'thres'
@@ -121,6 +121,12 @@ def conv_time_str(tm):
     match = re.search(r'(\d+-\d+-\d+).(\d+:\d+:\d+)', tm)
     return  match.group(1) + ' ' + match.group(2)
            
+def next_ed(ed):
+    time_fmt = '%Y-%m-%dT%H:%M:%S.%f+0800'
+    tm = datetime.strptime(time_fmt, ed)
+    tm -= timedelta(milliseconds=1)
+    return tm.strftime(time_fmt)
+           
 def download_zsxq(args):
     ori_st = args.start
     ori_ed = args.end
@@ -154,12 +160,13 @@ def download_zsxq(args):
         ]
         if len(j['resp_data']['topics']) == 0:
             break
+        print(j['resp_data']['topics'])
         part = get_article(j)        
         # 图片
         for art in part:
             art['content'] = process_img(art['content'], imgs)
         articles += part
-        ed = j['resp_data']['topics'][-1]['create_time']
+        ed = next_ed(j['resp_data']['topics'][-1]['create_time'])
     
     gen_epub(articles, imgs)
     
