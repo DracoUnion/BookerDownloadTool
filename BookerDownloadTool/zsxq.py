@@ -143,7 +143,7 @@ def download_zsxq(args):
     
     while True:
         print(f'st: {st}, ed: {ed}')
-        print(headers)
+        # print(headers)
         url = f'https://api.zsxq.com/v2/groups/{gid}/topics?scope=all&count=20&end_time={quote_plus(ed)}'
         # print(url)
         j = req_zsxq_retry(url)
@@ -152,7 +152,7 @@ def download_zsxq(args):
             it for it in j['resp_data']['topics']
             if conv_time_str(it['create_time']) >= st_fmt2
         ]
-        if len(j['resp_data']) == 0:
+        if len(j['resp_data']['topics']) == 0:
             break
         part = get_article(j)        
         # 图片
