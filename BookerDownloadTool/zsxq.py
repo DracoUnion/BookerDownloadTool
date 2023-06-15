@@ -122,10 +122,12 @@ def conv_time_str(tm):
     return  match.group(1) + ' ' + match.group(2)
            
 def next_ed(ed):
-    time_fmt = '%Y-%m-%dT%H:%M:%S.%f+0800'
-    tm = datetime.strptime(time_fmt, ed)
+    tm = datetime(
+        int(ed[0:4]), int(ed[5:7]), int(ed[8:10]),
+        int(ed[11:13]), int(ed[14:16]), int(ed[17:19]), int(ed[20:23]) * 1000
+    )
     tm -= timedelta(milliseconds=1)
-    return tm.strftime(time_fmt)
+    return f'{tm.year}-{tm.month:02d}-{tm.day:02d}T{tm.hour:02d}:{tm.minute:02d}:{tm.second:02d}.{tm.microsecond//1000:03d}+0800'
            
 def download_zsxq(args):
     ori_st = args.start
