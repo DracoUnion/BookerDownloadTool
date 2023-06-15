@@ -8,6 +8,7 @@ from .dl_gh_book import *
 from .bili import *
 from .dmzj import *
 from .discuz import *
+from .zsxq import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -138,6 +139,14 @@ def main():
     batch_parser.add_argument("-l", "--exi-list", default='exi_dz.json', help="existed fnames JSON")
     batch_parser.add_argument("-o", "--out", default='out', help="output dir")
     batch_parser.set_defaults(func=batch_dz)
+    
+    now = datetime.now()
+    zsxq_parser = subparsers.add_parser("zsxq", help="download zsxq")
+    zsxq_parser.add_argument('-s', '--start', default='00010101', help="starting date")
+    zsxq_parser.add_argument('-e', '--end', default=f'{now.year}{now.month:02d}{now.day:02d}', help="ending date")
+    zsxq_parser.add_argument('-c', '--cookie', default=os.environ.get('ZSXQ_COOKIE'), help="zsxq cookie, default as $ZSXQ_COOKIE")
+    zsxq_parser.add_argument('id', help='zsxq group id')
+    zsxq_parser.set_defaults(func=download_zsxq)
 
     args = parser.parse_args()
     args.func(args)
