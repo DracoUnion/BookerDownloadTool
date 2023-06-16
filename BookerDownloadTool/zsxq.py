@@ -166,7 +166,7 @@ def download_zsxq(args):
         part = get_article(j)        
         # 图片
         for art in part:
-            art['content'] = process_img(art['content'], imgs)
+            art['content'] = process_img(art['content'], imgs, img_prefix='../Images/')
         articles += part
         ed = next_ed(j['resp_data']['topics'][-1]['create_time'])
     
