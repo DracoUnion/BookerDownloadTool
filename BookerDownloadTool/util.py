@@ -27,7 +27,7 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 
 DIR = path.dirname(path.abspath(__file__))
 
-d = lambda name: path.join(path.dirname(__file__, name))
+d = lambda name: path.join(path.dirname(__file__), name)
 
     
 def is_gbk(ch):
