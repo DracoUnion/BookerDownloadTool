@@ -5,10 +5,57 @@ import sys
 from os import path
 from moviepy.editor import VideoFileClip
 from io import BytesIO
+import traceback
 import tempfile
 import uuid
 from urllib.parse import quote_plus
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 from .util import *
+import time
+
+def tr_download_meta_bili(aid, write_back, idx, args):
+    print(f'aid: {aid}')
+    url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
+    for i in range(args.retry):
+        text = request_retry(
+            'GET', url, 
+            headers=bili_hdrs,
+            retry=args.retry,
+        ).text \
+            .replace('\r', '') \
+            .replace('\n', ' ')
+        time.sleep(args.wait)
+        if '"message":"请求被拦截"' not in text: 
+            break
+    write_back(idx, text)
+        
+    
+def tr_download_meta_bili_safe(*args, **kw):
+    try: tr_download_meta_bili(*args, **kw)
+    except: traceback.print_exc()
+
+def download_meta_bili(args):
+    st = int(args.start)
+    ed = int(args.end)
+    ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
+    lk = Lock()
+    res = [''] * (ed - st + 1)
+    cur = 0
+    def write_back(idx, text):
+        nonlocal cur
+        res[idx] = text
+        with lk: 
+            while cur < len(res) and res[cur]:
+                ofile.write(res[cur] + '\n')
+                cur += 1
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    for i, aid in enumerate(range(st, ed + 1)):
+        h = pool.submit(tr_download_meta_bili_safe, aid, write_back, i, args)
+        hdls.append(h)
+    for h in hdls: h.result()
+    ofile.close()
 
 def batch_home_bili(args):
     mid = args.mid
@@ -47,8 +94,7 @@ def download_bili_safe(args):
     try: download_bili(args)
     except Exception as ex: print(ex)
 
-def download_bili(args):
-    id = args.id
+def download_bili_single(id, args):
     to_audio = args.audio
     sp = args.start_page
     ep = args.end_page
@@ -99,3 +145,7 @@ def download_bili(args):
         vc.audio.write_audiofile(fname)
         vc.reader.close()
         os.unlink(tmp_fname)
+
+def download_bili(args):
+    ids = args.id.split(',')
+    for id in ids: download_bili_single(id, args)

@@ -66,7 +66,7 @@ def download_ln(args):
         'title': info['title'], 
         'content': f"<p>作者：{info['author']}</p>",
     }]
-    url = f'http://dl.wenku8.com/down.php?type=udefault_hdrstf8&id={id}'
+    url = f'http://dl.wenku8.com/down.php?type=utf8&id={id}'
     text = request_retry('GET', url, headers=headers).content.decode('utf-8')
     chs = format_text(text)
     articles += chs
