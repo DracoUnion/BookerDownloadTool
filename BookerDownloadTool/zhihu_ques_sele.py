@@ -16,6 +16,7 @@ from .util import *
 # 滚动到底
 def scroll_to_bottom(driver):
     driver.execute_script('''
+        document.documentElement.scrollTop -= 50
         document.documentElement.scrollTop = 100000000
     ''')
     
