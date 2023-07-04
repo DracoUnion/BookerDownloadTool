@@ -81,11 +81,9 @@ def main():
     zhihu_ques_parser.add_argument("qid", help="qid")
     zhihu_ques_parser.set_defaults(func=zhihu_ques_sele)
     
-    zhihu_ques_batch_parser = subparsers.add_parser("zhihu-batch", help="crawl zhihu question by **selenium**")
-    zhihu_ques_batch_parser.add_argument("-s", "--start", type=int, default=1000_0000, help="starting qid")
-    zhihu_ques_batch_parser.add_argument("-e", "--end", type=int, default=9_9999_9999, help="ending qid")
-    zhihu_ques_batch_parser.add_argument("-t", "--threads", type=int, default=8, help="thread count")
-    zhihu_ques_batch_parser.set_defaults(func=zhihu_ques_batch_sele)
+    zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="crawl zhihu question by **selenium**")
+    zhihu_topic_parser.add_argument("tid", help="tid")
+    zhihu_topic_parser.set_defaults(func=zhihu_topic_sele)
     
     dmzj_dl_parser = subparsers.add_parser("dmzj", help="download dmzj comic")
     dmzj_dl_parser.add_argument("id", help="id")

@@ -36,14 +36,14 @@ def get_last_aid(driver):
     ''')   
 
 # 获取 AID 数量
-def get_aid_count(driver):
+def get_ans_count(driver):
     return driver.execute_script('''
         var ansLi = document.querySelectorAll('.AnswerItem')
         return ansLi.length
     ''')  
     
 # 获取回答数量
-def get_ans_count(driver):
+def get_ans_total(driver):
     return driver.execute_script('''
         var el = document.querySelector('h4.List-headerText')
         if (!el) return 0
@@ -52,13 +52,34 @@ def get_ans_count(driver):
         if (!m) return 0
         return Number.parseInt(m[0])
     ''')  
-    
+
+def get_ques_count(driver):
+    return driver.execute_script('''
+        var els = document.querySelectorAll('h2.ContentItem-title')
+        return els.length
+    ''')  
+
 # 获取整个页面 HTML
 def get_html(driver):
     return driver.execute_script('''
         return document.documentElement.outerHTML
     ''')    
+
+def close_login_dialog(driver):
+    driver.execute_script('''
+        var cls_btn = document.querySelector('.Modal-closeButton')
+        if (cls_btn) cls_btn.click()
+    ''')
     
+def get_qids(html):
+    rt = pq(html)
+    el_links = rt('h2.ContentItem-title meta[itemprop="url"]')
+    qids = [
+        pq(el).attr('content').split('/')[-1]
+        for el in el_links
+    ]
+    return qids
+
 # 获取文章列表
 def get_articles(html, qid):
     rt = pq(html)
@@ -90,26 +111,35 @@ def get_articles(html, qid):
         articles.append({'title': au_name, 'content': co})
     return articles
 
-
-def zhihu_ques_batch_sele(args):
-    st = args.start
-    ed = args.end
-    pool = ThreadPoolExecutor(args.threads)
-    hdls = []
-    for qid in range(st, ed + 1):
-        args = copy.deepcopy(args)
-        args.qid = qid
-        h = pool.submit(zhihu_ques_sele_safe, args)
-        # zhihu_ques_sele_safe(args)
-        hdls.append(h)
-    for h in hdls: h.result()
-
-def zhihu_ques_sele_safe(args):
-    try:
-        zhihu_ques_sele(args)
-    except:
-        traceback.print_exc()
-
+def zhihu_topic_sele(args):
+    tid = args.tid
+    # 检查是否存在
+    url = f'hhttps://www.zhihu.com/topic/{tid}'
+    html = request_retry('GET', url).text
+    rt = pq(html)
+    if '你似乎来到了没有知识存在的荒原' in rt('title').text():
+        print(f'问题 [qid={qid}] 不存在')
+        return
+    driver = create_driver()
+    driver.get(url)
+    close_login_dialog(driver)
+    last_count = 0
+    cntr = 0
+    while True:
+        try:
+            scroll_to_bottom(driver)
+            count = get_ques_count(driver)
+            print(f'count: {count}')
+            if count == last_count:
+                cntr += 1
+                if cntr == 10: break
+            last_count = count
+        except:
+            traceback.print_exc()
+    html = get_html(driver)
+    qids = get_qids(html)
+    driver.close()
+    open(f'zhihu_ques_{tid}.txt', 'w').write('\n'.join(qids) + '\n')
 
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
@@ -129,20 +159,17 @@ def zhihu_ques_sele(args):
     driver = create_driver()
     driver.get(url)
     # 关闭登录对话框
-    driver.execute_script('''
-        var cls_btn = document.querySelector('.Modal-closeButton')
-        if (cls_btn) cls_btn.click()
-    ''')
-    ansCnt = get_ans_count(driver)
-    if ansCnt == 0:
+    close_login_dialog(driver)
+    total = get_ans_total(driver)
+    if total == 0:
         print(f'问题 [qid={qid}] 无回答')
         driver.close()
         return
     # 如果没有到底就一直滚动
     while not if_reach_bottom(driver):
         try:
-            cnt = get_aid_count(driver)
-            print(f'reach bottom: false, count: {cnt}/{ansCnt}')
+            cnt = get_ans_count(driver)
+            print(f'reach bottom: false, count: {cnt}/{total}')
             scroll_to_bottom(driver)
             # time.sleep(1)
         except:
