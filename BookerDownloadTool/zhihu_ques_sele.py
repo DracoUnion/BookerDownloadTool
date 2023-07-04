@@ -99,7 +99,7 @@ def zhihu_ques_sele(args):
     qid = args.qid
     
     url = f'https://www.zhihu.com/question/{qid}'
-    driver = create_driver()
+    driver = getattr(args, 'driver', None) or create_driver()
     driver.get(url)
     html = get_html(driver)
     if '你似乎来到了没有知识存在的荒原' in html:
