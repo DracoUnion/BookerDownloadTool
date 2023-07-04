@@ -209,7 +209,7 @@ def zhihu_ques_sele(args):
         
     gen_epub(articles, imgs)
 
-def zhihu_all_topics(args):
+def zhihu_all_topics_sele(args):
     root_tid = args.root
     res_fname = f'zhihu_all_topics_{root_tid}.txt'
     rec_fname = f'zhihu_all_topics_{root_tid}_rec.txt'
