@@ -122,6 +122,9 @@ def zhihu_ques_sele(args):
     if '你似乎来到了没有知识存在的荒原' in html:
         print(f'问题 [qid={qid}] 不存在')
         return
+    if '暂时还没有回答' in html:
+        print(f'问题 [qid={qid}] 无回答')
+        return
     driver = create_driver()
     driver.get(url)
     # 关闭登录对话框
