@@ -119,10 +119,11 @@ def zhihu_ques_sele(args):
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
     html = request_retry('GET', url).text
-    if '你似乎来到了没有知识存在的荒原' in html:
+    rt = pq(html)
+    if '你似乎来到了没有知识存在的荒原' in rt('title').text():
         print(f'问题 [qid={qid}] 不存在')
         return
-    if '暂时还没有回答' in html:
+    if len(rt('h4.List-headerText')) == 0:
         print(f'问题 [qid={qid}] 无回答')
         return
     driver = create_driver()
@@ -133,6 +134,10 @@ def zhihu_ques_sele(args):
         if (cls_btn) cls_btn.click()
     ''')
     ansCnt = get_ans_count(driver)
+    if ansCnt == 0:
+        print(f'问题 [qid={qid}] 无回答')
+        driver.close()
+        return
     # 如果没有到底就一直滚动
     while not if_reach_bottom(driver):
         try:
