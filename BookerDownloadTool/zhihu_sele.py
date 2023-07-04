@@ -13,6 +13,7 @@ from GenEpub import gen_epub
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from concurrent.futures import ThreadPoolExecutor
+from collections import deque
 from .util import *
 
 # 滚动到底
@@ -79,6 +80,15 @@ def get_qids(html):
         for el in el_links
     ]
     return qids
+
+def get_sub_tids(html):
+    rt = pq(html)
+    el_topics = rt('.TopicRelativeBoard-item:last-of-type a')
+    tids = [
+        pq(el).attr('href').split('/')[-1]
+        for el in el_topics
+    ]
+    return tids
 
 # 获取文章列表
 def get_articles(html, qid):
@@ -198,3 +208,40 @@ def zhihu_ques_sele(args):
         )
         
     gen_epub(articles, imgs)
+
+def zhihu_all_topics(args):
+    root_tid = args.root
+    res_fname = f'zhihu_all_topics_{root_tid}.txt'
+    rec_fname = f'zhihu_all_topics_{root_tid}_rec.txt'
+
+    ofile = open(res_fname, 'a', encoding='utf8')
+    if path.isfile(rec_fname):
+        rec = open(rec_fname, encoding='utf8').read().split('\n')
+        rec = [l for l in rec if l]
+        if rec and rec[-1] == '-1': rec = rec[:-1]
+        vis = set(rec)
+        pop_count = rec.count('-1')
+        rec = [tid for tid in rec if tid != '-1'][pop_count:]
+        q = deque(rec)
+    else:
+        vis = set()
+        q = deque([root_tid])
+    rec_file = open(rec_fname, 'a', encoding='utf8')
+    driver = create_driver()
+    while q:
+        tid = q.popleft()
+        print(f'tid: {tid}')
+        rec_file.write('-1\n')
+        ofile.write(tid + '\n')
+        url = f'https://www.zhihu.com/topic/{tid}'
+        driver.get(url)
+        subs = get_sub_tids(get_html(driver))
+        for s in subs:
+            if s not in vis:
+                vis.add(s)
+                q.append(s)
+                rec_file.write(s + '\n')
+    ofile.close()
+    rec_file.close()
+
+    
