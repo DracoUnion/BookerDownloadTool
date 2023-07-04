@@ -78,14 +78,9 @@ def main():
     ln_fetch_parser.add_argument("-e", "--end", required=True, help="ending date (YYYYMMDD)")
     ln_fetch_parser.set_defaults(func=fetch_ln)
     
-    zhihu_ques_parser = subparsers.add_parser("zhihu-ques", help="crawl zhihu question by requests")
+    zhihu_ques_parser = subparsers.add_parser("zhihu-ques", help="crawl zhihu question by **selenium**")
     zhihu_ques_parser.add_argument("qid", help="qid")
-    zhihu_ques_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimazation mode, default 'thres'")
-    zhihu_ques_parser.set_defaults(func=zhihu_ques)
-
-    zhihu_ques_sele_parser = subparsers.add_parser("zhihu-ques-sele", help="crawl zhihu question by **selenium**")
-    zhihu_ques_sele_parser.add_argument("qid", help="qid")
-    zhihu_ques_sele_parser.set_defaults(func=zhihu_ques_sele)
+    zhihu_ques_parser.set_defaults(func=zhihu_ques_sele)
     
     dmzj_dl_parser = subparsers.add_parser("dmzj", help="download dmzj comic")
     dmzj_dl_parser.add_argument("id", help="id")
