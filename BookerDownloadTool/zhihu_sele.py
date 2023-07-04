@@ -215,8 +215,9 @@ def zhihu_all_topics_sele(args):
     rec_fname = f'zhihu_all_topics_{root_tid}_rec.txt'
 
     ofile = open(res_fname, 'a', encoding='utf8')
-    if path.isfile(rec_fname):
-        rec = open(rec_fname, encoding='utf8').read().split('\n')
+    rec_file = open(rec_fname, 'a+', encoding='utf8')
+    if rec_file.tell() != 0:
+        rec = rec_file.read().split('\n')
         rec = [l for l in rec if l]
         if rec and rec[-1] == '-1': rec = rec[:-1]
         vis = set(rec)
@@ -226,7 +227,7 @@ def zhihu_all_topics_sele(args):
     else:
         vis = set()
         q = deque([root_tid])
-    rec_file = open(rec_fname, 'a', encoding='utf8')
+        rec_file.write(root_tid + '\n')
     driver = create_driver()
     while q:
         tid = q.popleft()
