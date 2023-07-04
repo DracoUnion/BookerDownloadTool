@@ -2,6 +2,7 @@ import re
 import sys
 import time
 import traceback
+import copy
 from os import path
 from pyquery import PyQuery as pq
 from EpubCrawler.util import request_retry
@@ -91,7 +92,24 @@ def get_articles(html, qid):
 
 
 def zhihu_ques_batch_sele(args):
-    pass
+    st = args.start
+    ed = args.end
+    for qid in range(st, ed + 1):
+        url = f'https://www.zhihu.com/question/{qid}'
+        html = request_retry('GET', url).text
+        if '你似乎来到了没有知识存在的荒原' in html:
+            print(f'问题 [qid={qid}] 不存在')
+            continue
+        args = copy.deepcopy(args)
+        args.qid = qid
+        zhihu_ques_sele_safe(args)
+
+def zhihu_ques_sele_safe(args):
+    try:
+        zhihu_ques_sele(args)
+    except:
+        traceback.print_exc()
+
 
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
@@ -99,7 +117,7 @@ def zhihu_ques_sele(args):
     qid = args.qid
     
     url = f'https://www.zhihu.com/question/{qid}'
-    driver = getattr(args, 'driver', None) or create_driver()
+    driver = create_driver()
     driver.get(url)
     html = get_html(driver)
     if '你似乎来到了没有知识存在的荒原' in html:
