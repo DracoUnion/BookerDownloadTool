@@ -83,7 +83,7 @@ def get_qids(html):
 
 def get_sub_tids(html):
     rt = pq(html)
-    el_topics = rt('.TopicRelativeBoard-item:last-of-type a')
+    el_topics = rt('.TopicRelativeBoard-item').eq(-1).find('a')
     tids = [
         pq(el).attr('href').split('/')[-1]
         for el in el_topics
