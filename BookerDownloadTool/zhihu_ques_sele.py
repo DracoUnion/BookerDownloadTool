@@ -88,25 +88,18 @@ def get_articles(html, qid):
         articles.append({'title': au_name, 'content': co})
     return articles
 
+
+
+def zhihu_ques_batch_sele(args):
+    pass
+
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
     cralwer_config['imgSrc'] = ['data-original', 'src']
     qid = args.qid
     
     url = f'https://www.zhihu.com/question/{qid}'
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--log-level=3')
-    options.add_argument(f'--user-agent={UA}')
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = webdriver.Chrome(options=options)
-    driver.set_script_timeout(1000)
-    # StealthJS
-    stealth = open(d('stealth.min.js')).read()
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        "source": stealth
-    })
+    driver = create_driver()
     driver.get(url)
     html = get_html(driver)
     if '你似乎来到了没有知识存在的荒原' in html:

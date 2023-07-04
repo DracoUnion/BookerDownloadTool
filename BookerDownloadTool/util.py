@@ -6,6 +6,8 @@ import imgyaso
 import subprocess as subp
 import tempfile
 import uuid
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 RE_INFO = r'\[(.+?)\]([^\[]+)'
 
@@ -98,3 +100,20 @@ def anime4k_auto(img):
     img = open(fname, 'rb').read()
     safe_remove(fname)
     return img
+
+def create_driver():
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--log-level=3')
+    options.add_argument(f'--user-agent={UA}')
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    driver = webdriver.Chrome(options=options)
+    driver.set_script_timeout(1000)
+    # StealthJS
+    stealth = open(d('stealth.min.js')).read()
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+        "source": stealth
+    })
+    return driver
+
