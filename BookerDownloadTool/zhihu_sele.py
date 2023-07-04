@@ -161,6 +161,10 @@ def zhihu_ques_sele(args):
     if len(rt('h4.List-headerText')) == 0:
         print(f'问题 [qid={qid}] 无回答')
         return
+    fname = '知乎问答：' + fname_escape(rt('h1.QuestionHeader-title').eq(0).text()) + '.epub'
+    if path.isfile(fname):
+        print('问题 [qid={qid}] 已抓取')
+        return
     driver = create_driver()
     driver.get(url)
     # 关闭登录对话框
