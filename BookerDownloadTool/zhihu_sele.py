@@ -220,7 +220,9 @@ def zhihu_all_topics_sele(args):
         rec_file.seek(0, 0)
         rec = rec_file.read().split('\n')
         rec = [l for l in rec if l]
-        if rec and rec[-1] == '-1': rec = rec[:-1]
+        # if rec and rec[-1] == '-1': 
+        #     rec = rec[:-1]
+        #     rec_file.seek(1, -3)
         vis = set(rec)
         pop_count = rec.count('-1')
         rec = [tid for tid in rec if tid != '-1'][pop_count:]
@@ -233,11 +235,11 @@ def zhihu_all_topics_sele(args):
     while q:
         tid = q.popleft()
         print(f'tid: {tid}')
-        rec_file.write('-1\n')
         ofile.write(tid + '\n')
         url = f'https://www.zhihu.com/topic/{tid}'
         driver.get(url)
         subs = get_sub_tids(get_html(driver))
+        rec_file.write('-1\n')
         for s in subs:
             if s not in vis:
                 vis.add(s)
