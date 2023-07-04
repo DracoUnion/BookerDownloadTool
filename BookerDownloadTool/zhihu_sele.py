@@ -217,6 +217,7 @@ def zhihu_all_topics_sele(args):
     ofile = open(res_fname, 'a', encoding='utf8')
     rec_file = open(rec_fname, 'a+', encoding='utf8')
     if rec_file.tell() != 0:
+        rec_file.seek(0, 0)
         rec = rec_file.read().split('\n')
         rec = [l for l in rec if l]
         if rec and rec[-1] == '-1': rec = rec[:-1]
