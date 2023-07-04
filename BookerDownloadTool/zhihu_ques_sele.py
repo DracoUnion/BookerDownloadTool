@@ -90,16 +90,10 @@ def get_articles(html, qid):
     return articles
 
 
-
 def zhihu_ques_batch_sele(args):
     st = args.start
     ed = args.end
     for qid in range(st, ed + 1):
-        url = f'https://www.zhihu.com/question/{qid}'
-        html = request_retry('GET', url).text
-        if '你似乎来到了没有知识存在的荒原' in html:
-            print(f'问题 [qid={qid}] 不存在')
-            continue
         args = copy.deepcopy(args)
         args.qid = qid
         zhihu_ques_sele_safe(args)
@@ -116,13 +110,14 @@ def zhihu_ques_sele(args):
     cralwer_config['imgSrc'] = ['data-original', 'src']
     qid = args.qid
     
+    # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
-    driver = create_driver()
-    driver.get(url)
-    html = get_html(driver)
+    html = request_retry('GET', url).text
     if '你似乎来到了没有知识存在的荒原' in html:
         print(f'问题 [qid={qid}] 不存在')
         return
+    driver = create_driver()
+    driver.get(url)
     # 关闭登录对话框
     driver.execute_script('''
         var cls_btn = document.querySelector('.Modal-closeButton')
