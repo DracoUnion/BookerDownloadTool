@@ -118,7 +118,7 @@ def zhihu_topic_sele(args):
     html = request_retry('GET', url).text
     rt = pq(html)
     if '你似乎来到了没有知识存在的荒原' in rt('title').text():
-        print(f'问题 [qid={qid}] 不存在')
+        print(f'话题 [tid={tid}] 不存在')
         return
     driver = create_driver()
     driver.get(url)
