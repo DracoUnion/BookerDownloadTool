@@ -128,6 +128,7 @@ def zhihu_topic_sele(args):
     while True:
         try:
             scroll_to_bottom(driver)
+            time.sleep(0.5)
             count = get_ques_count(driver)
             print(f'count: {count}')
             if count == last_count:
