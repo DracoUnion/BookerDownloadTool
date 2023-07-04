@@ -108,6 +108,10 @@ def zhihu_ques_sele(args):
         "source": stealth
     })
     driver.get(url)
+    html = get_html(driver)
+    if '你似乎来到了没有知识存在的荒原' in html:
+        print(f'问题 [qid={qid}] 不存在')
+        return
     # 关闭登录对话框
     driver.execute_script('''
         var cls_btn = document.querySelector('.Modal-closeButton')
