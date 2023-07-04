@@ -12,6 +12,7 @@ from datetime import datetime
 from GenEpub import gen_epub
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from concurrent.futures import ThreadPoolExecutor
 from .util import *
 
 # 滚动到底
@@ -93,10 +94,15 @@ def get_articles(html, qid):
 def zhihu_ques_batch_sele(args):
     st = args.start
     ed = args.end
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
     for qid in range(st, ed + 1):
         args = copy.deepcopy(args)
         args.qid = qid
-        zhihu_ques_sele_safe(args)
+        h = pool.submit(zhihu_ques_sele_safe, args)
+        # zhihu_ques_sele_safe(args)
+        hdls.append(h)
+    for h in hdls: h.result()
 
 def zhihu_ques_sele_safe(args):
     try:
