@@ -134,6 +134,8 @@ def zhihu_topic_sele(args):
             if count == last_count:
                 cntr += 1
                 if cntr == 10: break
+            else:
+                cntr = 0
             last_count = count
         except:
             traceback.print_exc()
