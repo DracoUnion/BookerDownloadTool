@@ -114,7 +114,7 @@ def get_articles(html, qid):
 def zhihu_topic_sele(args):
     tid = args.tid
     # 检查是否存在
-    url = f'hhttps://www.zhihu.com/topic/{tid}'
+    url = f'https://www.zhihu.com/topic/{tid}'
     html = request_retry('GET', url).text
     rt = pq(html)
     if '你似乎来到了没有知识存在的荒原' in rt('title').text():
