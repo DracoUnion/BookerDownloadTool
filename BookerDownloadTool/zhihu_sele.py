@@ -120,6 +120,7 @@ def zhihu_topic_sele(args):
     if '你似乎来到了没有知识存在的荒原' in rt('title').text():
         print(f'话题 [tid={tid}] 不存在')
         return
+    title = rt('.TopicMetaCard-title').text()
     driver = create_driver()
     driver.get(url)
     close_login_dialog(driver)
@@ -140,7 +141,6 @@ def zhihu_topic_sele(args):
         except:
             traceback.print_exc()
     html = get_html(driver)
-    title = pq(html).find('.TopicMetaCard-title').text()
     qids = get_qids(html)
     driver.close()
     fname = f'zhihu_ques_{tid}_{title}.txt'
