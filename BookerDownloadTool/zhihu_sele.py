@@ -140,9 +140,11 @@ def zhihu_topic_sele(args):
         except:
             traceback.print_exc()
     html = get_html(driver)
+    title = pq(html).find('.TopicMetaCard-title').text()
     qids = get_qids(html)
     driver.close()
-    open(f'zhihu_ques_{tid}.txt', 'w').write('\n'.join(qids) + '\n')
+    fname = f'zhihu_ques_{tid}_{title}.txt'
+    open(fname, 'w').write('\n'.join(qids) + '\n')
 
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
