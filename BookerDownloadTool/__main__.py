@@ -8,6 +8,7 @@ from .bili import *
 from .dmzj import *
 from .discuz import *
 from .zsxq import *
+from .whole_site import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -149,6 +150,10 @@ def main():
     zsxq_parser.add_argument('-c', '--cookie', default=os.environ.get('ZSXQ_COOKIE'), help="zsxq cookie, default as $ZSXQ_COOKIE")
     zsxq_parser.add_argument('id', help='zsxq group id')
     zsxq_parser.set_defaults(func=download_zsxq)
+
+    whole_site_parser = subparsers.add_parser("whole-site", help="crawl whole site urls")
+    whole_site_parser.add_argument("site", help="site url")
+    whole_site_parser.set_defaults(func=whole_site)
 
     args = parser.parse_args()
     args.func(args)
