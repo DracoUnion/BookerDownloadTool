@@ -3,10 +3,11 @@ from urllib.parse import urljoin, urlparse
 import requests
 from pyquery import PyQuery as pq
 import re
+from .util import *
 
 
 def get_next(url):
-    html = requests.get(url).text
+    html = request_retry('GET', url).text
     if not html: return []
     rt = pq(html)
     el_links = rt('a')
