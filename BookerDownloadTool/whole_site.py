@@ -47,7 +47,7 @@ def whole_site(args):
         vis = set([site])
 
     while q:
-        url = q.pop()
+        url = q.popleft()
         print(url)
         if url.endswith('.xml'): continue
         nexts = get_next(url)
