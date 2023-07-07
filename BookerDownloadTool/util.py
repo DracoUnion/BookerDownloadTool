@@ -101,6 +101,20 @@ def anime4k_auto(img):
     safe_remove(fname)
     return img
 
+def parse_cookie(cookie):
+    # cookie.split('; ').map(x => x.split('='))
+    #     .filter(x => x.length >= 2)
+    #     .reduce((x, y) =>  {x[y[0]] = y[1]; return x}, {})
+    kvs = [kv.split('=') for kv in cookie.split('; ')]
+    res = {kv[0]:kv[1] for kv in kvs if len(kv) >= 2}
+    return res
+        
+def set_driver_cookie(driver, cookie):
+    if isinstance(cookie, str):
+        cookie = parse_cookie(cookie)
+    for k, v in cookie.items():
+        driver.add_cookie({'name': k, 'value': v})
+
 def create_driver():
     options = Options()
     options.add_argument('--headless')
