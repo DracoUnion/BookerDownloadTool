@@ -88,6 +88,7 @@ def main():
 
     zhihu_all_topics_parser = subparsers.add_parser("zhihu-all-topics", help="crawl zhihu sub topics  by **selenium**")
     zhihu_all_topics_parser.add_argument("root", help="root tid")
+    zhihu_all_topics_parser.add_argument("-c", "--cookie", default='', help="zhihu cookie")
     zhihu_all_topics_parser.set_defaults(func=zhihu_all_topics_sele)
 
     dmzj_dl_parser = subparsers.add_parser("dmzj", help="download dmzj comic")

@@ -232,6 +232,8 @@ def zhihu_all_topics_sele(args):
         q = deque([root_tid])
         rec_file.write(root_tid + '\n')
     driver = create_driver()
+    driver.get(f'https://www.zhihu.com/topic/{root_tid}')
+    set_driver_cookie(driver, args.cookie)
     while q:
         tid = q.popleft()
         print(f'tid: {tid}')
