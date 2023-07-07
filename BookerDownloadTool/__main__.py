@@ -82,14 +82,14 @@ def main():
     zhihu_ques_parser.add_argument("qid", help="qid")
     zhihu_ques_parser.set_defaults(func=zhihu_ques_sele)
     
-    zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="crawl zhihu questions of a topic by **selenium**")
-    zhihu_topic_parser.add_argument("tid", help="tid")
-    zhihu_topic_parser.set_defaults(func=zhihu_topic_sele)
+    zhihu_fetch_parser = subparsers.add_parser("zhihu-fetch", help="crawl zhihu questions of a topic by **selenium**")
+    zhihu_fetch_parser.add_argument("tid", help="tid")
+    zhihu_fetch_parser.set_defaults(func=zhihu_topic_sele)
 
-    zhihu_all_topics_parser = subparsers.add_parser("zhihu-all-topics", help="crawl zhihu sub topics  by **selenium**")
-    zhihu_all_topics_parser.add_argument("root", help="root tid")
-    zhihu_all_topics_parser.add_argument("-c", "--cookie", default='', help="zhihu cookie")
-    zhihu_all_topics_parser.set_defaults(func=zhihu_all_topics_sele)
+    zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="crawl zhihu sub topics  by **selenium**")
+    zhihu_topics_parser.add_argument("root", help="root tid")
+    zhihu_topics_parser.add_argument("-c", "--cookie", default='', help="zhihu cookie")
+    zhihu_topics_parser.set_defaults(func=zhihu_all_topics_sele)
 
     dmzj_dl_parser = subparsers.add_parser("dmzj", help="download dmzj comic")
     dmzj_dl_parser.add_argument("id", help="id")
