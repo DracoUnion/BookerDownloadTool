@@ -78,13 +78,21 @@ def main():
     ln_fetch_parser.add_argument("-e", "--end", required=True, help="ending date (YYYYMMDD)")
     ln_fetch_parser.set_defaults(func=fetch_ln)
     
-    zhihu_ques_parser = subparsers.add_parser("zhihu", help="crawl zhihu answers of a question by **selenium**")
+    zhihu_ques_parser = subparsers.add_parser("zhihu-ques", help="crawl zhihu answers of a question by **selenium**")
     zhihu_ques_parser.add_argument("qid", help="qid")
     zhihu_ques_parser.set_defaults(func=zhihu_ques_sele)
     
-    zhihu_fetch_parser = subparsers.add_parser("zhihu-fetch", help="crawl zhihu questions of a topic by **selenium**")
-    zhihu_fetch_parser.add_argument("tid", help="tid")
-    zhihu_fetch_parser.set_defaults(func=zhihu_topic_sele)
+    zhihu_ques_batch_parser = subparsers.add_parser("zhihu-ques-batch", help="crawl zhihu answers of a question by **selenium**")
+    zhihu_ques_batch_parser.add_argument("fname", help="fname of qids")
+    zhihu_ques_batch_parser.set_defaults(func=zhihu_ques_batch_sele)
+    
+    zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="crawl zhihu questions of a topic by **selenium**")
+    zhihu_topic_parser.add_argument("tid", help="tid")
+    zhihu_topic_parser.set_defaults(func=zhihu_topic_sele)
+
+    zhihu_topic_batch_parser = subparsers.add_parser("zhihu-topic-batch", help="crawl zhihu questions of a topic by **selenium**")
+    zhihu_topic_batch_parser.add_argument("fname", help="fname of tids")
+    zhihu_topic_batch_parser.set_defaults(func=zhihu_topic_batch_sele)
 
     zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="crawl zhihu sub topics  by **selenium**")
     zhihu_topics_parser.add_argument("root", help="root tid")

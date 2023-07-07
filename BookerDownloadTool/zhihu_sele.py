@@ -121,6 +121,15 @@ def get_articles(html, qid):
         articles.append({'title': au_name, 'content': co})
     return articles
 
+def zhihu_topic_batch_sele(args):
+    fname = args.fname
+    tids = open(fname, encoding='utf8').read().split('\n')
+    tids = [t for t in tids if t]
+    for t in tids:
+        args.tid = t
+        zhihu_topic_sele(args)
+
+
 def zhihu_topic_sele(args):
     tid = args.tid
     # 检查是否存在
@@ -155,6 +164,14 @@ def zhihu_topic_sele(args):
     driver.close()
     fname = f'zhihu_ques_{tid}_{title}.txt'
     open(fname, 'w').write('\n'.join(qids) + '\n')
+
+def zhihu_ques_batch_sele(args):
+    fname = args.fname
+    qids = open(fname, encoding='utf8').read().split('\n')
+    qids = [q for q in qids if q]
+    for q in qids:
+        args.qid = q
+        zhihu_ques_sele(args)
 
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
