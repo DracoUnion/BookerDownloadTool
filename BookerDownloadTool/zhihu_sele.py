@@ -265,6 +265,7 @@ def zhihu_all_topics_sele(args):
                 vis.add(s)
                 q.append(s)
                 rec_file.write(s + '\n')
+        time.sleep(0.5)
     ofile.close()
     rec_file.close()
 
