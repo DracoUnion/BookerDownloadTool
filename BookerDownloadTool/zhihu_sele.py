@@ -127,8 +127,8 @@ def zhihu_topic_batch_sele(args):
     tids = [t for t in tids if t]
     for t in tids:
         args.tid = t
-        zhihu_topic_sele(args)
-
+        try: zhihu_topic_sele(args)
+        except: traceback.print_exc()
 
 def zhihu_topic_sele(args):
     tid = args.tid
@@ -171,7 +171,8 @@ def zhihu_ques_batch_sele(args):
     qids = [q for q in qids if q]
     for q in qids:
         args.qid = q
-        zhihu_ques_sele(args)
+        try: zhihu_ques_sele(args)
+        except: traceback.print_exc()
 
 def zhihu_ques_sele(args):
     cralwer_config['optiMode'] = 'thres'
