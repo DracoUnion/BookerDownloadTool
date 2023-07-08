@@ -162,7 +162,7 @@ def zhihu_topic_sele(args):
     html = get_html(driver)
     qids = get_qids(html)
     driver.close()
-    fname = f'zhihu_ques_{tid}_{title}.txt'
+    fname = f'zhihu_ques_{tid}_{fname_escape(title)}.txt'
     open(fname, 'w').write('\n'.join(qids) + '\n')
 
 def zhihu_ques_batch_sele(args):
