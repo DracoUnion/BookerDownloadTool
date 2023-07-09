@@ -6,3 +6,4 @@ imgyaso
 pyexecjs
 BookerWikiTool
 img2pdf
+pandas
