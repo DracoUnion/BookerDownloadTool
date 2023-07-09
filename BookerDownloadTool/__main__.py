@@ -12,6 +12,7 @@ from .whole_site import *
 from .medium import *
 from .webarchive import *
 from .links import *
+from .wx import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -217,6 +218,12 @@ def main():
     batch_links_parser.add_argument("-g", "--time-regex", default=r'(\d+)-(\d+)-(\d+)', help="time regex")
     batch_links_parser.add_argument("-E", "--exec", action='store_true', help="whether to execute EpubCrawler on config files")
     batch_links_parser.set_defaults(func=batch_links)
+
+    crawl_wx_parser = subparsers.add_parser("wx", help="crawler weixin articles")
+    crawl_wx_parser.add_argument("fname", help="XLSX fname")
+    crawl_wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
+    crawl_wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    crawl_wx_parser.set_defaults(func=crawl_wx)
 
 
     args = parser.parse_args()
