@@ -9,6 +9,9 @@ from .dmzj import *
 from .discuz import *
 from .zsxq import *
 from .whole_site import *
+from .medium import *
+from .webarchive import *
+from .links import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -163,6 +166,58 @@ def main():
     whole_site_parser = subparsers.add_parser("whole-site", help="crawl whole site urls")
     whole_site_parser.add_argument("site", help="site url")
     whole_site_parser.set_defaults(func=whole_site)
+    
+    fetch_med_parser = subparsers.add_parser("fetch-medium", help="fetch medium toc")
+    fetch_med_parser.add_argument("host", help="medium blog host: xxx.medium.com or medium.com/xxx")
+    fetch_med_parser.add_argument('-s', '--start', default='20150101', help="starting date")
+    fetch_med_parser.add_argument('-e', '--end', default='99991231', help="ending date")
+    fetch_med_parser.add_argument('-p', '--proxy', help="proxy")
+    fetch_med_parser.set_defaults(func=fetch_medium)
+
+    fetch_war_parser = subparsers.add_parser("fetch-web-archive", help="fetch web archive")
+    fetch_war_parser.add_argument("host", help="host")
+    fetch_war_parser.add_argument("-s", "--start", type=int, default=1, help="starting page")
+    fetch_war_parser.add_argument("-e", "--end", type=int, default=1_000_000_000, help="ending page")
+    fetch_war_parser.add_argument("-r", "--regex", default='.', help="regex to match urls")
+    fetch_war_parser.add_argument("-q", "--query", action='store_true', help="whether to deduplicate with query")
+    fetch_war_parser.add_argument("-f", "--fragment", action='store_true', help="whether to deduplicate with fragment")
+    fetch_war_parser.add_argument("-p", "--proxy", help="proxy")
+    fetch_war_parser.set_defaults(vis=set())
+    fetch_war_parser.set_defaults(func=fetch_webarchive)
+
+
+    fetch_links_parser = subparsers.add_parser("fetch-links", help="fetch links in pages")
+    fetch_links_parser.add_argument("url", help="url with {i} as page num")
+    fetch_links_parser.add_argument("link", help="link selector")
+    fetch_links_parser.add_argument("ofname", help="output file name")
+    fetch_links_parser.add_argument("-s", "--start", type=int, default=1, help="starting page")
+    fetch_links_parser.add_argument("-e", "--end", type=int, default=10000000, help="ending page")
+    fetch_links_parser.add_argument("-t", "--time", help="time selector")
+    fetch_links_parser.add_argument("-r", "--time-regex", default=r"\d+-\d+-\d+", help="time regex")
+    fetch_links_parser.add_argument("-p", "--proxy", help="proxy")
+    fetch_links_parser.add_argument("-H", "--headers", help="headers in JSON")
+    fetch_links_parser.add_argument("-J", "--json", action='store_true', help="treat output as JSON not HTML")
+    fetch_links_parser.set_defaults(func=fetch_links)
+
+    fetch_sitemap_parser = subparsers.add_parser("fetch-sitemap", help="fetch links in sitemap")
+    fetch_sitemap_parser.add_argument("url", help="sitemap url")
+    fetch_sitemap_parser.add_argument("-r", "--regex", default="/blog/", help="link regex")
+    fetch_sitemap_parser.add_argument("-o", "--ofname", help="output file name")
+    fetch_sitemap_parser.set_defaults(func=fetch_sitemap_handle)
+
+    batch_links_parser = subparsers.add_parser("batch-links", help="batch download links to epub")
+    batch_links_parser.add_argument("links", help="name of file storing links")
+    batch_links_parser.add_argument("--name", help="epub name")
+    batch_links_parser.add_argument("-t", "--title", default="", help="title selector")
+    batch_links_parser.add_argument("-c", "--content", default="", help="content selector")
+    batch_links_parser.add_argument("-r", "--remove", default="", help="remove elems selector")
+    batch_links_parser.add_argument("-n", "--num", default=500, type=int, help="num of articles in one epub")
+    batch_links_parser.add_argument("-m", "--opti-mode", default='quant', help="img optimization mode")
+    batch_links_parser.add_argument("-l", "--size-limit", default='100m', help="epub size limit")
+    batch_links_parser.add_argument("-g", "--time-regex", default=r'(\d+)-(\d+)-(\d+)', help="time regex")
+    batch_links_parser.add_argument("-E", "--exec", action='store_true', help="whether to execute EpubCrawler on config files")
+    batch_links_parser.set_defaults(func=batch_links)
+
 
     args = parser.parse_args()
     args.func(args)
