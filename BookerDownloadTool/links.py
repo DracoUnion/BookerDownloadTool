@@ -84,7 +84,7 @@ def fetch_links(args):
         if len(toc) == 0: break
         for it in toc:
             print(it)
-            ofile.write(it + '\n')
+            ofile.write(str(it) + '\n')
     
     ofile.close()
 
