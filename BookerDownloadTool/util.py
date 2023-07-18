@@ -8,6 +8,7 @@ import tempfile
 import uuid
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from functools import reduce
 
 RE_INFO = r'\[(.+?)\]([^\[]+)'
 
