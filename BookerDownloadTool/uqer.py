@@ -33,8 +33,14 @@ def download_uqer(args):
             continue
         aid = it['attachment_id']
         notebook = it['content']
-        name = it['notebook_name']
-        ofname = path.join(dir, f'{tid} - {aid} - {name}')
+        name = it['notebook_name'][:-6]
+        notebook['worksheets'][0]['cells'].insert(0, {
+            "cell_type": "markdown", 
+            "id": uuid.uuid4().hex.upper(), 
+            "metadata": {}, 
+            "source": f'# {name}',
+        })
+        ofname = path.join(dir, f'{tid} - {aid}.ipynb')
         if path.isfile(ofname):
             print(f'[aid={aid}] 已下载')
             continue
