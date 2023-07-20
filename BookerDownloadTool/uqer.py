@@ -54,10 +54,11 @@ def download_uqer(args):
             print(f'附件格式为 {fmt}，不是 ipynb，无法处理')
             continue
         aid = it['attachment_id']
-        ofname = path.join(dir, f'{tid} - {aid}.ipynb')
+        ofname = path.join(dir, f'{tid}-{aid}.ipynb')
         if path.isfile(ofname):
             print(f'[aid={aid}] 已下载')
             continue
+        print(ofname)
         notebook = it['content']
         name = it['notebook_name'][:-6]
         notebook['worksheets'][0]['cells'].insert(0, {
@@ -66,7 +67,6 @@ def download_uqer(args):
             "metadata": {}, 
             "source": f'# {name}',
         })
-        print(ofname)
         open(ofname, 'w', encoding='utf8').write(json.dumps(notebook))
     
         
