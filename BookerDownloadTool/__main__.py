@@ -223,6 +223,11 @@ def main():
     wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
     wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
     wx_parser.set_defaults(func=crawl_wx)
+    
+    uqer_parser = subparsers.add_parser("uqer", help="download uqer post")
+    uqer_parser.add_argument("tid", help="uqer tid")
+    uqer_parser.add_argument("-d", "--dir", default='.',  help="output dir")
+    uqer_parser.set_defaults(func=download_uqer)
 
     args = parser.parse_args()
     args.func(args)
