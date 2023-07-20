@@ -36,7 +36,7 @@ def download_uqer(args):
         return
 
     fmt = j['data']['content_format']
-    if fmt == 'markdown':
+    if fmt in ['markdown', 'ipynb']:
         ofname = path.join(dir, f'{tid}.md')
         if path.isfile(ofname):
             print(f'[tid={tid}] 已下载')
@@ -45,21 +45,6 @@ def download_uqer(args):
         title = j['data']['title']
         cont = j['data']['content']
         open(ofname, 'w', encoding='utf8').write(f'# {title}\n\n{cont}')
-    elif fmt == 'ipynb':
-        ofname = path.join(dir, f'{tid}.ipynb')
-        if path.isfile(ofname):
-            print(f'[tid={tid}] 已下载')
-            return
-        print(ofname)
-        name = j['data']['title']
-        notebook = j['data']['content']
-        notebook['worksheets'][0]['cells'].insert(0, {
-            "cell_type": "markdown", 
-            "id": uuid.uuid4().hex.upper(), 
-            "metadata": {}, 
-            "source": f'# {name}',
-        })
-        open(ofname, 'w', encoding='utf8').write(json.dumps(cont))
     else:
         print(f'格式为 {fmt}，不是 Markdown 或者 ipynb，无法处理')
 
