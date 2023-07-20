@@ -1,6 +1,28 @@
 from .util import *
 import json
 from os import path
+import traceback
+import copy
+from concurrent.futures import ThreadPoolExecutor
+
+def download_uqer_batch(args):
+    fname = args.fname
+    lines = open(fname, encoding='utf8').read().split('\n')
+    lines = [l for l in lines if l.strip()]
+    
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    for tid in lines:
+        args = copy.deepcopy(args)
+        args.tid = tid
+        h = pool.submit(download_uqer_safe, args)
+        hdls.append(h)
+    for h in hdls: h.result()
+     
+def download_uqer_safe(*args, **kw):
+    try: download_uqer(*args, **kw)
+    except: traceback.print_exc()
+     
 
 def download_uqer(args):
     tid = args.tid

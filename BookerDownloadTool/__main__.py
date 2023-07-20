@@ -230,6 +230,11 @@ def main():
     uqer_parser.add_argument("-d", "--dir", default='.',  help="output dir")
     uqer_parser.set_defaults(func=download_uqer)
 
+    uqer_batch_parser = subparsers.add_parser("batch-uqer", help="download uqer post in batch")
+    uqer_batch_parser.add_argument("fname", help="file name of uqer tids")
+    uqer_batch_parser.add_argument("-d", "--dir", default='.',  help="output dir")
+    uqer_batch_parser.set_defaults(func=download_uqer_batch)
+
     args = parser.parse_args()
     args.func(args)
     
