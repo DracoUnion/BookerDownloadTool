@@ -21,6 +21,7 @@ def download_uqer(args):
         if path.isfile(ofname):
             print(f'[tid={tid}] 已下载')
             return
+        print(ofname)
         open(ofname, 'w', encoding='utf8').write(f'# {title}\n\n{cont}')
     else:
         print(f'格式为 {fmt}，不是 Markdown，无法处理')
@@ -37,6 +38,7 @@ def download_uqer(args):
         if path.isfile(ofname):
             print(f'[aid={aid}] 已下载')
             continue
+        print(ofname)
         open(ofname, 'w', encoding='utf8').write(json.dumps(notebook))
     
         
