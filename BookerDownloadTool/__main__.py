@@ -13,6 +13,7 @@ from .medium import *
 from .webarchive import *
 from .links import *
 from .wx import *
+from .uqer import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
