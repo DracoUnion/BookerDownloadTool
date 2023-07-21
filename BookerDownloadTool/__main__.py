@@ -241,6 +241,7 @@ def main():
     fmb_parser.add_argument("start", type=int, help="starting ssid")
     fmb_parser.add_argument("end", type=int, help="ending ssid")
     fmb_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
+    fmb_parser.add_argument("-p", "--proxy", default='',  help="proxy splitted by ';'")
     fmb_parser.set_defaults(func=download_fmb)
 
     args = parser.parse_args()

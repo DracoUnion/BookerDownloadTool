@@ -3,10 +3,15 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 import json
 
-def tr_download_fmb(i, ssid, writeback):
+def tr_download_fmb(i, ssid, pr, writeback):
     print(f'ssid: {ssid}')
     url = f'https://api.freembook.com/search?category=duxiu&q={ssid}'
-    j = request_retry('GET', url, retry=10000, check_status=True).json()
+    j = request_retry(
+        'GET', url, 
+        retry=10000, 
+        check_status=True,
+        proxies={'http': pr, 'https': pr},
+    ).json()
     books = [
         {
             'id': b[0],
@@ -24,7 +29,12 @@ def tr_download_fmb(i, ssid, writeback):
     for b in books:
         bid = b['id']
         url = f'https://api.freembook.com/acquire?book_id={bid}'
-        j = request_retry('GET', url, retry=10000, check_status=True).json()
+        j = request_retry(
+            'GET', url, 
+            retry=10000, 
+            check_status=True,
+            proxies={'http': pr, 'https': pr},
+        ).json()
         b['miaochuan'] = j.get('book_baidu', [])
 
     writeback(i, json.dumps(books).replace('\n', ''))
@@ -36,6 +46,7 @@ def tr_download_fmb_safe(*args, **kw):
 def download_fmb(args):
     st = args.start
     ed = args.end
+    proxy = args.proxy.split(';')
     
     ofname = f'freembook_{st}_{ed}.jsonl'
     f = open(ofname, 'w', encoding='utf8')
@@ -51,7 +62,8 @@ def download_fmb(args):
             f.write(res[cur] + '\n')
             cur += 1
     for i, ssid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_fmb_safe, i, ssid, writeback)
+        pr = proxy[i % len(proxy)]
+        h = pool.submit(tr_download_fmb_safe, i, ssid, pr, writeback)
         hdls.append(h)
     for h in hdls: h.result()
     f.close()
