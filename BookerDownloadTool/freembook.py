@@ -45,10 +45,11 @@ def download_fmb(args):
     res = [None] * (ed - st + 1)
     cur = 0
     def writeback(i, text):
+        nonlocal cur
         res[i] = text
         while cur < len(res) and res[cur]:
             f.write(res[cur] + '\n')
-            res += 1
+            cur += 1
     for i, ssid in enumerate(range(st, ed + 1)):
         h = pool.submit(tr_download_fmb_safe, i, ssid, writeback)
         hdls.append(h)
