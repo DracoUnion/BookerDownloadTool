@@ -1,6 +1,6 @@
 from .util import *
 import traceback
-from threading import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 def tr_download_fmb(i, ssid, writeback):
     print(f'ssid: {ssid}')
