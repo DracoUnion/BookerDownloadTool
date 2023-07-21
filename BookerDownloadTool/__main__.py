@@ -14,6 +14,7 @@ from .webarchive import *
 from .links import *
 from .wx import *
 from .uqer import *
+from .freembook import *
 
 def main():
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -235,6 +236,12 @@ def main():
     uqer_batch_parser.add_argument("-d", "--dir", default='.',  help="output dir")
     uqer_batch_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
     uqer_batch_parser.set_defaults(func=download_uqer_batch)
+
+    fmb_parser = subparsers.add_parser("freembook", help="download freembook info")
+    fmb_parser.add_argument("start", type=int, help="starting ssid")
+    fmb_parser.add_argument("end", type=int, help="ending ssid")
+    fmb_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
+    fmb_parser.set_defaults(func=download_fmb)
 
     args = parser.parse_args()
     args.func(args)

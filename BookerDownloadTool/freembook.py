@@ -2,7 +2,7 @@ from .util import *
 import traceback
 from threading import ThreadPoolExecutor
 
-def tr_download_fmt(i, ssid, writeback):
+def tr_download_fmb(i, ssid, writeback):
     print(f'ssid: {ssid}')
     url = f'https://api.freembook.com/search?category=duxiu&q={ssid}'
     j = request_retry('GET', url, retry=10000, check_status=True).json()
@@ -28,13 +28,13 @@ def tr_download_fmt(i, ssid, writeback):
 
     writeback(i, json.dumps(books).replace('\n', ''))
     
-def tr_download_fmt_safe(*args, **kw):
-    try: tr_download_fmt(*args, **kw)
+def tr_download_fmb_safe(*args, **kw):
+    try: tr_download_fmb(*args, **kw)
     except: traceback.print_exc()
 
 def download_fmb(args):
-    st = args.st
-    ed = args.ed
+    st = args.start
+    ed = args.end
     
     ofname = f'freembook_{st}_{ed}.jsonl'
     f = open(ofname, 'w', encoding='utf8')
@@ -49,7 +49,7 @@ def download_fmb(args):
             f.write(res[cur] + '\n')
             res += 1
     for i, ssid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_fmt_safe, i, ssid, writeback)
+        h = pool.submit(tr_download_fmb_safe, i, ssid, writeback)
         hdls.append(h)
     for h in hdls: h.result()
     f.close()
