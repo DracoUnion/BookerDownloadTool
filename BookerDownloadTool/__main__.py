@@ -63,6 +63,7 @@ def main():
     bili_meta_parser.add_argument("-t", "--threads", type=int, default=1, help="thread num")
     bili_meta_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
     bili_meta_parser.add_argument("-w", "--wait", type=float, default=0, help="sec to wait")
+    bili_meta_parser.add_argument("-p", "--proxy", default='', help="proxies splitted by ';'")
     bili_meta_parser.set_defaults(func=download_meta_bili)
 
     ln_parser = subparsers.add_parser("ln", help="download lightnovel")

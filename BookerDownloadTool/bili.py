@@ -14,7 +14,7 @@ from threading import Lock
 from .util import *
 import time
 
-def tr_download_meta_bili(aid, write_back, idx, args):
+def tr_download_meta_bili(idx, aid, pr, write_back, args):
     print(f'aid: {aid}')
     url = f'https://api.bilibili.com/x/web-interface/view?aid={aid}'
     for i in range(args.retry):
@@ -22,6 +22,7 @@ def tr_download_meta_bili(aid, write_back, idx, args):
             'GET', url, 
             headers=bili_hdrs,
             retry=args.retry,
+            proxies = {'http': pr, 'https': pr},
         ).text \
             .replace('\r', '') \
             .replace('\n', ' ')
@@ -38,6 +39,8 @@ def tr_download_meta_bili_safe(*args, **kw):
 def download_meta_bili(args):
     st = int(args.start)
     ed = int(args.end)
+    proxy = args.proxy.split(';')
+    proxy = [p.strip() for p in proxy if p.strip()]
     ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'w', encoding='utf8')
     lk = Lock()
     res = [''] * (ed - st + 1)
@@ -52,7 +55,8 @@ def download_meta_bili(args):
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i, aid in enumerate(range(st, ed + 1)):
-        h = pool.submit(tr_download_meta_bili_safe, aid, write_back, i, args)
+        pr = proxy[i % len(proxy)]
+        h = pool.submit(tr_download_meta_bili_safe, i, aid, pr, write_back, args)
         hdls.append(h)
     for h in hdls: h.result()
     ofile.close()
