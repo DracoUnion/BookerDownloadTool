@@ -33,6 +33,7 @@ def main():
     bili_parser.add_argument("id", help="av or bv")
     bili_parser.add_argument("-a", "--audio", type=bool, default=False, help="whether to convert to audio")
     bili_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
+    bili_parser.add_argument("-c", "--cookie", default='', help="cookie")
     bili_parser.add_argument("--start_page", type=int, default=1, help="start page")
     bili_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
     bili_parser.set_defaults(func=download_bili)
@@ -45,6 +46,7 @@ def main():
     bili_kw_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
     bili_kw_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
     bili_kw_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
+    bili_kw_parser.add_argument("-c", "--cookie", default='', help="cookie")
     bili_kw_parser.set_defaults(func=batch_kw_bili)
   
     bili_home_parser = subparsers.add_parser("bili-home", help="download bilibili video by user")
@@ -55,6 +57,7 @@ def main():
     bili_home_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
     bili_home_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
     bili_home_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
+    bili_home_parser.add_argument("-c", "--cookie", default='', help="cookie")
     bili_home_parser.set_defaults(func=batch_home_bili)
     
     bili_meta_parser = subparsers.add_parser("bili-meta", help="download bilibili meta")

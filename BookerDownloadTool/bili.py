@@ -66,9 +66,11 @@ def batch_home_bili(args):
     st = args.start
     ed = args.end
     to_audio = args.audio
+    hdrs = bili_hdrs.copy()
+    hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
         url = f'https://api.bilibili.com/x/space/arc/search?search_type=video&mid={mid}&pn={i}&order=pubdate'
-        j = requests.get(url, headers=bili_hdrs).json()
+        j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
@@ -83,9 +85,11 @@ def batch_kw_bili(args):
     ed = args.end
     to_audio = args.audio
     kw_enco = quote_plus(kw)
+    hdrs = bili_hdrs.copy()
+    hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
         url = f'https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword={kw_enco}&page={i}&order=pubdate'
-        j = requests.get(url, headers=bili_hdrs).json()
+        j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
@@ -110,9 +114,11 @@ def download_bili_single(id, args):
         av = id[2:]
     else:
         bv = id
-        
+    hdrs = bili_hdrs.copy()
+    hdrs['Cookie'] = args.cookie
+
     url = f'https://api.bilibili.com/x/web-interface/view?bvid={bv}&aid={av}'
-    j = requests.get(url, headers=bili_hdrs).json()
+    j = requests.get(url, headers=hdrs).json()
     if j['code'] != 0:
         print('获取 CID 失败：' + j['message'])
         return
@@ -134,7 +140,7 @@ def download_bili_single(id, args):
             print(f'{fname} 已存在')
             continue
         url = f'https://api.bilibili.com/x/player/playurl?fnval=80&cid={cid}&otype=json&bvid={bv}&aid={av}'
-        j = requests.get(url, headers=bili_hdrs).json()
+        j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             continue
@@ -144,7 +150,7 @@ def download_bili_single(id, args):
             continue
         print(videos)
         video_url = videos[0]['base_url']
-        video = requests.get(video_url, headers=bili_hdrs).content
+        video = requests.get(video_url, headers=hdrs).content
         if not to_audio:
             open(fname, 'wb').write(video)
             continue
