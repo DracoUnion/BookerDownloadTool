@@ -65,7 +65,6 @@ def batch_home_bili(args):
     mid = args.mid
     st = args.start
     ed = args.end
-    to_audio = args.audio
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
@@ -83,7 +82,6 @@ def batch_kw_bili(args):
     kw = args.kw
     st = args.start
     ed = args.end
-    to_audio = args.audio
     kw_enco = quote_plus(kw)
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
@@ -130,12 +128,14 @@ def download_bili_single(id, args):
         cid = it['cid']
         pg = it['page']
         title2 = fname_escape(it['part'])
-        title = f'{title1} - P{pg}' if title1 == title2 \
+        title = (
+            f'{title1} - P{pg}' 
+            if title1 == title2
             else f'{title1} - P{pg}：{title2}'
+        )
         print(title, author)
-        name = f'{title} - {author} - {bv}'
-        ext = 'mp3' if to_audio else 'mp4'
-        fname = path.join(opath, name + '.' + ext)
+        name = f'{title} - {author} - {bv}.mp4'
+        fname = path.join(opath, name)
         if path.isfile(fname):
             print(f'{fname} 已存在')
             continue
@@ -144,21 +144,17 @@ def download_bili_single(id, args):
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             continue
-        videos = j['data']['dash']['video']
+        videos = (
+            j['data']['dash']['video']
+            if not args.audio
+            else j['data']['dash']['audio']
+        )
         if len(videos) == 0:
             print('解析失败，视频列表为空')
             continue
         video_url = videos[0]['base_url']
         video = requests.get(video_url, headers=hdrs).content
-        if not to_audio:
-            open(fname, 'wb').write(video)
-            continue
-        tmp_fname = path.join(tempfile.gettempdir(), uuid.uuid4().hex + '.mp4')
-        open(tmp_fname, 'wb').write(video)
-        vc = VideoFileClip(tmp_fname)
-        vc.audio.write_audiofile(fname)
-        vc.reader.close()
-        os.unlink(tmp_fname)
+        open(fname, 'wb').write(video)
 
 def download_bili(args):
     ids = args.id.split(',')
