@@ -144,16 +144,20 @@ def download_bili_single(id, args):
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             continue
-        videos = (
-            j['data']['dash']['video']
-            if not args.audio
-            else j['data']['dash']['audio']
-        )
-        if len(videos) == 0:
+        
+        videos = j['data']['dash']['video']
+        audios = j['data']['dash']['audio']
+        if len(videos) == 0 or len(audios) == 0:
             print('解析失败，视频列表为空')
+            continue
+        audio_url = audios[0]['base_url']
+        audio = requests.get(video_url, headers=hdrs).content
+        if args.audio:
+            open(fname, 'wb').write(audio)
             continue
         video_url = videos[0]['base_url']
         video = requests.get(video_url, headers=hdrs).content
+        video = merge_video_audio(video, audio)
         open(fname, 'wb').write(video)
 
 def download_bili(args):
