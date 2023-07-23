@@ -141,3 +141,24 @@ def dict_get_recur(obj, keys):
         else:
             res = [o.get(k) for o in res if k in o]
     return res
+
+def merge_video_audio(video, audio):
+    tmpdir = path.join(tempfile.gettempdir(), uuid.uuid4().hex)
+    safe_mkdir(tmpdir)
+    vfname = path.join(tmpdir, 'video.mp4')
+    open(vfname, 'wb').write(video)
+    afname = path.join(tmpdir, 'audio.mp4')
+    open(afname, 'wb').write(audio)
+    res_fname = path.join(tmpdir, 'merged.mp4')
+    cmds = [
+        ['ffmpeg', '-i', vfname, '-vcodec', 'copy', '-an', vfname],
+        ['ffmpeg', '-i', afname, '-acodec', 'copy', '-vn', afname],
+        ['ffmpeg', '-i', afname, '-i', vfname, '-vcodec', 'copy', '-acodec', 'copy', res_fname],
+    ]
+    for cmd in cmds:
+        print(f'cmd: {cmd}')
+        subp.Popen(cmd, shell=True).communicate()
+    res = open(res_fname, 'rb').read()
+    safe_rmdir(tmpdir)
+    return res
+
