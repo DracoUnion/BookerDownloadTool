@@ -151,7 +151,7 @@ def download_bili_single(id, args):
             print('解析失败，视频列表为空')
             continue
         audio_url = audios[0]['base_url']
-        audio = requests.get(video_url, headers=hdrs).content
+        audio = requests.get(audio_url, headers=hdrs).content
         if args.audio:
             open(fname, 'wb').write(audio)
             continue
