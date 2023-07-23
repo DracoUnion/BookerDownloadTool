@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 from . import __version__
 from .zhihu_sele import *
 from .lightnovel import *
@@ -17,6 +18,9 @@ from .uqer import *
 from .freembook import *
 
 def main():
+    bili_cookie = os.environ.get('BILI_COOKIE', '')
+    wk8_cookie = os.environ.get('WK8_COOKIE', '')
+
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-v", "--version", action="version", version=f"PYBP version: {__version__}")
     parser.set_defaults(func=lambda x: parser.print_help())
@@ -33,7 +37,7 @@ def main():
     bili_parser.add_argument("id", help="av or bv")
     bili_parser.add_argument("-a", "--audio", action='store_true', help="whether to convert to audio")
     bili_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_parser.add_argument("-c", "--cookie", default='', help="cookie")
+    bili_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
     bili_parser.add_argument("--start_page", type=int, default=1, help="start page")
     bili_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
     bili_parser.set_defaults(func=download_bili)
@@ -46,7 +50,7 @@ def main():
     bili_kw_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
     bili_kw_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
     bili_kw_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_kw_parser.add_argument("-c", "--cookie", default='', help="cookie")
+    bili_kw_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
     bili_kw_parser.set_defaults(func=batch_kw_bili)
   
     bili_home_parser = subparsers.add_parser("bili-home", help="download bilibili video by user")
@@ -57,7 +61,7 @@ def main():
     bili_home_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
     bili_home_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
     bili_home_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_home_parser.add_argument("-c", "--cookie", default='', help="cookie")
+    bili_home_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
     bili_home_parser.set_defaults(func=batch_home_bili)
     
     bili_meta_parser = subparsers.add_parser("bili-meta", help="download bilibili meta")
@@ -72,18 +76,18 @@ def main():
     ln_parser = subparsers.add_parser("ln", help="download lightnovel")
     ln_parser.add_argument("id", help="id")
     ln_parser.add_argument("-s", "--save-path", default='out', help="path to save")
-    ln_parser.add_argument("-c", "--cookie", default=os.environ.get('WK8_COOKIE', ''), help="wenku8.net cookie")
+    ln_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
     ln_parser.set_defaults(func=download_ln)
 
     ln_batch_parser = subparsers.add_parser("batch-ln", help="download lightnovel in batch")
     ln_batch_parser.add_argument("fname", help="file name of ids")
     ln_batch_parser.add_argument("-s", "--save-path", default='out', help="path to save")
-    ln_batch_parser.add_argument("-c", "--cookie", default=os.environ.get('WK8_COOKIE', ''), help="wenku8.net cookie")
+    ln_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
     ln_batch_parser.set_defaults(func=batch_ln)
 
     ln_fetch_parser = subparsers.add_parser("fetch-ln", help="fetch lightnovel ids")
     ln_fetch_parser.add_argument("fname", help="file fname")
-    ln_fetch_parser.add_argument("-c", "--cookie", default=os.environ.get('WK8_COOKIE', ''), help="wenku8.net cookie")
+    ln_fetch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
     ln_fetch_parser.add_argument("-s", "--start", required=True, help="starting date (YYYYMMDD)")
     ln_fetch_parser.add_argument("-e", "--end", required=True, help="ending date (YYYYMMDD)")
     ln_fetch_parser.set_defaults(func=fetch_ln)
