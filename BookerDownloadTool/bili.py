@@ -128,22 +128,26 @@ def download_bili_single(id, args):
             else f'{title1} - P{pg}：{title2}'
         print(title, author)
         name = f'{title} - {author} - {bv}'
-        ext = 'mp3' if to_audio else 'flv'
+        ext = 'mp3' if to_audio else 'mp4'
         fname = path.join(opath, name + '.' + ext)
         if path.isfile(fname):
             print(f'{fname} 已存在')
             continue
-        url = f'https://api.bilibili.com/x/player/playurl?cid={cid}&otype=json&bvid={bv}&aid={av}'
+        url = f'https://api.bilibili.com/x/player/playurl?fnval=80&cid={cid}&otype=json&bvid={bv}&aid={av}'
         j = requests.get(url, headers=bili_hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             continue
-        video_url = j['data']['durl'][0]['url']
+        videos = j['data']['dash']['video']
+        if len(videos) == 0:
+            print('解析失败，视频列表为空')
+            continue
+        video_url = videos[0]['base_url']
         video = requests.get(video_url, headers=bili_hdrs).content
         if not to_audio:
             open(fname, 'wb').write(video)
             continue
-        tmp_fname = path.join(tempfile.gettempdir(), uuid.uuid4().hex + '.flv')
+        tmp_fname = path.join(tempfile.gettempdir(), uuid.uuid4().hex + '.mp4')
         open(tmp_fname, 'wb').write(video)
         vc = VideoFileClip(tmp_fname)
         vc.audio.write_audiofile(fname)
