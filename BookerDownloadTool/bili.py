@@ -148,7 +148,6 @@ def download_bili_single(id, args):
         if len(videos) == 0:
             print('解析失败，视频列表为空')
             continue
-        print(videos)
         video_url = videos[0]['base_url']
         video = requests.get(video_url, headers=hdrs).content
         if not to_audio:
