@@ -5,5 +5,5 @@ selenium
 imgyaso
 pyexecjs
 BookerWikiTool
-img2pdf
+img2jb2pdf
 pandas
