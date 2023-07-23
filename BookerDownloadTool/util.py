@@ -151,8 +151,8 @@ def merge_video_audio(video, audio):
     open(afname, 'wb').write(audio)
     res_fname = path.join(tmpdir, 'merged.mp4')
     cmds = [
-        ['ffmpeg', '-i', vfname, '-vcodec', 'copy', '-an', vfname],
-        ['ffmpeg', '-i', afname, '-acodec', 'copy', '-vn', afname],
+        ['ffmpeg', '-i', vfname, '-vcodec', 'copy', '-an', vfname, '-y'],
+        ['ffmpeg', '-i', afname, '-acodec', 'copy', '-vn', afname, '-y'],
         ['ffmpeg', '-i', afname, '-i', vfname, '-vcodec', 'copy', '-acodec', 'copy', res_fname],
     ]
     for cmd in cmds:
