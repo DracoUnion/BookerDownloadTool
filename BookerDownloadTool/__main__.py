@@ -176,6 +176,8 @@ def main():
 
     whole_site_parser = subparsers.add_parser("whole-site", help="crawl whole site urls")
     whole_site_parser.add_argument("site", help="site url")
+    whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="times to retry")
+    whole_site_parser.add_argument("-p", "--proxy", help="proxy")
     whole_site_parser.set_defaults(func=whole_site)
     
     med_parser = subparsers.add_parser("medium", help="fetch medium toc")

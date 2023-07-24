@@ -6,8 +6,12 @@ import re
 from .util import *
 
 
-def get_next(url):
-    html = request_retry('GET', url).text
+def get_next(url, args):
+    html = request_retry(
+        'GET', url, 
+        retry=args.retry,
+        proxy=args.proxy,
+    ).text
     if not html: return []
     rt = pq(html)
     el_links = rt('a')
@@ -28,6 +32,8 @@ def get_next(url):
 
 def whole_site(args):
     site = args.site
+    if args.proxy: 
+        args.proxy = {'http': args.proxy, 'https': args.proxy}
     pref = re.sub(r'[^\w\-\.]', '-', site)
     res_fname = f'{pref}.txt'
     rec_fname = f'{pref}_rec.txt'
@@ -50,7 +56,7 @@ def whole_site(args):
         url = q.popleft()
         print(url)
         if url.endswith('.xml'): continue
-        nexts = get_next(url)
+        nexts = get_next(url, args)
         ofile.write(url + '\n')
         rec_file.write('-1\n')
         for n in nexts:
