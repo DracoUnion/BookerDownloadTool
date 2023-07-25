@@ -10,7 +10,7 @@ def get_next(url, args):
     html = request_retry(
         'GET', url, 
         retry=args.retry,
-        proxy=args.proxy,
+        proxies=args.proxy,
     ).text
     if not html: return []
     rt = pq(html)
