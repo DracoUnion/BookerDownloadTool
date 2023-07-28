@@ -60,6 +60,7 @@ def whole_site(args):
     else:
         q = deque([site])
         vis = set([site])
+        rec_file.write(site + '\n')
     pool = ThreadPoolExecutor(args.threads)
 
     while q:
