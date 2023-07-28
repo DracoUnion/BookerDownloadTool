@@ -68,7 +68,7 @@ def batch_home_bili(args):
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/space/arc/search?search_type=video&mid={mid}&pn={i}&order=pubdate'
+        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
