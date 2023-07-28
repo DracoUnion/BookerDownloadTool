@@ -73,7 +73,9 @@ def batch_home_bili(args):
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
-        for it in j['data']['list']['vlist']:
+        res = j['data']['list']['vlist']
+        if len(res) == 0: break
+        for it in res:
             bv = it['bvid']
             args.id = bv
             download_bili_safe(args)
@@ -91,7 +93,9 @@ def batch_kw_bili(args):
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
-        for it in j['data']['result']:
+        res = j['data']['result']
+        if len(res) == 0: break
+        for it in res:
             bv = it['bvid']
             args.id = bv
             download_bili_safe(args)
