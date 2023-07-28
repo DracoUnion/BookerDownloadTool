@@ -86,7 +86,7 @@ def batch_kw_bili(args):
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword={kw_enco}&page={i}&order=pubdate'
+        url = f'https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&page={i}&page_size=50&platform=pc&highlight=1&single_column=0&keyword={kw_enco}&source_tag=3&search_type=video&order=pubdate'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
