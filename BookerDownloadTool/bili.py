@@ -156,13 +156,13 @@ def download_bili_single(id, args):
             continue
         audio_url = audios[0]['base_url']
         print(f'audio: {audio_url}')
-        audio = requests.get(audio_url, headers=hdrs, timeout=(8, 3600)).content
+        audio = requests.get(audio_url, headers=hdrs, timeout=(8, None)).content
         if args.audio:
             open(fname, 'wb').write(audio)
             continue
         video_url = videos[0]['base_url']
         print(f'video: {video_url}')
-        video = requests.get(video_url, headers=hdrs, timeout=(8, 3600)).content
+        video = requests.get(video_url, headers=hdrs, timeout=(8, None)).content
         video = merge_video_audio(video, audio)
         open(fname, 'wb').write(video)
 
