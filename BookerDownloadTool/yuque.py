@@ -20,7 +20,7 @@ def crawl_yuque(args):
         "link": "",
         "title": "h1#article-title",
         "content": ".ne-viewer-body",
-        "selenium": true,
+        "selenium": True,
         "waitContent": args.wait,
         "textThreads": args.text_threads,
         "imgThreads": args.img_threads,
@@ -33,5 +33,5 @@ def crawl_yuque(args):
         "list": ids,
     }
     cfg_fname = 'config_' + fname_escape(name) + '.json'
-    open(cfg_fname, 'w', encoding='utf8').write(json.dumps(cfg_fname))
+    open(cfg_fname, 'w', encoding='utf8').write(json.dumps(cfg))
     subp.Popen(['crawl-epub', cfg_fname], shell=True).communicate()
