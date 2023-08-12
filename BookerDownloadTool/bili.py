@@ -68,12 +68,14 @@ def batch_home_bili(args):
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/space/arc/search?search_type=video&mid={mid}&pn={i}&order=pubdate'
+        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
-        for it in j['data']['list']['vlist']:
+        res = j['data']['list']['vlist']
+        if len(res) == 0: break
+        for it in res:
             bv = it['bvid']
             args.id = bv
             download_bili_safe(args)
@@ -86,12 +88,14 @@ def batch_kw_bili(args):
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword={kw_enco}&page={i}&order=pubdate'
+        url = f'https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&page={i}&page_size=50&platform=pc&highlight=1&single_column=0&keyword={kw_enco}&source_tag=3&search_type=video&order=pubdate'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
             return
-        for it in j['data']['result']:
+        res = j['data']['result']
+        if len(res) == 0: break
+        for it in res:
             bv = it['bvid']
             args.id = bv
             download_bili_safe(args)
@@ -151,12 +155,14 @@ def download_bili_single(id, args):
             print('解析失败，视频列表为空')
             continue
         audio_url = audios[0]['base_url']
-        audio = requests.get(audio_url, headers=hdrs).content
+        print(f'audio: {audio_url}')
+        audio = requests.get(audio_url, headers=hdrs, timeout=(8, None)).content
         if args.audio:
             open(fname, 'wb').write(audio)
             continue
         video_url = videos[0]['base_url']
-        video = requests.get(video_url, headers=hdrs).content
+        print(f'video: {video_url}')
+        video = requests.get(video_url, headers=hdrs, timeout=(8, None)).content
         video = merge_video_audio(video, audio)
         open(fname, 'wb').write(video)
 
