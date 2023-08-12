@@ -16,6 +16,7 @@ from .links import *
 from .wx import *
 from .uqer import *
 from .freembook import *
+from .yuque import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -253,6 +254,13 @@ def main():
     fmb_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
     fmb_parser.add_argument("-p", "--proxy", default='',  help="proxy splitted by ';'")
     fmb_parser.set_defaults(func=download_fmb)
+
+    wx_parser = subparsers.add_parser("wx", help="crawler weixin articles")
+    wx_parser.add_argument("fname", help="XLSX fname")
+    wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
+    wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    wx_parser.set_defaults(func=crawl_wx)
+
 
     args = parser.parse_args()
     args.func(args)
