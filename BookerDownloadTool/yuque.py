@@ -5,7 +5,7 @@ import json
 import subprocess as subp
 
 
-def download_yuque(args):
+def crawl_yuque(args):
     fname = args.fname
     name = re.sub(r'\.\w+$', '', path.basename(fname))
     ids = open(fname, encoding='utf8').read().split()
@@ -24,7 +24,7 @@ def download_yuque(args):
         "waitContent": args.wait,
         "textThreads": args.text_threads,
         "imgThreads": args.img_threads,
-        "optiMode": "thres",
+        "optiMode": args.opti_mode,
         "remove": "button",
         "headers": {
             "Cookie": args.cookie,

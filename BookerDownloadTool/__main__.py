@@ -255,12 +255,14 @@ def main():
     fmb_parser.add_argument("-p", "--proxy", default='',  help="proxy splitted by ';'")
     fmb_parser.set_defaults(func=download_fmb)
 
-    wx_parser = subparsers.add_parser("wx", help="crawler weixin articles")
-    wx_parser.add_argument("fname", help="XLSX fname")
-    wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
-    wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
-    wx_parser.set_defaults(func=crawl_wx)
-
+    yuque_parser = subparsers.add_parser("yuque", help="crawler yuque articles")
+    yuque_parser.add_argument("fname", help="IDS fname")
+    yuque_parser.add_argument("-w", "--wait", type=int, default=100, help="waiting sec for content")
+    yuque_parser.add_argument("-t", "--text-threads", type=int, default=8, help="num of threads for text")
+    yuque_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
+    yuque_parser.add_argument("-c", "--cookie", default=os.environ.get('YUQUE_COOKIE', ''), help="yuque cookie")
+    yuque_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    yuque_parser.set_defaults(func=crawl_yuque)
 
     args = parser.parse_args()
     args.func(args)
