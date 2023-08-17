@@ -142,18 +142,20 @@ def dict_get_recur(obj, keys):
             res = [o.get(k) for o in res if k in o]
     return res
 
-def merge_video_audio(video, audio):
+def merge_video_audio(video, audio, video_fmt='mp4', audio_fmt='mp4'):
     tmpdir = path.join(tempfile.gettempdir(), uuid.uuid4().hex)
     safe_mkdir(tmpdir)
-    vfname = path.join(tmpdir, 'video.mp4')
+    vfname = path.join(tmpdir, f'video.{video_fmt}')
+    v0fname = path.join(tmpdir, f'video0.{video_fmt}')
     open(vfname, 'wb').write(video)
-    afname = path.join(tmpdir, 'audio.mp4')
+    afname = path.join(tmpdir, f'audio.{audio_fmt}')
+    a0fname = path.join(tmpdir, f'audio0.{audio_fmt}')
     open(afname, 'wb').write(audio)
-    res_fname = path.join(tmpdir, 'merged.mp4')
+    res_fname = path.join(tmpdir, f'merged.{video_fmt}')
     cmds = [
-        ['ffmpeg', '-i', vfname, '-vcodec', 'copy', '-an', vfname, '-y'],
-        ['ffmpeg', '-i', afname, '-acodec', 'copy', '-vn', afname, '-y'],
-        ['ffmpeg', '-i', afname, '-i', vfname, '-vcodec', 'copy', '-acodec', 'copy', res_fname, '-y'],
+        ['ffmpeg', '-i', vfname, '-vcodec', 'copy', '-an', v0fname, '-y'],
+        ['ffmpeg', '-i', afname, '-acodec', 'copy', '-vn', a0fname, '-y'],
+        ['ffmpeg', '-i', a0fname, '-i', v0fname, '-c', 'copy', res_fname, '-y'],
     ]
     for cmd in cmds:
         print(f'cmd: {cmd}')
@@ -161,4 +163,3 @@ def merge_video_audio(video, audio):
     res = open(res_fname, 'rb').read()
     safe_rmdir(tmpdir)
     return res
-
