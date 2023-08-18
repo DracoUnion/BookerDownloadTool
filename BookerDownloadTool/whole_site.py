@@ -36,12 +36,12 @@ def get_next(url, args):
     ]
     links = [
         re.sub(r'#.*', '', l)
-        l for l in links
+        for l in links
     ]
     if args.noqs:
         links = [
             re.sub(r'\?.*', '', l)
-            l for l in links
+            for l in links
         ]
     # print(f'url: {url}\nnext: {links}\n')
     return links
