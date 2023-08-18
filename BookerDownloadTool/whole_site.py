@@ -34,6 +34,15 @@ def get_next(url, args):
         l for l in links 
         if urlparse(l).hostname == hostname
     ]
+    links = [
+        re.sub(r'#.*', '', l)
+        l for l in links
+    ]
+    if args.noqs:
+        links = [
+            re.sub(r'\?.*', '', l)
+            l for l in links
+        ]
     # print(f'url: {url}\nnext: {links}\n')
     return links
 
