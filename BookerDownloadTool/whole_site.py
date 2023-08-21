@@ -38,7 +38,7 @@ def get_next(url, args):
         re.sub(r'#.*', '', l)
         for l in links
     ]
-    if args.noqs:
+    if not args.qs:
         links = [
             re.sub(r'\?.*', '', l)
             for l in links
