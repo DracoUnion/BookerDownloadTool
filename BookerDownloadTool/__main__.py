@@ -180,6 +180,7 @@ def main():
     whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="times to retry")
     whole_site_parser.add_argument("-p", "--proxy", help="proxy")
     whole_site_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    whole_site_parser.add_argument("--re", help="pattern to match links")
     whole_site_parser.add_argument("--qs", action='store_true', help="whether to consider query string")
     whole_site_parser.set_defaults(func=whole_site)
     

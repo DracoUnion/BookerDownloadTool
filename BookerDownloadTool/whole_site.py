@@ -43,6 +43,11 @@ def get_next(url, args):
             re.sub(r'\?.*', '', l)
             for l in links
         ]
+    if args.re:
+        links = [
+            l for l in links
+            if re.search(args.re, l)
+        ]
     # print(f'url: {url}\nnext: {links}\n')
     return links
 
