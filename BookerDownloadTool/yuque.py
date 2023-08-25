@@ -9,11 +9,7 @@ def crawl_yuque(args):
     fname = args.fname
     name = re.sub(r'\.\w+$', '', path.basename(fname))
     ids = open(fname, encoding='utf8').read().split()
-    pref = 'https://www.yuque.com/'
-    ids = [
-        (id if id.startswith(pref) else pref + id)
-        for id in ids if id
-    ]
+    ids = [id for id in ids if id]
     cfg = {
         "name": name,
         "url": "https://www.yuque.com",
