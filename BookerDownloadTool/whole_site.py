@@ -89,9 +89,8 @@ def whole_site(args):
             h = pool.submit(tr_get_next_safe, i, url, nexts, args)
             hdls.append(h)
         for h in hdls: h.result()
-        # 过滤空项、合并、去重
-        nexts = [n for n in nexts if n]
-        nexts = set(reduce(lambda x, y: x + y, nexts, []))
+        # 合并、去重
+        nexts = set(sum(nexts, []))
         nexts = (u for u in nexts if not u.endswith('.xml'))
         for url in urls:
             ofile.write(url + '\n')
