@@ -22,6 +22,7 @@ def get_next(url, args):
         proxies=args.proxy,
     ).text
     if not html: return []
+    html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
     rt = pq(html)
     el_links = rt('a')
     links = [
@@ -91,7 +92,6 @@ def whole_site(args):
         for h in hdls: h.result()
         # 合并、去重
         nexts = set(sum(nexts, []))
-        nexts = (u for u in nexts if not u.endswith('.xml'))
         for url in urls:
             ofile.write(url + '\n')
             rec_file.write('-1\n')
