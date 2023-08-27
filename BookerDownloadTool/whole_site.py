@@ -23,7 +23,7 @@ def get_next(url, args):
     ).text
     if not html: return []
     html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
-    html = re.sub(r'\x20xmnls=".+?"', '', html)
+    html = re.sub(r'xmnls=".+?"', '', html)
     rt = pq(html)
     el_links = rt('a')
     links = [
