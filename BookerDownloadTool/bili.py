@@ -40,7 +40,7 @@ def download_meta_bili(args):
     st = int(args.start)
     ed = int(args.end)
     proxy = args.proxy.split(';')
-    proxy = [p.strip() for p in proxy if p.strip()]
+    proxy = [p.strip() for p in proxy]
     ofile = open(f'bili_meta_{st}_{ed}.jsonl', 'a+', encoding='utf8')
     if ofile.tell() != 0:
         ofile.seek(0, 0)
