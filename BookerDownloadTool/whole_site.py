@@ -7,6 +7,10 @@ from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
+hdrs = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+}
+
 def tr_get_next_safe(i, url, res, args):
     try:
         print(url)
@@ -20,6 +24,7 @@ def get_next(url, args):
         'GET', url, 
         retry=args.retry,
         proxies=args.proxy,
+        headers=hdrs,
     ).text
     if not html: return []
     html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
@@ -57,8 +62,13 @@ def get_next(url, args):
 
 def whole_site(args):
     site = args.site
+    pres = urlparse(site)
+    hdrs['Referer'] = f'{pres.scheme}://{pres.hostname}'
     if args.proxy: 
         args.proxy = {'http': args.proxy, 'https': args.proxy}
+    if args.cookie:
+        hdrs['Cookie'] = args.cookie
+    
     pref = re.sub(r'[^\w\-\.]', '-', site)
     res_fname = f'{pref}.txt'
     rec_fname = f'{pref}_rec.txt'
