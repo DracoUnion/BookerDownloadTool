@@ -1,5 +1,5 @@
-from Epubcrawler.utils import request_retry
-from Epubcrawler import config
+from EpubCrawler.utils import request_retry
+from EpubCrawler import config
 
 def get_article(html, url):
     # 获取文章 ID
