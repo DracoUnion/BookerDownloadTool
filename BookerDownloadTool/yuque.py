@@ -18,10 +18,11 @@ def get_name(html, args):
 
 def crawl_yuque(args):
     path_ = args.path
-    url = r'https://www.yuque.com/{path_}'
+    url = f'https://www.yuque.com/{path_}'
     hdrs = {'Cookie': args.cookie}
     html = request_retry('GET', url, headers=hdrs).text
     name = args.name or get_name(html, args)
+    print(name)
     m = re.search(r'book%22%3A%7B%22id%22%3A(\d+)', html)
     if not m: 
         print('找不到书籍 ID')
