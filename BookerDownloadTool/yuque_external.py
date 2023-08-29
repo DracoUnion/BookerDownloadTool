@@ -32,7 +32,7 @@ def get_article(html, url):
         el = pq(el)
         props = json.loads(unquote_plus(el.attr('value'))[5:])
         el_new = pq('<img />')
-        for k, v in props.items(): el_new.attr(k, v)
+        for k, v in props.items(): el_new.attr(k, str(v))
         el.replace_with(el_new)
     el_hrs = rt('card[name=hr]')
     for el in el_hrs:
