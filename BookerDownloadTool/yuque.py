@@ -30,7 +30,7 @@ def crawl_yuque(args):
             "Referer": "https://www.yuque.com/"
         },
         "list": ids,
-        "external": d('yuque_external.py'),
+        "external": path.join(DIR, 'yuque_external.py'),
     }
     cfg_fname = 'config_' + fname_escape(name) + '.json'
     open(cfg_fname, 'w', encoding='utf8').write(json.dumps(cfg))
