@@ -270,6 +270,14 @@ def main():
     yuque_parser.add_argument("-n", "--name", help="book name")
     yuque_parser.set_defaults(func=crawl_yuque)
 
+    yuque_parser = subparsers.add_parser("batch-yuque", help="crawler yuque articles")
+    yuque_parser.add_argument("fname", help="fname of yuque article links")
+    yuque_parser.add_argument("-t", "--text-threads", type=int, default=8, help="num of threads for text")
+    yuque_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
+    yuque_parser.add_argument("-c", "--cookie", default=os.environ.get('YUQUE_COOKIE', ''), help="yuque cookie")
+    yuque_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    yuque_parser.set_defaults(func=batch_yuque)
+
     args = parser.parse_args()
     args.func(args)
     
