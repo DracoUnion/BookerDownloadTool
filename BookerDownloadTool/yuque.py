@@ -20,7 +20,6 @@ def crawl_yuque(args):
         "link": "",
         "title": "h1#article-title",
         "content": ".ne-viewer-body",
-        "selenium": True,
         "waitContent": args.wait,
         "textThreads": args.text_threads,
         "imgThreads": args.img_threads,
@@ -31,6 +30,7 @@ def crawl_yuque(args):
             "Referer": "https://www.yuque.com/"
         },
         "list": ids,
+        "external": d('yuque_external.py'),
     }
     cfg_fname = 'config_' + fname_escape(name) + '.json'
     open(cfg_fname, 'w', encoding='utf8').write(json.dumps(cfg))
