@@ -260,8 +260,7 @@ def main():
     fmb_parser.set_defaults(func=download_fmb)
 
     yuque_parser = subparsers.add_parser("yuque", help="crawler yuque articles")
-    yuque_parser.add_argument("fname", help="IDS fname")
-    yuque_parser.add_argument("-w", "--wait", type=int, default=100, help="waiting sec for content")
+    yuque_parser.add_argument("path", help="yuque \"{userName}/{bookName}\"")
     yuque_parser.add_argument("-t", "--text-threads", type=int, default=8, help="num of threads for text")
     yuque_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
     yuque_parser.add_argument("-c", "--cookie", default=os.environ.get('YUQUE_COOKIE', ''), help="yuque cookie")

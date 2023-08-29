@@ -44,7 +44,6 @@ def crawl_yuque(args):
         "link": "",
         "title": "h1#article-title",
         "content": ".ne-viewer-body",
-        "waitContent": args.wait,
         "textThreads": args.text_threads,
         "imgThreads": args.img_threads,
         "optiMode": args.opti_mode,
