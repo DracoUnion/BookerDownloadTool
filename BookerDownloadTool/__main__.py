@@ -266,6 +266,9 @@ def main():
     yuque_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
     yuque_parser.add_argument("-c", "--cookie", default=os.environ.get('YUQUE_COOKIE', ''), help="yuque cookie")
     yuque_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    yuque_parser.add_argument("-s", "--start", help="starting date for articles")
+    yuque_parser.add_argument("-e", "--end", help="ending date for articles")
+    yuque_parser.add_argument("-n", "--name", help="book name")
     yuque_parser.set_defaults(func=crawl_yuque)
 
     args = parser.parse_args()
