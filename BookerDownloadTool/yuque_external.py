@@ -26,7 +26,7 @@ def get_article(html, url):
     cont = j['data']['content']
     cont = re.sub(r'<!doctype[^>]*>', '', cont)
     # 处理正文中的 <card> 元素
-    rt = pq(f'<div>{cont}></div>')
+    rt = pq(f'<div>{cont}</div>')
     el_imgs = rt('card[name=image]')
     for el in el_imgs:
         el = pq(el)
