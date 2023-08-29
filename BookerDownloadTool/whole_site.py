@@ -7,6 +7,10 @@ from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
+hdrs = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+}
+
 def tr_get_next_safe(i, url, res, args):
     try:
         print(url)
@@ -20,8 +24,11 @@ def get_next(url, args):
         'GET', url, 
         retry=args.retry,
         proxies=args.proxy,
+        headers=hdrs,
     ).text
     if not html: return []
+    html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
+    html = re.sub(r'xmnls=".+?"', '', html)
     rt = pq(html)
     el_links = rt('a')
     links = [
@@ -43,6 +50,11 @@ def get_next(url, args):
             re.sub(r'\?.*', '', l)
             for l in links
         ]
+    if args.re:
+        links = [
+            l for l in links
+            if re.search(args.re, l)
+        ]
     # print(f'url: {url}\nnext: {links}\n')
     return links
 
@@ -50,8 +62,13 @@ def get_next(url, args):
 
 def whole_site(args):
     site = args.site
+    pres = urlparse(site)
+    hdrs['Referer'] = f'{pres.scheme}://{pres.hostname}'
     if args.proxy: 
         args.proxy = {'http': args.proxy, 'https': args.proxy}
+    if args.cookie:
+        hdrs['Cookie'] = args.cookie
+    
     pref = re.sub(r'[^\w\-\.]', '-', site)
     res_fname = f'{pref}.txt'
     rec_fname = f'{pref}_rec.txt'
@@ -84,10 +101,8 @@ def whole_site(args):
             h = pool.submit(tr_get_next_safe, i, url, nexts, args)
             hdls.append(h)
         for h in hdls: h.result()
-        # 过滤空项、合并、去重
-        nexts = [n for n in nexts if n]
-        nexts = set(reduce(lambda x, y: x + y, nexts, []))
-        nexts = (u for u in nexts if not u.endswith('.xml'))
+        # 合并、去重
+        nexts = set(sum(nexts, []))
         for url in urls:
             ofile.write(url + '\n')
             rec_file.write('-1\n')
