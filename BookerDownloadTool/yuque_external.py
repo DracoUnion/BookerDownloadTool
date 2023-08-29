@@ -3,7 +3,7 @@ import json
 from pyquery import PyQuery as pq
 from urllib.parse import unquote_plus
 from EpubCrawler.util import request_retry
-from EpubCrawler import config
+from EpubCrawler.config import config
 
 def get_article(html, url):
     # 获取文章 ID
