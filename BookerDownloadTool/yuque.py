@@ -23,7 +23,7 @@ def crawl_yuque(args):
         "remove": "button",
         "headers": {
             "Cookie": args.cookie,
-            "Referer": "https://www.yuque.com/"
+            # "Referer": "https://www.yuque.com/"
         },
         "list": ids,
         "external": path.join(DIR, 'yuque_external.py'),

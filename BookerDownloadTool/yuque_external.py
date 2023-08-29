@@ -33,9 +33,6 @@ def get_article(html, url):
         props = json.loads(unquote_plus(el.attr('value'))[5:])
         el_new = pq('<img />')
         for k, v in props.items(): el_new.attr(k, str(v))
-        if el_new.attr('src'):
-            src = 'https://www.yuque.com/api/filetransfer/images?url=' + quote_plus(el_new.attr('src'))
-            el_new.attr('src', src)
         el.replace_with(el_new)
     el_hrs = rt('card[name=hr]')
     for el in el_hrs:
