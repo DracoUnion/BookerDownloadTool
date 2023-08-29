@@ -1,3 +1,7 @@
+import re
+import json
+from pyquery import PyQuery as pq
+from urllib.parse import unquote_plus
 from EpubCrawler.util import request_retry
 from EpubCrawler import config
 
