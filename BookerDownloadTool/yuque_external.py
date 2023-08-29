@@ -1,4 +1,4 @@
-from EpubCrawler.utils import request_retry
+from EpubCrawler.util import request_retry
 from EpubCrawler import config
 
 def get_article(html, url):
