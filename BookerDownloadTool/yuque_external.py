@@ -37,6 +37,16 @@ def get_article(html, url):
     el_hrs = rt('card[name=hr]')
     for el in el_hrs:
         pq(el).replace_with('<hr />')
+    el_pres = rt('card[name=codeblock]')
+    for el in el_pres:
+        el = pq(el)
+        props = json.loads(unquote_plus(el.attr('value'))[5:])
+        el_new = pq('<pre></pre>')
+        if 'code' in props:
+            el_new.text(props['code'])
+            del props['code']
+        for k, v in props.items(): el_new.attr(k, str(v))
+        el.replace_with(el_new)
     el_cards = rt('card')
     if len(el_cards):
         names = {pq(el).attr('name') for el in el_cards}
