@@ -279,7 +279,7 @@ def main():
     yuque_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
     yuque_parser.set_defaults(func=batch_yuque)
 
-    feishu_parser = subparsers.add_parser("batch-yuque", help="crawler yuque articles")
+    feishu_parser = subparsers.add_parser("feishu", help="crawler yuque articles")
     feishu_parser.add_argument("wiki", help="wiki token")
     feishu_parser.add_argument("-t", "--text-threads", type=int, default=8, help="num of threads for text")
     feishu_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
