@@ -64,7 +64,7 @@ def crawl_feishu(args):
     # 如果没有Cookie，设置临时Cookie
     if not cookie:
         cookie = r.headers.get('Set-Cookie', '')
-    toc = get_space_toc(space_id, domain)
+    toc = get_space_toc(space_id, domain, cookie)
     links = [
         f'https://{domain}.feishu.cn/space/api/ssr/wiki/{wiki}' 
         for wiki in toc
