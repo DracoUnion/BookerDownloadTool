@@ -5,7 +5,7 @@ import json
 def get_article(jstr, base):
     j = json.loads(jstr)
     if j['code'] != 0:
-        raise RuntimeError(j['msg'])
+        raise RuntimeError(f'{base}: ' + j['message'])
     html = j['data']['ssr_content']
     rt = pq(html)
     title = rt('.page-block-content').eq(0).text().strip()
