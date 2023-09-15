@@ -2,6 +2,8 @@ import json
 import re
 from EpubCrawler.util import request_retry
 import argparse
+from os import path
+import subprocess as subp
 from .util import *
 
 def get_children(space_id, domain, wiki, cookie):
@@ -63,8 +65,11 @@ def crawl_feishu(args):
     if not cookie:
         cookie = r.headers.get('Set-Cookie', '')
     toc = get_space_toc(space_id, domain)
-    links = [f'https://{domain}.feishu.cn/space/api/ssr/wiki/{wiki}' for wiki in toc]
-    name = args.name
+    links = [
+        f'https://{domain}.feishu.cn/space/api/ssr/wiki/{wiki}' 
+        for wiki in toc
+    ]
+    name = args.name or f'飞书文档集_{domain}_{space_id}'
     cfg = {
         "name": name,
         "url": f"https://{domain}.feishu.cn",

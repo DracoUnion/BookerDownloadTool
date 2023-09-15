@@ -17,6 +17,7 @@ from .wx import *
 from .uqer import *
 from .freembook import *
 from .yuque import *
+from .feishu import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -279,10 +280,13 @@ def main():
     yuque_parser.set_defaults(func=batch_yuque)
 
     feishu_parser = subparsers.add_parser("batch-yuque", help="crawler yuque articles")
-    feishu_parser.add_argument("wiki", help="wiki")
+    feishu_parser.add_argument("wiki", help="wiki token")
     feishu_parser.add_argument("-t", "--text-threads", type=int, default=8, help="num of threads for text")
     feishu_parser.add_argument("-i", "--img-threads", type=int, default=24, help="num of threads for imgs")
-
+    feishu_parser.add_argument("-c", "--cookie", default=os.environ.get('FEISHU_COOKIE', ''), help="feishu cookie")
+    feishu_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    feishu_parser.add_argument("-n", "--name", help="book name")
+    feishu_parser.set_defaults(func=crawl_feishu)
 
     args = parser.parse_args()
     args.func(args)
