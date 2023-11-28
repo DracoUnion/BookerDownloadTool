@@ -30,13 +30,28 @@ def get_content(art):
     '''
     return {'title': au_name, 'content': co}
     
+def ext_cookies(cookie_str):
+    # _xsrf=...; KLBRSID=...
+    kvs = re.findall(r'(?:_xsrf|KLBRSID)=[^;]+', cookie_str)
+    kvs = [kv.split('=') for kv in kvs]
+    return {kv[0]:kv[1] for kv in kvs}
+    
 def zhihu_ques(args):
     qid = args.qid
     cralwer_config['optiMode'] = args.opti_mode
     cralwer_config['imgSrc'] = ['data-original', 'src']
 
-    url = f'https://www.zhihu.com/api/v4/questions/{qid}//answers?limit=20&include=content,voteup_count'
-    j = request_retry('GET', url, headers=headers).json()
+    url = f'https://www.zhihu.com/api/v4/questions/{qid}/feeds?cursor=&include=content,voteup_count'
+    r = request_retry(
+        'GET', url, 
+        headers=headers,
+        proxies={'http': args.proxy, 'https': args.proxy},
+    )
+    cookies = ext_cookies(r.headers.get('Set-Cookie', ''))
+    j = r.json()
+    if len(j['data']) == 0:
+        print(f'问题 {qid} 没有回答')
+        return
     title = '知乎问答：' + j['data'][0]['question']['title']
     co = f'''
         <blockquote>来源：<a href='https://www.zhihu.com/question/{qid}'>https://www.zhihu.com/question/{qid}</a></blockquote>
@@ -46,7 +61,14 @@ def zhihu_ques(args):
     
     while True:
         print(url)
-        j = request_retry('GET', url, headers=headers).json()
+        r = request_retry(
+            'GET', url, 
+            headers=headers, 
+            cookies=cookies,
+            proxies={'http': args.proxy, 'https': args.proxy},
+        )
+        cookies |= ext_cookies(r.headers.get('Set-Cookie', ''))
+        j = r.json()
         for art in j['data']:
             art = get_content(art)
             art['content'] = process_img(
@@ -55,8 +77,6 @@ def zhihu_ques(args):
             )
             articles.append(art)
         if j['paging']['is_end']: break
-        url = j['paging']['next'] \
-            .replace('/answers', '//answers') \
-            .replace('/questions', '/api/v4/questions')
+        url = j['paging']['next']
         
     gen_epub(articles, imgs)
