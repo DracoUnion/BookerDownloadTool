@@ -3,6 +3,7 @@ import sys
 import os
 from . import __version__
 from .zhihu_sele import *
+from .zhihu_api import *
 from .lightnovel import *
 from .dl_gh_book import *
 from .bili import *
