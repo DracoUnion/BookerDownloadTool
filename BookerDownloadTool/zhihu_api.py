@@ -52,11 +52,11 @@ def zhihu_ques_api(args):
     if len(j['data']) == 0:
         print(f'问题 {qid} 没有回答')
         return
-    articles = [
+    answers = [
         it['target'] for it in j['data'] 
         if it['target_type'] == 'answer'
     ]
-    title = '知乎问答：' + articles[0]['question']['title']
+    title = '知乎问答：' + answers[0]['question']['title']
     co = f'''
         <blockquote>来源：<a href='https://www.zhihu.com/question/{qid}'>https://www.zhihu.com/question/{qid}</a></blockquote>
     '''
@@ -73,12 +73,12 @@ def zhihu_ques_api(args):
         )
         cookies |= ext_cookies(r.headers.get('Set-Cookie', ''))
         j = r.json()
-        articles = [
+        answers = [
             it['target'] for it in j['data'] 
             if it['target_type'] == 'answer'
         ]
-        for art in articles:
-            art = get_content(art)
+        for ans in answers:
+            art = get_content(ans)
             art['content'] = process_img(
                 art['content'], imgs, 
                 img_prefix='../Images/'
