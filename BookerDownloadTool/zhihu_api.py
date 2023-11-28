@@ -78,7 +78,7 @@ def zhihu_ques_api(args):
             if it['target_type'] == 'answer'
         ]
         for art in articles:
-            art = get_content(art['])
+            art = get_content(art)
             art['content'] = process_img(
                 art['content'], imgs, 
                 img_prefix='../Images/'
