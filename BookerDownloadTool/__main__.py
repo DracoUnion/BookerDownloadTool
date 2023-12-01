@@ -289,7 +289,7 @@ def main():
     feishu_parser.add_argument("-n", "--name", help="book name")
     feishu_parser.set_defaults(func=crawl_feishu)
 
-    zhihu_ques_api_parser = subparsers.add_parser("zhihu-ques-api", help="crawl zhihu answers of a question by **API**")
+    zhihu_ques_api_parser = subparsers.add_parser("zhiapi-ques", help="crawl zhihu answers of a question by **API**")
     zhihu_ques_api_parser.add_argument("qid", help="qid")
     zhihu_ques_api_parser.add_argument("-p", "--proxy", help="proxy")
     zhihu_ques_api_parser.add_argument("-m", "--opti-mode", default="thres", help="img opti mode")
