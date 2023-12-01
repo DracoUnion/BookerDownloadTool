@@ -5,6 +5,9 @@ from EpubCrawler.img import process_img
 from EpubCrawler.config import config as cralwer_config
 from datetime import datetime
 from GenEpub import gen_epub
+import traceback
+from concurrent.futures import ThreadPoolExecutor
+import copy
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
@@ -91,3 +94,21 @@ def zhihu_ques_api(args):
         url = j['paging']['next']
         
     gen_epub(articles, imgs)
+
+def zhihu_ques_api_safe(args):
+    try:
+        zhihu_ques_api(args)
+    except:
+        traceback.print_exc()
+        
+def zhihu_ques_range_api(args):
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    
+    for i in range(args.start, args.end + 1):
+        args = copy.deepcopy(args)
+        args.qid = i
+        h = pool.submit(zhihu_ques_api_safe, args)
+        hdls.append(h)
+    
+    for h in hdls: h.result()
