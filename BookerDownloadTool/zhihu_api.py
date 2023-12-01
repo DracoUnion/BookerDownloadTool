@@ -43,7 +43,8 @@ def zhihu_ques_api(args):
     qid = args.qid
     cralwer_config['optiMode'] = args.opti_mode
     cralwer_config['imgSrc'] = ['data-original', 'src']
-
+    
+    print(f'qid: {qid}')
     url = f'https://www.zhihu.com/api/v4/questions/{qid}/feeds?cursor=&include=content,voteup_count'
     r = request_retry(
         'GET', url, 
