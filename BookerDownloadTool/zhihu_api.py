@@ -39,6 +39,13 @@ def ext_cookies(cookie_str):
     kvs = [kv.split('=') for kv in kvs]
     return {kv[0]:kv[1] for kv in kvs}
     
+def request_retry_no403(*args, **kw):
+    kw.setdefault('retry', 10)
+    for i in range(kw['retry']):
+        r = request_retry(*args, **kw)
+        if r.status_code != 403: break
+    return r
+    
 def zhihu_ques_api(args):
     qid = args.qid
     cralwer_config['optiMode'] = args.opti_mode
@@ -46,8 +53,9 @@ def zhihu_ques_api(args):
     
     print(f'qid: {qid}')
     url = f'https://www.zhihu.com/api/v4/questions/{qid}/feeds?cursor=&include=content,voteup_count'
-    r = request_retry(
+    r = request_retry_no403(
         'GET', url, 
+        retry=args.retry,
         headers=headers,
         proxies={'http': args.proxy, 'https': args.proxy},
     )
@@ -72,8 +80,9 @@ def zhihu_ques_api(args):
     
     while True:
         print(url)
-        r = request_retry(
+        r = request_retry_no403(
             'GET', url, 
+            retry=args.retry,
             headers=headers, 
             cookies=cookies,
             proxies={'http': args.proxy, 'https': args.proxy},
