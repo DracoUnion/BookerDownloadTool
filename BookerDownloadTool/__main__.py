@@ -293,6 +293,7 @@ def main():
     zhihu_ques_api_parser.add_argument("qid", help="qid")
     zhihu_ques_api_parser.add_argument("-p", "--proxy", help="proxy")
     zhihu_ques_api_parser.add_argument("-m", "--opti-mode", default="thres", help="img opti mode")
+    zhihu_ques_api_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
     zhihu_ques_api_parser.set_defaults(func=zhihu_ques_api)
 
     zhihu_ques_range_api_parser = subparsers.add_parser("zhiapi-ques-range", help="crawl zhihu answers of a question by **API**")
@@ -301,6 +302,7 @@ def main():
     zhihu_ques_range_api_parser.add_argument("-p", "--proxy", help="proxy")
     zhihu_ques_range_api_parser.add_argument("-m", "--opti-mode", default="thres", help="img opti mode")
     zhihu_ques_range_api_parser.add_argument("-t", "--threads", type=int, default=8, help="thread num")
+    zhihu_ques_range_api_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
     zhihu_ques_range_api_parser.set_defaults(func=zhihu_ques_range_api)
 
 
