@@ -49,6 +49,9 @@ def zhihu_ques_api(args):
     )
     cookies = ext_cookies(r.headers.get('Set-Cookie', ''))
     j = r.json()
+    if 'data' not in j:
+        print(f'问题 {qid} 不存在')
+        return
     if len(j['data']) == 0:
         print(f'问题 {qid} 没有回答')
         return
