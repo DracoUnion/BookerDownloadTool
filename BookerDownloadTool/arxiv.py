@@ -1,5 +1,6 @@
 from .util import *
-
+from pyquery import PyQuery as pq
+import re
 
 def get_total(html):
     rt = pq(html)
