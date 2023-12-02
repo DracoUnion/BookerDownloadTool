@@ -2,15 +2,20 @@ from .util import *
 from pyquery import PyQuery as pq
 import re
 
+def rm_xml_tags(html):
+    html = re.sub(r'<?xml[^>]*?>', '', html)
+    html = re.sub(r'xmlns=".+?"', '', html)
+    return html
+
 def get_total(html):
-    rt = pq(html)
+    rt = pq(rm_xml_tags(html))
     txt = rt('h2+small').text()
     m = re.search(r'(\d+)\x20entries', txt)
     if not m: return 0
     return int(m.group(1))
     
 def get_ids(html):
-    rt = pq(html)
+    rt = pq(rm_xml_tags(html))
     el_links = rt('.list-identifier>a:first-of-type')
     ids = [
         pq(el).attr('href').split('/')[-1]
