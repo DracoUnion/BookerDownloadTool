@@ -44,6 +44,7 @@ def request_retry_no403(*args, **kw):
     for i in range(kw['retry']):
         r = request_retry(*args, **kw)
         if r.status_code != 403: break
+    if r.status_code == 403: raise Exception('HTTP 403')
     return r
     
 def zhihu_ques_api(args):
