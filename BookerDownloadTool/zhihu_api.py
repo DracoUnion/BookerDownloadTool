@@ -121,5 +121,9 @@ def zhihu_ques_range_api(args):
         args.qid = i
         h = pool.submit(zhihu_ques_api_safe, args)
         hdls.append(h)
+        # 及时释放内存
+        if len(hdls) >= args.threads:
+            for h in hdls: h.result()
+            hdls = []
     
     for h in hdls: h.result()
