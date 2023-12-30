@@ -33,7 +33,8 @@ def get_content(art):
 def zhihu_ques(args):
     qid = args.qid
     cralwer_config['optiMode'] = args.opti_mode
-    
+    cralwer_config['imgSrc'] = ['data-original', 'src']
+
     url = f'https://www.zhihu.com/api/v4/questions/{qid}//answers?limit=20&include=content,voteup_count'
     j = request_retry('GET', url, headers=headers).json()
     title = '知乎问答：' + j['data'][0]['question']['title']

@@ -13,9 +13,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from .util import *
 
-cralwer_config['optiMode'] = 'thres'
-cralwer_config['imgSrc'] = ['data-original', 'src']
-
 # 滚动到底
 def scroll_to_bottom(driver):
     driver.execute_script('''
@@ -91,7 +88,10 @@ def get_articles(html, qid):
     return articles
 
 def zhihu_ques_sele(args):
+    cralwer_config['optiMode'] = 'thres'
+    cralwer_config['imgSrc'] = ['data-original', 'src']
     qid = args.qid
+    
     url = f'https://www.zhihu.com/question/{qid}'
     options = Options()
     options.add_argument('--headless')
