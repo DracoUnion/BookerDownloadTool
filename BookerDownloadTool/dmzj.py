@@ -12,7 +12,7 @@ import re
 import tempfile
 import json
 import uuid
-import img2pdf
+from img2jb2pdf import img2jb2pdf
 import subprocess as subp
 from concurrent.futures import ThreadPoolExecutor
 from .util import *
@@ -92,7 +92,7 @@ def download_dmzj_ch(url, info, odir):
         imgs.get(f'{i}.png', b'')
         for i in range(len(imgs))
     ]
-    pdf = img2pdf.convert(img_list)
+    pdf = img2jb2pdf(img_list)
     open(ofname, 'wb').write(pdf)
     
 def init_pools(args):

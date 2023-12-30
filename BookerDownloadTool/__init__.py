@@ -4,7 +4,7 @@
 """BookerDownloadTool
 https://github.com/apachecnBookerDownloadTool"""
 
-__author__ = "ApacheCN"
-__email__ = "apachecn@163.com"
+__author__ = "wizardforcel"
+__email__ = "wizard.z@qq.com"
 __license__ = "SATA"
-__version__ = "2023.4.27.0"
+__version__ = "2023.8.30.0"
