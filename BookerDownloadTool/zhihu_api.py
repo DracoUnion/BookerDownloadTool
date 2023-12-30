@@ -88,7 +88,7 @@ def zhihu_ques_api(args):
             cookies=cookies,
             proxies={'http': args.proxy, 'https': args.proxy},
         )
-        cookies |= ext_cookies(r.headers.get('Set-Cookie', ''))
+        cookies.update(ext_cookies(r.headers.get('Set-Cookie', '')))
         j = r.json()
         answers = [
             it['target'] for it in j['data'] 
