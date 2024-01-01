@@ -81,7 +81,7 @@ def batch_ln(args):
     
     lines = open(fname, encoding='utf-8').read().split('\n')
     lines = filter(None, map(lambda x: x.strip(), lines))
-    pool = ThreadPoolExecutor(5)
+    pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for id in lines:
         args = copy.deepcopy(args)

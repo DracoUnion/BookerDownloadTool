@@ -87,6 +87,7 @@ def main():
     ln_batch_parser.add_argument("fname", help="file name of ids")
     ln_batch_parser.add_argument("-s", "--save-path", default='out', help="path to save")
     ln_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_batch_parser.add_argument("-t", "--threads", type=int, default=5, help="thread count")
     ln_batch_parser.set_defaults(func=batch_ln)
 
     ln_fetch_parser = subparsers.add_parser("fetch-ln", help="fetch lightnovel ids")
