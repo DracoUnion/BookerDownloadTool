@@ -81,6 +81,7 @@ def main():
     ln_parser.add_argument("id", help="id")
     ln_parser.add_argument("-s", "--save-path", default='out', help="path to save")
     ln_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
     ln_parser.set_defaults(func=download_ln)
 
     ln_batch_parser = subparsers.add_parser("batch-ln", help="download lightnovel in batch")
@@ -88,6 +89,7 @@ def main():
     ln_batch_parser.add_argument("-s", "--save-path", default='out', help="path to save")
     ln_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
     ln_batch_parser.add_argument("-t", "--threads", type=int, default=5, help="thread count")
+    ln_batch_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
     ln_batch_parser.set_defaults(func=batch_ln)
 
     ln_fetch_parser = subparsers.add_parser("fetch-ln", help="fetch lightnovel ids")

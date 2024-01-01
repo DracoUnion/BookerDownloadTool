@@ -67,7 +67,15 @@ def download_ln(args):
         'content': f"<p>作者：{info['author']}</p>",
     }]
     url = f'http://dl.wenku8.com/down.php?type=utf8&id={id}'
-    text = request_retry('GET', url, headers=headers).content.decode('utf-8')
+    for i in range(args.retry):
+        text = request_retry(
+            'GET', url, 
+            retry=args.retry, 
+            headers=headers,
+        ).content.decode('utf-8')
+        if text.strip(): break
+        if i == args.retry - 1:
+            raise Exception('下载失败：内容为空')
     chs = format_text(text)
     articles += chs
     gen_epub(articles, {}, None, ofname)
