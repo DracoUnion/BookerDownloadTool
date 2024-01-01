@@ -68,12 +68,14 @@ def download_ln(args):
     }]
     url = f'http://dl.wenku8.com/down.php?type=utf8&id={id}'
     for i in range(args.retry):
-        text = request_retry(
+        r = request_retry(
             'GET', url, 
             retry=args.retry, 
             headers=headers,
-        ).content.decode('utf-8')
-        if text.strip(): break
+        )
+        if r.status_code == 200:
+            text = r.content.decode('utf-8')
+            break
         if i == args.retry - 1:
             raise Exception('下载失败：内容为空')
     chs = format_text(text)
