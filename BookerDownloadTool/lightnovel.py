@@ -67,7 +67,17 @@ def download_ln(args):
         'content': f"<p>作者：{info['author']}</p>",
     }]
     url = f'http://dl.wenku8.com/down.php?type=utf8&id={id}'
-    text = request_retry('GET', url, headers=headers).content.decode('utf-8')
+    for i in range(args.retry):
+        r = request_retry(
+            'GET', url, 
+            retry=args.retry, 
+            headers=headers,
+        )
+        if r.status_code == 200:
+            text = r.content.decode('utf-8')
+            break
+        if i == args.retry - 1:
+            raise Exception('下载失败：内容为空')
     chs = format_text(text)
     articles += chs
     gen_epub(articles, {}, None, ofname)
@@ -81,7 +91,7 @@ def batch_ln(args):
     
     lines = open(fname, encoding='utf-8').read().split('\n')
     lines = filter(None, map(lambda x: x.strip(), lines))
-    pool = ThreadPoolExecutor(5)
+    pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for id in lines:
         args = copy.deepcopy(args)

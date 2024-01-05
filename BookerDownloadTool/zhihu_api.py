@@ -44,6 +44,7 @@ def request_retry_no403(*args, **kw):
     for i in range(kw['retry']):
         r = request_retry(*args, **kw)
         if r.status_code != 403: break
+    if r.status_code == 403: raise Exception('HTTP 403')
     return r
     
 def zhihu_ques_api(args):
@@ -87,7 +88,7 @@ def zhihu_ques_api(args):
             cookies=cookies,
             proxies={'http': args.proxy, 'https': args.proxy},
         )
-        cookies |= ext_cookies(r.headers.get('Set-Cookie', ''))
+        cookies.update(ext_cookies(r.headers.get('Set-Cookie', '')))
         j = r.json()
         answers = [
             it['target'] for it in j['data'] 
@@ -120,5 +121,9 @@ def zhihu_ques_range_api(args):
         args.qid = i
         h = pool.submit(zhihu_ques_api_safe, args)
         hdls.append(h)
+        # 及时释放内存
+        if len(hdls) >= args.threads:
+            for h in hdls: h.result()
+            hdls = []
     
     for h in hdls: h.result()

@@ -19,6 +19,7 @@ from .uqer import *
 from .freembook import *
 from .yuque import *
 from .feishu import *
+from .arxiv import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -80,12 +81,15 @@ def main():
     ln_parser.add_argument("id", help="id")
     ln_parser.add_argument("-s", "--save-path", default='out', help="path to save")
     ln_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
     ln_parser.set_defaults(func=download_ln)
 
     ln_batch_parser = subparsers.add_parser("batch-ln", help="download lightnovel in batch")
     ln_batch_parser.add_argument("fname", help="file name of ids")
     ln_batch_parser.add_argument("-s", "--save-path", default='out', help="path to save")
     ln_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_batch_parser.add_argument("-t", "--threads", type=int, default=5, help="thread count")
+    ln_batch_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
     ln_batch_parser.set_defaults(func=batch_ln)
 
     ln_fetch_parser = subparsers.add_parser("fetch-ln", help="fetch lightnovel ids")
@@ -306,6 +310,11 @@ def main():
     zhihu_ques_range_api_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
     zhihu_ques_range_api_parser.set_defaults(func=zhihu_ques_range_api)
 
+    arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
+    arxiv_fetch_parser.add_argument("subject", help="subject code")
+    arxiv_fetch_parser.add_argument("year_month", help="year and month like yymm")
+    arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
+    arxiv_fetch_parser.set_defaults(func=arxiv_fetch)
 
     args = parser.parse_args()
     args.func(args)
