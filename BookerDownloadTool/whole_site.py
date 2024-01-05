@@ -29,13 +29,13 @@ def get_html_checked(url, args):
 def tr_get_next_safe(i, url, res, args):
     try:
         print(url)
-        html = get_html_checked(url, args)
-        ns = get_next(html, args)
+        ns = get_next(url, args)
         res[i] = ns
     except:
         traceback.print_exc()
 
-def get_next(html, args):
+def get_next(url, args):
+    html = get_html_checked(url, args)
     if not html: return []
     html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
     html = re.sub(r'xmnls=".+?"', '', html)
