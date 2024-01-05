@@ -24,6 +24,7 @@ def get_html_checked(url, args):
         if check_text.strip(): break
         if i == args.retry - 1:
             raise Exception(f'url: [{url}] element: [{args.nonblank}] checked blank')
+    return html
 
 def tr_get_next_safe(i, url, res, args):
     try:
