@@ -20,7 +20,7 @@ def get_html_checked(url, args):
             headers=hdrs,
         ).text
         if not args.nonblank: break
-        check_text = pq(html).find(args.nonblank)
+        check_text = pq(html).find(args.nonblank).text()
         if check_text.strip(): break
         if i == args.retry - 1:
             raise Exception(f'url: [{url}] element: [{args.nonblank}] checked blank')
