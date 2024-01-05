@@ -19,11 +19,11 @@ def get_html_checked(url, args):
             proxies=args.proxy,
             headers=hdrs,
         ).text
-        if not args.check_nonblank: break
-        check_text = pq(html).find(args.check_nonblank)
+        if not args.nonblank: break
+        check_text = pq(html).find(args.nonblank)
         if check_text.strip(): break
         if i == args.retry - 1:
-            raise Exception(f'url [{url}] element {args.check_nonblank} checked blank')
+            raise Exception(f'url: [{url}] element: [{args.nonblank}] checked blank')
 
 def tr_get_next_safe(i, url, res, args):
     try:
