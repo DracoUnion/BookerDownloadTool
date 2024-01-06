@@ -76,7 +76,7 @@ def zhihu_ques_api(args):
     title = '知乎问答：' + answers[0]['question']['title']
     if path.isfile(f'{title}.epub') or \
        path.isfile(f'{title} - PT1.epub'):
-       print(r'问题 {qid} 已经抓取完毕：{title}')
+       print(f'问题 {qid} 已经抓取完毕：{title}')
        return
     co = f'''
         <blockquote>来源：<a href='https://www.zhihu.com/question/{qid}'>https://www.zhihu.com/question/{qid}</a></blockquote>
