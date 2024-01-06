@@ -8,6 +8,7 @@ from GenEpub import gen_epub
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 import copy
+from os import path
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
@@ -73,6 +74,10 @@ def zhihu_ques_api(args):
         if it['target_type'] == 'answer'
     ]
     title = '知乎问答：' + answers[0]['question']['title']
+    if path.isfile(f'{title}.epub') or \
+       path.isfile(f'{title} - PT1.epub'):
+       print(r'问题 {qid} 已经抓取完毕：{title}')
+       return
     co = f'''
         <blockquote>来源：<a href='https://www.zhihu.com/question/{qid}'>https://www.zhihu.com/question/{qid}</a></blockquote>
     '''
