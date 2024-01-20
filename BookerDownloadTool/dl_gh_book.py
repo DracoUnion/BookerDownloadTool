@@ -40,6 +40,7 @@ def dl_gh_book(args):
     config['imgThreads'] = args.threads
     config['textThreads'] = args.threads
     config['proxy'] = args.proxy
+    config['external'] = path.join(DIR, 'gh_json_external.py')
     open('config.json', 'w', encoding='utf8') \
         .write(json.dumps(config))
     subp.Popen('crawl-epub', shell=True).communicate()
