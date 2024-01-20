@@ -11,6 +11,21 @@ hdrs = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
 }
 
+def get_html_checked(url, args):
+    for i in range(args.retry):
+        html = request_retry(
+            'GET', url, 
+            retry=args.retry,
+            proxies=args.proxy,
+            headers=hdrs,
+        ).text
+        if not args.nonblank: break
+        check_text = pq(html).find(args.nonblank).text()
+        if check_text.strip(): break
+        if i == args.retry - 1:
+            raise Exception(f'url: [{url}] element: [{args.nonblank}] checked blank')
+    return html
+
 def tr_get_next_safe(i, url, res, args):
     try:
         print(url)
@@ -20,12 +35,7 @@ def tr_get_next_safe(i, url, res, args):
         traceback.print_exc()
 
 def get_next(url, args):
-    html = request_retry(
-        'GET', url, 
-        retry=args.retry,
-        proxies=args.proxy,
-        headers=hdrs,
-    ).text
+    html = get_html_checked(url, args)
     if not html: return []
     html = re.sub(r'<\?xml\x20[^>]*\?>', '', html)
     html = re.sub(r'xmnls=".+?"', '', html)
