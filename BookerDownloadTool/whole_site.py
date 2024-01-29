@@ -67,7 +67,7 @@ def get_next(url, args):
             if re.search(args.re, l)
         ]
     # print(f'url: {url}\nnext: {links}\n')
-    return links
+    return list(set(links))
 
 def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
     while True:
