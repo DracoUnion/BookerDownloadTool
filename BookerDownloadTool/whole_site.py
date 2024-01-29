@@ -6,6 +6,7 @@ import re
 from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 
 hdrs = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
@@ -68,6 +69,31 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return links
 
+def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
+    while True:
+        with lock:
+            if len(q) == 0:
+                idle[i] = 1
+                if sum(idle) == args.threads:
+                    break
+                continue
+            url = q.popleft()
+            ofile.write(url + '\n')
+            rec_file.write('-1\n')
+
+        nexts = get_next(url)
+        with lock:
+            has_new = False
+            for n in nexts:
+                if n not in vis:
+                    vis.add(n)
+                    q.append(n)
+                    rec_file.write(n + '\n')
+                    has_new = True
+            if has_new:
+                for i in range(len(idle)):
+                    idle[i] = 0
+
 
 
 def whole_site(args):
@@ -97,8 +123,18 @@ def whole_site(args):
         q = deque([site])
         vis = set([site])
         rec_file.write(site + '\n')
-    pool = ThreadPoolExecutor(args.threads)
 
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    lock = Lock()
+    idle = [0] * args.threads
+    for i in range(args.threads):
+        h = pool.submit(tr_whole_site, i, q, vis, ofile, rec_file, lock, idle, args)
+        hdls.append(h)
+    for h in hdls:
+        h.result()
+    
+    '''
     while q:
         # 取出指定数量的链接
         pop_cnt = min(len(q), args.threads)
@@ -121,6 +157,7 @@ def whole_site(args):
                 vis.add(n)
                 q.append(n)
                 rec_file.write(n + '\n')
-    
+    '''
+
     ofile.close()
     rec_file.close()
