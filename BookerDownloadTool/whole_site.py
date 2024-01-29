@@ -81,7 +81,7 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
             ofile.write(url + '\n')
             rec_file.write('-1\n')
 
-        nexts = get_next(url)
+        nexts = get_next(url, args)
         with lock:
             has_new = False
             for n in nexts:
