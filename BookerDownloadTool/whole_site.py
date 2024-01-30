@@ -74,21 +74,23 @@ def tr_whole_site(i, q: deque, vis, ofile, rec_file, lock, idle, args):
     print(f'[thread {i}] start')
     while True:
         with lock:
-            if len(q) == 0:
-                idle[i] = 1
-                print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
-                if sum(idle) == args.threads:
-                    break
-                time.sleep(0.1)
-                continue
-            url = q.popleft()
-            print(f'[thread {i}] proc: {url}')
-            ofile.write(url + '\n')
-            rec_file.write('-1\n')
+            url = q.popleft() if len(q) else None
+        if url is None:
+            idle[i] = 1
+            print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
+            if sum(idle) == args.threads:
+                break
+            time.sleep(0.1)
+            continue
+
+        print(f'[thread {i}] proc: {url}')
+        ofile.write(url + '\n')
+        rec_file.write('-1\n')
 
         nexts = get_next(url, args)
+
+        has_new = False
         with lock:
-            has_new = False
             for n in nexts:
                 if n not in vis:
                     vis.add(n)
@@ -96,11 +98,12 @@ def tr_whole_site(i, q: deque, vis, ofile, rec_file, lock, idle, args):
                     rec_file.write(n + '\n')
                     print(f'[thread {i}] {url} -> {n}')
                     has_new = True
-            if has_new:
-                for i in range(len(idle)):
-                    idle[i] = 0
-            else:
-                print(f'[thread {i}] {url} -> nothing')
+        
+        if has_new:
+            for i in range(len(idle)):
+                idle[i] = 0
+        else:
+            print(f'[thread {i}] {url} -> nothing')
 
     print(f'[thread {i}] exit')
 
