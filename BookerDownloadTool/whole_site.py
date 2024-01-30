@@ -6,8 +6,8 @@ import re
 from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-# from threading import Lock, Thread
-from multiprocessing import Lock, Process as Thread
+from threading import Lock, Thread
+# from multiprocessing import Lock, Process as Thread
 import time
 from sqlalchemy import Text, Integer, Column, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
@@ -22,6 +22,7 @@ Session = None
 idle = None
 lock_get = None
 lock_add = None
+ofile = None
 
 class UrlRecord(Base):
     __tablename__ = 'url_record'
@@ -88,7 +89,7 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, ofile, args):
+def tr_whole_site(i, args):
     print(f'[thread {i}] start')
     sess = Session()
     while True:
@@ -148,6 +149,7 @@ def whole_site(args):
     global idle
     global lock_add
     global lock_get
+    global ofile
 
     site = args.site
     pres = urlparse(site)
@@ -184,7 +186,7 @@ def whole_site(args):
     for i in range(args.threads):
         tr = Thread(
             target=tr_whole_site,
-            args=(i, ofile, args),
+            args=(i, args),
         )
         tr.start()
         trs.append(tr)
