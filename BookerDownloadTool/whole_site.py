@@ -101,7 +101,7 @@ def tr_whole_site(trid, args):
                 sess.commit()
 
         if rec is None:
-            idle[i] = 1
+            idle[trid] = 1
             print(f'[thread {trid}] idle, {sum(idle)}/{args.threads}')
             if sum(idle) == args.threads:
                 break
