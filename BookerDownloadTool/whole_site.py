@@ -136,7 +136,7 @@ def tr_whole_site(i, ofile, args):
             print(f'[thread {i}] {url} -> nothing')
         
         # print(f'[thread {i}] loop end')
-        time.sleep(0)
+        time.sleep(0.1)
 
     print(f'[thread {i}] exit')
 
