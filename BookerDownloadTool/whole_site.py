@@ -71,17 +71,18 @@ def get_next(url, args):
     return list(set(links))
 
 def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
+    print(f'[thread {i}] start')
     while True:
         with lock:
             if len(q) == 0:
                 idle[i] = 1
-                print(f'thread {i} idle, {sum(idle)}/{args.threads}')
+                print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
                 if sum(idle) == args.threads:
                     break
                 time.sleep(0.05)
                 continue
             url = q.popleft()
-            print(url)
+            print(f'[thread {i}] proc: {url}')
             ofile.write(url + '\n')
             rec_file.write('-1\n')
 
@@ -93,10 +94,14 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
                     vis.add(n)
                     q.append(n)
                     rec_file.write(n + '\n')
+                    print(f'[thread {i}] add: {n}')
                     has_new = True
             if has_new:
-                for i in range(len(idle)):
-                    idle[i] = 0
+                idle = [0] * args.threads
+            else:
+                print(f'[thread {i}] add nothing')
+
+    print(f'[thread {i}] exit')
 
 
 
