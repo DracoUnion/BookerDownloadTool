@@ -134,7 +134,7 @@ def whole_site(args):
     # 创建数据库
     pref = re.sub(r'[^\w\-\.]', '-', site)
     db_fname = f'{pref}.db' 
-    engine = create_engine('sqlite:///' + db_fname, echo=True)
+    engine = create_engine('sqlite:///' + db_fname, echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
