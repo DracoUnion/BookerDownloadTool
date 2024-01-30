@@ -89,30 +89,26 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, args):
-    print(f'[thread {i}] start')
+def tr_whole_site(trid, args):
+    print(f'[thread {trid}] start')
     sess = Session()
     while True:
-        # print(f'[thread {i}] loop start')
         with lock_get:
-            # print(f'[thread {i}] aqr lock_get')
             rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
             if rec:
                 sess.query(UrlRecord).filter(UrlRecord.id == rec.id) \
                     .update({'stat': 1})
                 sess.commit()
-            # print(f'[thread {i}] rls lock_get')
 
         if rec is None:
             idle[i] = 1
-            print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
+            print(f'[thread {trid}] idle, {sum(idle)}/{args.threads}')
             if sum(idle) == args.threads:
                 break
-            time.sleep(0)
             continue            
         
         url = rec.url
-        print(f'[thread {i}] proc: {url}')
+        print(f'[thread {trid}] proc: {url}')
         ofile.write(url + '\n')
 
         nexts = get_next(url, args)
@@ -120,26 +116,20 @@ def tr_whole_site(i, args):
         has_new = False
         for n in nexts:
             with lock_add:
-                # print(f'[thread {i}] aqr lock_add')
                 exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
                 if not exi:
-                    print(f'[thread {i}] {url} -> {n}')
+                    print(f'[thread {trid}] {url} -> {n}')
                     sess.add(UrlRecord(url=n, stat=0))
                     sess.commit()
                     has_new = True
-                # print(f'[thread {i}] rls lock_add')
 
         if has_new:
-            # print(f'[thread {i}] rst idle')
             for i in range(len(idle)):
                 idle[i] = 0
         else:
-            print(f'[thread {i}] {url} -> nothing')
-        
-        # print(f'[thread {i}] loop end')
-        time.sleep(0.1)
+            print(f'[thread {trid}] {url} -> nothing')
 
-    print(f'[thread {i}] exit')
+    print(f'[thread {trid}] exit')
 
 
 
