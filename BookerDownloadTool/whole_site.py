@@ -6,8 +6,8 @@ import re
 from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-# from threading import Lock, Thread
-from multiprocessing import Lock, Process as Thread
+from threading import Lock, Thread
+# from multiprocessing import Lock, Process as Thread
 import time
 from sqlalchemy import Text, Integer, Column, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
