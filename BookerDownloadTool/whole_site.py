@@ -76,6 +76,7 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
         with lock:
             if len(q) == 0:
                 idle[i] = 1
+                print(f'[thread {i}], {idle}')
                 print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
                 if sum(idle) == args.threads:
                     break
