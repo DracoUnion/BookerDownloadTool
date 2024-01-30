@@ -93,11 +93,13 @@ def tr_whole_site(i, ofile, args):
     sess = Session()
     while True:
         with lock_get:
+            print(f'[thread {i}] aqr lock_get')
             rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
             if rec:
                 sess.query(UrlRecord).filter(UrlRecord.id == rec.id) \
                     .update({'stat': 1})
                 sess.commit()
+            print(f'[thread {i}] rls lock_get')
 
         if rec is None:
             idle[i] = 1
@@ -116,14 +118,17 @@ def tr_whole_site(i, ofile, args):
         has_new = False
         for n in nexts:
             with lock_add:
+                print(f'[thread {i}] aqr lock_add')
                 exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
                 if not exi:
                     print(f'[thread {i}] {url} -> {n}')
                     sess.add(UrlRecord(url=n, stat=0))
                     sess.commit()
                     has_new = True
+                print(f'[thread {i}] rls lock_add')
 
         if has_new:
+            print(f'[thread {i}] rst idle')
             for i in range(len(idle)):
                 idle[i] = 0
         else:
