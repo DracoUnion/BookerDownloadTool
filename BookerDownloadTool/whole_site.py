@@ -82,11 +82,17 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, get_session, ofile, idle, args):
+def tr_whole_site(i, get_session, lock, ofile, idle, args):
     print(f'[thread {i}] start')
     sess: Session = get_session()
     while True:
-        rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
+        with lock:
+            rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
+            if rec:
+                sess.query(UrlRecord).filter(UrlRecord.url == url) \
+                    .update({'stat': 1})
+                sess.commit()
+
         if rec is None:
             idle[i] = 1
             print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
@@ -94,23 +100,22 @@ def tr_whole_site(i, get_session, ofile, idle, args):
                 break
             time.sleep(0.1)
             continue            
+        
         url = rec.url
-        sess.query(UrlRecord).filter(UrlRecord.url == url) \
-            .update({'stat': 1})
-        sess.commit()
         print(f'[thread {i}] proc: {url}')
         ofile.write(url + '\n')
 
         nexts = get_next(url, args)
 
         has_new = False
-        for n in nexts:
-            exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
-            if not exi:
-                print(f'[thread {i}] {url} -> {n}')
-                sess.add(UrlRecord(url=n, stat=0))
-                sess.commit()
-                has_new = True
+        with lock:
+            for n in nexts:
+                exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
+                if not exi:
+                    print(f'[thread {i}] {url} -> {n}')
+                    sess.add(UrlRecord(url=n, stat=0))
+                    sess.commit()
+                    has_new = True
 
         if has_new:
             for i in range(len(idle)):
@@ -152,12 +157,12 @@ def whole_site(args):
 
     # pool = ThreadPoolExecutor(args.threads)
     trs = []
-    # lock = Lock()
+    lock = Lock()
     idle = [0] * args.threads
     for i in range(args.threads):
         tr = Thread(
             target=tr_whole_site,
-            args=(i, Session, ofile, idle, args),
+            args=(i, Session, lock, ofile, idle, args),
         )
         tr.start()
         trs.append(tr)
