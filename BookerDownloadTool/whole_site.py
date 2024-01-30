@@ -109,13 +109,13 @@ def tr_whole_site(trid, args):
 
         if rec is None:
             idle[trid] = 1
-            print(f'[thread {trid}] idle, {sum(idle)}/{args.threads}')
+            print(f'[thread {trid}] idle, {sum(idle)}/{args.threads}\n', end='')
             if sum(idle) == args.threads:
                 break
             continue            
         
         url = rec.url
-        print(f'[thread {trid}] proc: {url}')
+        print(f'[thread {trid}] proc: {url}\n', end='')
         ofile.write(url + '\n')
 
         nexts = get_next(url, args)
