@@ -17,7 +17,6 @@ hdrs = {
 }
 
 Base = declarative_base()
-engine = None
 Session = None
 idle = None
 lock_get = None
@@ -31,6 +30,10 @@ class UrlRecord(Base):
     # 是否已处理，1：已处理，0：未处理
     stat = Column(Integer, index=True, server_default="0")
 
+def get_session_maker(db_fname):
+    engine = create_engine('sqlite:///' + db_fname, echo=False)
+    Session = sessionmaker(bind=engine)
+    return Session
 
 def get_html_checked(url, args):
     for i in range(args.retry):
@@ -129,7 +132,6 @@ def tr_whole_site(trid, args):
 
 
 def whole_site(args):
-    global engine
     global Session
     global idle
     global lock_add
@@ -147,9 +149,8 @@ def whole_site(args):
     # 创建数据库
     pref = re.sub(r'[^\w\-\.]', '-', site)
     db_fname = f'{pref}.db' 
-    engine = create_engine('sqlite:///' + db_fname, echo=False)
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
+    Session = get_session_maker(db_fname)
+    Base.metadata.create_all(Session.kw['bind'])
 
     # 创建结果文件
     res_fname = f'{pref}.txt'
