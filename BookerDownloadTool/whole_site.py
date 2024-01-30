@@ -70,7 +70,7 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
+def tr_whole_site(i, q: deque, vis, ofile, rec_file, lock, idle, args):
     print(f'[thread {i}] start')
     while True:
         with lock:
@@ -94,13 +94,13 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
                     vis.add(n)
                     q.append(n)
                     rec_file.write(n + '\n')
-                    print(f'[thread {i}] add: {n}')
+                    print(f'[thread {i}] {url} -> {n}')
                     has_new = True
             if has_new:
                 for i in range(len(idle)):
                     idle[i] = 0
             else:
-                print(f'[thread {i}] add nothing')
+                print(f'[thread {i}] {url} -> nothing')
 
     print(f'[thread {i}] exit')
 
