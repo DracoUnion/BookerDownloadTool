@@ -31,7 +31,12 @@ class UrlRecord(Base):
     stat = Column(Integer, index=True, server_default="0")
 
 def get_session_maker(db_fname):
-    engine = create_engine('sqlite:///' + db_fname, echo=False)
+    engine = create_engine(
+        'sqlite:///' + db_fname, 
+        echo=False,
+        pool_size=0, 
+        max_overflow=-1,
+    )
     Session = sessionmaker(bind=engine)
     return Session
 
