@@ -79,7 +79,7 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
                 print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
                 if sum(idle) == args.threads:
                     break
-                time.sleep(0.05)
+                time.sleep(0.1)
                 continue
             url = q.popleft()
             print(f'[thread {i}] proc: {url}')
