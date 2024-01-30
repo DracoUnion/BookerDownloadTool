@@ -92,6 +92,7 @@ def tr_whole_site(i, ofile, args):
     print(f'[thread {i}] start')
     sess = Session()
     while True:
+        print(f'[thread {i}] loop start')
         with lock_get:
             print(f'[thread {i}] aqr lock_get')
             rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
@@ -133,6 +134,8 @@ def tr_whole_site(i, ofile, args):
                 idle[i] = 0
         else:
             print(f'[thread {i}] {url} -> nothing')
+        
+        print(f'[thread {i}] loop end')
 
     print(f'[thread {i}] exit')
 
