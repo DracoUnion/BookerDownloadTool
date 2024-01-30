@@ -7,6 +7,7 @@ from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
+import time
 
 hdrs = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
@@ -74,9 +75,10 @@ def tr_whole_site(i, q, vis, ofile, rec_file, lock, idle, args):
         with lock:
             if len(q) == 0:
                 idle[i] = 1
-                print(f'thread {i} idle, idle: {sum(idle)}/{args.threads}')
+                print(f'thread {i} idle, {sum(idle)}/{args.threads}')
                 if sum(idle) == args.threads:
                     break
+                time.sleep(0.05)
                 continue
             url = q.popleft()
             print(url)
