@@ -17,6 +17,11 @@ hdrs = {
 }
 
 Base = declarative_base()
+engine = None
+Session = None
+idle = None
+lock_get = None
+lock_add = None
 
 class UrlRecord(Base):
     __tablename__ = 'url_record'
@@ -83,11 +88,11 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, get_session, lock, ofile, idle, args):
+def tr_whole_site(i, ofile, args):
     print(f'[thread {i}] start')
-    sess: Session = get_session()
+    sess = Session()
     while True:
-        with lock:
+        with lock_get:
             rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
             if rec:
                 sess.query(UrlRecord).filter(UrlRecord.id == rec.id) \
@@ -110,7 +115,7 @@ def tr_whole_site(i, get_session, lock, ofile, idle, args):
 
         has_new = False
         for n in nexts:
-            with lock:
+            with lock_add:
                 exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
                 if not exi:
                     print(f'[thread {i}] {url} -> {n}')
@@ -129,6 +134,12 @@ def tr_whole_site(i, get_session, lock, ofile, idle, args):
 
 
 def whole_site(args):
+    global engine
+    global Session
+    global idie
+    global lock_add
+    global lock_get
+
     site = args.site
     pres = urlparse(site)
     hdrs['Referer'] = f'{pres.scheme}://{pres.hostname}'
@@ -163,7 +174,7 @@ def whole_site(args):
     for i in range(args.threads):
         tr = Thread(
             target=tr_whole_site,
-            args=(i, Session, lock, ofile, idle, args),
+            args=(i, ofile, args),
         )
         tr.start()
         trs.append(tr)
