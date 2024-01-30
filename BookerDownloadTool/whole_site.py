@@ -89,7 +89,7 @@ def tr_whole_site(i, get_session, lock, ofile, idle, args):
         with lock:
             rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
             if rec:
-                sess.query(UrlRecord).filter(UrlRecord.url == url) \
+                sess.query(UrlRecord).filter(UrlRecord.id == rec.id) \
                     .update({'stat': 1})
                 sess.commit()
 
