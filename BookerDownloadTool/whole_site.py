@@ -90,7 +90,7 @@ def get_next(url, args):
     return list(set(links))
 
 def tr_whole_site(trid, args):
-    print(f'[thread {trid}] start')
+    # print(f'[thread {trid}] start')
     sess = Session()
     while True:
         with lock_get:
@@ -118,7 +118,7 @@ def tr_whole_site(trid, args):
             with lock_add:
                 exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
                 if not exi:
-                    print(f'[thread {trid}] {url} -> {n}')
+                    # print(f'[thread {trid}] {url} -> {n}')
                     sess.add(UrlRecord(url=n, stat=0))
                     sess.commit()
                     has_new = True
@@ -126,10 +126,10 @@ def tr_whole_site(trid, args):
         if has_new:
             for i in range(len(idle)):
                 idle[i] = 0
-        else:
-            print(f'[thread {trid}] {url} -> nothing')
+        # else:
+        #     print(f'[thread {trid}] {url} -> nothing')
 
-    print(f'[thread {trid}] exit')
+    # print(f'[thread {trid}] exit')
 
 
 
