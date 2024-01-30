@@ -108,8 +108,8 @@ def tr_whole_site(i, get_session, lock, ofile, idle, args):
         nexts = get_next(url, args)
 
         has_new = False
-        with lock:
-            for n in nexts:
+        for n in nexts:
+            with lock:
                 exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
                 if not exi:
                     print(f'[thread {i}] {url} -> {n}')
