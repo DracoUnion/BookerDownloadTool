@@ -8,10 +8,22 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock, Thread
 import time
+from sqlalchemy import Text, Integer, Column, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 hdrs = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
 }
+
+Base = declarative_base()
+
+class UrlRecord(Base):
+    __tablename__ = 'url_record'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    url = Column(Text, unique=True)
+    # 是否已处理，1：已处理，0：未处理
+    stat = Column(Integer, index=True, server_default="0")
+
 
 def get_html_checked(url, args):
     for i in range(args.retry):
@@ -70,35 +82,36 @@ def get_next(url, args):
     # print(f'url: {url}\nnext: {links}\n')
     return list(set(links))
 
-def tr_whole_site(i, q: deque, vis, ofile, rec_file, lock, idle, args):
+def tr_whole_site(i, get_session, ofile, idle, args):
     print(f'[thread {i}] start')
+    sess: Session = get_session()
     while True:
-        with lock:
-            url = q.popleft() if len(q) else None
-        if url is None:
+        rec = sess.query(UrlRecord).filter(UrlRecord.stat == 0).first()
+        if rec is None:
             idle[i] = 1
             print(f'[thread {i}] idle, {sum(idle)}/{args.threads}')
             if sum(idle) == args.threads:
                 break
             time.sleep(0.1)
-            continue
-
+            continue            
+        url = rec.url
+        sess.query(UrlRecord).filter(UrlRecord.url == url) \
+            .update({'stat': 1})
+        sess.commit()
         print(f'[thread {i}] proc: {url}')
         ofile.write(url + '\n')
-        rec_file.write('-1\n')
 
         nexts = get_next(url, args)
 
         has_new = False
-        with lock:
-            for n in nexts:
-                if n not in vis:
-                    vis.add(n)
-                    q.append(n)
-                    rec_file.write(n + '\n')
-                    print(f'[thread {i}] {url} -> {n}')
-                    has_new = True
-        
+        for n in nexts:
+            exi = sess.query(UrlRecord).filter(UrlRecord.url == n).count()
+            if not exi:
+                print(f'[thread {i}] {url} -> {n}')
+                sess.add(UrlRecord(url=n, stat=0))
+                sess.commit()
+                has_new = True
+
         if has_new:
             for i in range(len(idle)):
                 idle[i] = 0
@@ -118,33 +131,33 @@ def whole_site(args):
     if args.cookie:
         hdrs['Cookie'] = args.cookie
     
+    # 创建数据库
     pref = re.sub(r'[^\w\-\.]', '-', site)
-    res_fname = f'{pref}.txt'
-    rec_fname = f'{pref}_rec.txt'
-    
-    ofile = open(res_fname, 'a', encoding='utf8')
-    rec_file = open(rec_fname, 'a+', encoding='utf8')
-    
-    if rec_file.tell() != 0:
-        rec_file.seek(0, 0)
-        rec = rec_file.read().split('\n')
-        rec = [l for l in rec if l.strip()]
-        pop_count = rec.count('-1')
-        q = deque([l for l in rec if l != "-1"][pop_count:])
-        vis = set(rec)
-    else:
-        q = deque([site])
-        vis = set([site])
-        rec_file.write(site + '\n')
+    db_fname = f'{pref}.db' 
+    engine = create_engine('sqlite:///' + db_fname, echo=True)
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
 
-    pool = ThreadPoolExecutor(args.threads)
+    # 创建结果文件
+    res_fname = f'{pref}.txt'
+    ofile = open(res_fname, 'a', encoding='utf8')
+
+    # 初始化数据库
+    sess = Session()
+    cnt = sess.query(UrlRecord).count()
+    if cnt == 0:
+        ofile.write(site + '\n')
+        sess.add(UrlRecord(url=site, stat=0))
+        sess.commit()
+
+    # pool = ThreadPoolExecutor(args.threads)
     trs = []
-    lock = Lock()
+    # lock = Lock()
     idle = [0] * args.threads
     for i in range(args.threads):
         tr = Thread(
             target=tr_whole_site,
-            args=(i, q, vis, ofile, rec_file, lock, idle, args),
+            args=(i, Session, ofile, idle, args),
         )
         tr.start()
         trs.append(tr)
@@ -177,4 +190,3 @@ def whole_site(args):
     '''
 
     ofile.close()
-    rec_file.close()
