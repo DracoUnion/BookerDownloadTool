@@ -136,7 +136,7 @@ def tr_whole_site(i, ofile, args):
 def whole_site(args):
     global engine
     global Session
-    global idie
+    global idle
     global lock_add
     global lock_get
 
@@ -169,7 +169,8 @@ def whole_site(args):
 
     # pool = ThreadPoolExecutor(args.threads)
     trs = []
-    lock = Lock()
+    lock_add = Lock()
+    lock_get = Lock()
     idle = [0] * args.threads
     for i in range(args.threads):
         tr = Thread(
