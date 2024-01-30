@@ -6,7 +6,7 @@ import re
 from .util import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from threading import Lock
+from threading import Lock, Thread
 import time
 
 hdrs = {
@@ -135,14 +135,18 @@ def whole_site(args):
         rec_file.write(site + '\n')
 
     pool = ThreadPoolExecutor(args.threads)
-    hdls = []
+    trs = []
     lock = Lock()
     idle = [0] * args.threads
     for i in range(args.threads):
-        h = pool.submit(tr_whole_site, i, q, vis, ofile, rec_file, lock, idle, args)
-        hdls.append(h)
-    for h in hdls:
-        h.result()
+        tr = Thread(
+            target=tr_whole_site,
+            args=(i, q, vis, ofile, rec_file, lock, idle, args),
+        )
+        tr.start()
+        trs.append(tr)
+    for tr in trs:
+        tr.join()
     
     '''
     while q:
