@@ -1,4 +1,4 @@
-from util import *
+from .util import *
 from urllib.parse import quote_plus
 
 def gh_repo_fetch(args):
