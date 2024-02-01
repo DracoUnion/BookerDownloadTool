@@ -1,7 +1,7 @@
 from util import *
 from urllib.parse import quote_plus
 
-def fetch_gh_repo(args):
+def gh_repo_fetch(args):
     ofile = open(args.ofname, 'w', encoding='utf8')
 
     q_enco = quote_plus(args.query)

@@ -20,6 +20,7 @@ from .freembook import *
 from .yuque import *
 from .feishu import *
 from .arxiv import *
+from .gh import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -315,6 +316,16 @@ def main():
     arxiv_fetch_parser.add_argument("year_month", help="year and month like yymm")
     arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
     arxiv_fetch_parser.set_defaults(func=arxiv_fetch)
+
+    gh_repo_parser = subparsers.add_parser("gh-repo-fetch", help="fetch gh repos")
+    gh_repo_parser.add_argument("-s", "--start", type=int, default=1, help="starting page ")
+    gh_repo_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page ")
+    gh_repo_parser.add_argument("-t", "--token", default=os.environ.get('GH_TOKEN', ''), help="github token")
+    gh_repo_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
+    gh_repo_parser.add_argument("-p", "--proxy", help="proxy")
+    gh_repo_parser.add_argument("query", help="query to search")
+    gh_repo_parser.add_argument("ofname", help="output file name")
+    gh_repo_parser.set_defaults(func=gh_repo_fetch)
 
     args = parser.parse_args()
     args.func(args)
