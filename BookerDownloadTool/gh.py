@@ -6,7 +6,8 @@ def gh_repo_fetch(args):
 
     q_enco = quote_plus(args.query)
     headers = default_hdrs.copy()
-    headers['Authorization'] = 'token ' + args.token
+    if args.token:
+        headers['Authorization'] = 'token ' + args.token
     for pg_num in range(args.start, args.end + 1):
         print(f'page: {pg_num}')
         url = f'https://api.github.com/search/repositories' + \
