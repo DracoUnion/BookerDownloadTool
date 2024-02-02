@@ -2,7 +2,7 @@ from .util import *
 from urllib.parse import quote_plus
 
 def gh_repo_fetch(args):
-    ofile = open(args.ofname, 'w', encoding='utf8')
+    ofile = open(args.ofname, 'a', encoding='utf8')
 
     q_enco = quote_plus(args.query)
     headers = default_hdrs.copy()
