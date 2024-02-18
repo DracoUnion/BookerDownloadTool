@@ -21,7 +21,6 @@ Session = None
 idle = None
 lock_get = None
 lock_add = None
-ofile = None
 
 class UrlRecord(Base):
     __tablename__ = 'url_record'
@@ -116,8 +115,6 @@ def tr_whole_site(trid, args):
         
         url = rec.url
         print(f'[thread {trid}] proc: {url}\n', end='')
-        ofile.write(url + '\n')
-
         nexts = get_next(url, args)
 
         has_new = False
@@ -141,9 +138,12 @@ def whole_site(args):
     global idle
     global lock_add
     global lock_get
-    global ofile
 
     site = args.site
+    dbname = args.db
+    if not dbname.endswith('.db'):
+        print('数据库文件扩展名必须是 DB')
+        return
     pres = urlparse(site)
     hdrs['Referer'] = f'{pres.scheme}://{pres.hostname}'
     if args.proxy: 
@@ -152,20 +152,13 @@ def whole_site(args):
         hdrs['Cookie'] = args.cookie
     
     # 创建数据库
-    pref = re.sub(r'[^\w\-\.]', '-', site)
-    db_fname = f'{pref}.db' 
-    Session = get_session_maker(db_fname)
+    Session = get_session_maker(dbname)
     Base.metadata.create_all(Session.kw['bind'])
-
-    # 创建结果文件
-    res_fname = f'{pref}.txt'
-    ofile = open(res_fname, 'a', encoding='utf8')
 
     # 初始化数据库
     sess = Session()
     cnt = sess.query(UrlRecord).count()
     if cnt == 0:
-        ofile.write(site + '\n')
         sess.add(UrlRecord(url=site, stat=0))
         sess.commit()
 
@@ -208,5 +201,3 @@ def whole_site(args):
                 q.append(n)
                 rec_file.write(n + '\n')
     '''
-
-    ofile.close()

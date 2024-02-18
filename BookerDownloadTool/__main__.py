@@ -184,6 +184,7 @@ def main():
 
     whole_site_parser = subparsers.add_parser("whole-site", help="crawl whole site urls")
     whole_site_parser.add_argument("site", help="site url")
+    whole_site_parser.add_argument("db", help="db fname")
     whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="times to retry")
     whole_site_parser.add_argument("-p", "--proxy", help="proxy")
     whole_site_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
