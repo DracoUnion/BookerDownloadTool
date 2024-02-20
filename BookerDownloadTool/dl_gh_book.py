@@ -9,7 +9,7 @@ import os
 
 tmpl = {
     "link": "{article} li a",
-    "title": "{article}>h1",
+    "title": "{article}>h1, {article}>h2, {article}>h3",
     "content": "{article}",
     "remove": "a.anchor",
     "optiMode": "none",
