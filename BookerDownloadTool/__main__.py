@@ -196,6 +196,7 @@ def main():
 
     exp_whole_site_parser = subparsers.add_parser("exp-whole-site", help="export whole site urls")
     exp_whole_site_parser.add_argument("db", help="db fname")
+    exp_whole_site_parser.add_argument("-s", "--batch-size", type=int, default=1000, help="db fname")
     exp_whole_site_parser.set_defaults(func=exp_whole_site)
     
     med_parser = subparsers.add_parser("medium", help="fetch medium toc")

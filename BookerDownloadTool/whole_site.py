@@ -213,9 +213,11 @@ def exp_whole_site(args):
     Base.metadata.create_all(Session.kw['bind'])
     
     sess = Session()
-    recs = sess.query(UrlRecord).all()
     ofile = open(dbname[:-3] + '.txt', 'w', encoding='utf8')
-    for rec in recs:
-        print(rec.url)
-        ofile.write(rec.url + '\n')
+    cnt = sess.query(UrlRecord).count()
+    for i in range(0, cnt, args.batch_size):
+        recs = sess.query(UrlRecord).offset(i).limit(args.batch_size)
+        for rec in recs:
+            print(rec.url)
+            ofile.write(rec.url + '\n')
     ofile.close()
