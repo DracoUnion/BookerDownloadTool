@@ -217,7 +217,7 @@ def exp_whole_site(args):
     cnt = sess.query(UrlRecord).count()
     for i in range(0, cnt, args.batch_size):
         recs = sess.query(UrlRecord).offset(i).limit(args.batch_size)
-        for rec in recs:
-            print(rec.url)
-            ofile.write(rec.url + '\n')
+        urls = [r.url for r in recs]
+        print('\n'.join(urls))
+        ofile.write('\n'.join(urls) + '\n')
     ofile.close()
