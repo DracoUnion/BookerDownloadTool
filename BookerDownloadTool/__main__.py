@@ -193,6 +193,10 @@ def main():
     whole_site_parser.add_argument("--re", help="pattern to match links")
     whole_site_parser.add_argument("--qs", action='store_true', help="whether to consider query string")
     whole_site_parser.set_defaults(func=whole_site)
+
+    exp_whole_site_parser = subparsers.add_parser("exp-whole-site", help="export whole site urls")
+    exp_whole_site_parser.add_argument("db", help="db fname")
+    exp_whole_site_parser.set_defaults(func=exp_whole_site)
     
     med_parser = subparsers.add_parser("medium", help="fetch medium toc")
     med_parser.add_argument("host", help="medium blog host: xxx.medium.com or medium.com/xxx")

@@ -201,3 +201,21 @@ def whole_site(args):
                 q.append(n)
                 rec_file.write(n + '\n')
     '''
+
+def exp_whole_site(args):
+    dbname = args.db
+    if not dbname.endswith('.db'):
+        print('请提供 DB 文件')
+        return
+
+    # 创建数据库
+    Session = get_session_maker(dbname)
+    Base.metadata.create_all(Session.kw['bind'])
+    
+    sess = Session()
+    recs = sess.query(UrlRecord).all()
+    ofile = open(dbname[:-3] + '.txt', 'w', encoding='utf8')
+    for rec in recs:
+        print(rec.url)
+        ofile.write(rec.url + '\n')
+    ofile.close()
