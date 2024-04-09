@@ -33,10 +33,13 @@ def blk2html(blk):
         if 'image' in blk['data'] else ''
     )
     if tp == 'page':
+        cont = cont.replace('\n', ' ')
         return f'<h1>{cont}</h1>'
     elif tp in ['text', 'image']:
-        return f'<p>{cont}</p>'
+        lines = [l.strip() for l in cont.split('\n')]
+        return '\n'.join([f'<p>{l}</p>' for l in lines if l])
     elif tp.startswith('heading'):
+        cont = cont.replace('\n', ' ')
         tag = 'h' + tp[-1]
         return f'<{tag}>{cont}</{tag}>'
     else:
