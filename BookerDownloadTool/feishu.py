@@ -75,7 +75,7 @@ def download_feishu(args):
     html = get_docx_html(uid, aid, args.cookie)
     imgs = {}
     html = process_img(html, imgs, img_prefix='img/')
-    html_fname = url.split('/')[-1] + '.html'
+    html_fname = args.url.split('/')[-1] + '.html'
     open(html_fname, 'w', encoding='utf8').write(html)
     if not path.isdir('img'):
         os.makedirs('img')
