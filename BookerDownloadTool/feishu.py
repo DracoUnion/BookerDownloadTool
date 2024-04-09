@@ -65,8 +65,10 @@ def get_docx_html(uid, aid, cookie=''):
     blk_map = data['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
     blks = [b for b in blks if b['data']['type'] in ALLOW_TYPES]
-    html = '\n'.join([blk2html(b) for b in blks])
-    return html
+    htmls = [blk2html(b) for b in blks]
+    url = f'https://{uid}.feishu.cn/docx/{aid}'
+    htmls.insert(1, f'<blockquote>来源：<a href="{url}">{url}</a></blockquote>')
+    return '\n'.join(htmls)
 
 def download_feishu(args):
     crconf['optiMode'] = args.opti_mode
