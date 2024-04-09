@@ -44,7 +44,7 @@ def blk2html(blk):
 
 def get_docx_html(url, cookie=''):
     if not re.search(r'^https://\w+\.feishu.cn/docx/\w+$', url):
-        raise ValueError('飞书 docx url 格式错误')
+        raise ValueError('URL 格式错误：https://<user>.feishu.cn/docx/<art>')
     hdrs = default_hdrs | {'Cookie': cookie}
     html = request_retry('GET', url, headers=hdrs).text
     rt = pq(html)
