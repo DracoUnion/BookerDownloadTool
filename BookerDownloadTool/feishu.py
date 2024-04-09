@@ -5,89 +5,71 @@ import argparse
 from os import path
 import subprocess as subp
 from .util import *
+from pyquery import PyQuery as pq
+import execjs
+from EpubCrawler.img import process_img
 
-def get_children(space_id, domain, wiki, cookie):
-    url = f'https://{domain}.feishu.cn/space/api/wiki/v2/tree/get_node_child/?space_id={space_id}&wiki_token={wiki}'
-    j = request_retry(
-        'GET', url, 
-        headers={'Cookie': cookie},
-    ).json()
-    if j['code'] != 0:
-        raise RuntimeError(j['msg'])
-    return [ch['wiki_token'] for ch in j['data'][wiki]]
+ALLOW_TYPES = {
+    'page',
+    'text',
+    'image',
+    'heading1',
+    'heading2',
+    'heading3',
+    'heading4',
+    'heading5',
+    'heading6',
+}
 
-def get_root_wikis(space_id, domain, cookie):
-    url = f'https://{domain}.feishu.cn/space/api/wiki/v2/tree/get_info/?need_shared=true&space_id={space_id}'
-    j = request_retry(
-        'GET', url, 
-        headers={'Cookie': cookie},
-    ).json()
-    if j['code'] != 0:
-        raise RuntimeError(j['msg'])
-    return j['data']['tree']['root_list']
 
-def get_space_toc(space_id, domain, cookie):
-    roots = get_root_wikis(space_id, domain, cookie)[::-1]
-    res = []
-    while len(roots):
-        cur = roots.pop()
-        res.append(cur)
-        children = get_children(space_id, domain, cur, cookie)
-        roots.extend(children[::-1])
-    return res
+def blk2html(blk):
+    tp = blk['data']['type']
+    tok2_img_tag = lambda tok: f'<img src="https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/" />'
+    cont = (
+        blk['data']['text']['initialAttributedTexts']['text']['0']
+        if 'text' in blk['data'] else 
+        tok2_img_tag(blk['data']['image']['token'])
+        if 'image' in blk['data'] else ''
+    )
+    if tp == 'page':
+        return f'<h1>{cont}</h1>'
+    elif tp in ['text', 'image']:
+        return f'<p>{cont}</p>'
+    elif tp.startswith('heading'):
+        tag = 'h' + tp[-1]
+        return f'<{tag}>{cont}</{tag}>'
+    else:
+        raise ValueError()
 
-def crawl_feishu(args):
-    # 请求页面获取空间 ID
-    wiki = args.wiki
-    cookie = args.cookie
-    url = f'https://feishu.cn/wiki/{wiki}'
-    # 解决重定向不带 Cookie 的问题
-    while True:
-        r = request_retry(
-            'GET', url, 
-            headers={'Cookie': cookie}, 
-            allow_redirects=False
-        )
-        if 'Location' not in r.headers: break
-        url = r.headers['Location']
-    m = re.search(r'([\w\-]+)\.feishu\.cn', url)
-    if not m: 
-        print(f'空间域名获取失败')
-        return
-    domain = m.group(1)
-    html = r.text
-    m = re.search(r'"space_id":"(\d+)"', html)
-    if not m:
-        print("空间 ID 获取失败")
-        return
-    space_id = m.group(1)
-    # 如果没有Cookie，设置临时Cookie
-    if not cookie:
-        cookie = r.headers.get('Set-Cookie', '')
-    toc = get_space_toc(space_id, domain, cookie)
-    links = [
-        f'https://{domain}.feishu.cn/space/api/ssr/wiki/{wiki}' 
-        for wiki in toc
-    ]
-    name = args.name or f'飞书文档集_{domain}_{space_id}'
-    cfg = {
-        "name": name,
-        "url": f"https://{domain}.feishu.cn",
-        "link": "",
-        "title": ".",
-        "content": ".ne-viewer-body",
-        "textThreads": args.text_threads,
-        "imgThreads": args.img_threads,
-        "optiMode": args.opti_mode,
-        "remove": "button",
-        "headers": {
-            "Cookie": cookie,
-            # "Referer": "https://www.yuque.com/"
-        },
-        "list": links,
-        "external": path.join(DIR, 'feishu_external.py'),
-    }
-    cfg_fname = 'config_' + fname_escape(name) + '.json'
-    open(cfg_fname, 'w', encoding='utf8').write(json.dumps(cfg))
-    subp.Popen(['crawl-epub', cfg_fname], shell=True).communicate()
-    
+def get_docx_html(url):
+    if not re.search(r'^https://\w+\.feishu.cn/docx/\w+$', url):
+        raise ValueError('飞书 docx url 格式错误')
+    html = request_retry('GET', url, headers=default_hdrs).text
+    rt = pq(html)
+    el_data_sc = pq([
+        el for el in rt('script')
+        if pq(el).text().strip().startswith('window.DATA =')
+    ])
+    if len(el_data_sc) == 0:
+        raise ValueError('找不到内容元素！')
+    jscode = 'var window = {};' + el_data_sc.text()
+    data = execjs.compile(jscode).eval('window.DATA')
+    blk_ids = data['clientVars']['data']['block_sequence']
+    blk_map = data['clientVars']['data']['block_map']
+    blks = [blk_map[bid] for bid in blk_ids]
+    blks = [b for b in blks if b['data']['type'] in ALLOW_TYPES]
+    html = '\n'.join([blk2html(b) for b in blks])
+    return html
+
+def download_feishu(args):
+    url = args.url
+    html = get_docx_html(url)
+    imgs = {}
+    html = process_img(html, imgs, img_prefix='img/')
+    html_fname = url.split('/')[-1] + '.html'
+    open(html_fname, 'w', encoding='utf8').write(html)
+    if not path.isdir('img'):
+        os.makedirs('img')
+    for name, img in imgs.items():
+        img_fname = path.join('img', name)
+        open(img_fname, 'wb').write(img)
