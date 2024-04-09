@@ -8,6 +8,7 @@ from .util import *
 from pyquery import PyQuery as pq
 import execjs
 from EpubCrawler.img import process_img
+from EpubCrawler.config import config as crconf
 
 ALLOW_TYPES = {
     'page',
@@ -41,10 +42,11 @@ def blk2html(blk):
     else:
         raise ValueError()
 
-def get_docx_html(url):
+def get_docx_html(url, cookie=''):
     if not re.search(r'^https://\w+\.feishu.cn/docx/\w+$', url):
         raise ValueError('飞书 docx url 格式错误')
-    html = request_retry('GET', url, headers=default_hdrs).text
+    hdrs = default_hdrs | {'Cookie': cookie}
+    html = request_retry('GET', url, headers=hdrs).text
     rt = pq(html)
     el_data_sc = pq([
         el for el in rt('script')
@@ -62,8 +64,9 @@ def get_docx_html(url):
     return html
 
 def download_feishu(args):
+    crconf['optiMode'] = args.opti_mode
     url = args.url
-    html = get_docx_html(url)
+    html = get_docx_html(url, args.cookie)
     imgs = {}
     html = process_img(html, imgs, img_prefix='img/')
     html_fname = url.split('/')[-1] + '.html'
