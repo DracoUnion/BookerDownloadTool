@@ -65,6 +65,7 @@ def get_docx_html(url, cookie=''):
 
 def download_feishu(args):
     crconf['optiMode'] = args.opti_mode
+    crconf['headers']['Cookie'] = args.cookie
     url = args.url
     html = get_docx_html(url, args.cookie)
     imgs = {}
