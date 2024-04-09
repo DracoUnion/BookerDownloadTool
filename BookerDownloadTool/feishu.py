@@ -68,7 +68,11 @@ def get_docx_html(uid, aid):
 def download_feishu(args):
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
-    html = get_docx_html(args.uid, args.aid, args.cookie)
+    m = re.search(r'(\w+).feishu.cn/docx/(\w+)', args.url)
+    if not m:
+        raise ValueError('URL 格式错误：https://<uid>.feishu.cn/docx/<aid>')
+    uid, aid = m.group(1), m.group(2)
+    html = get_docx_html(uid, aid, args.cookie)
     imgs = {}
     html = process_img(html, imgs, img_prefix='img/')
     html_fname = url.split('/')[-1] + '.html'

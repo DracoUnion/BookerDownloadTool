@@ -293,8 +293,7 @@ def main():
     yuque_parser.set_defaults(func=batch_yuque)
 
     feishu_parser = subparsers.add_parser("feishu", help="crawler feishu articles")
-    feishu_parser.add_argument("uid", help="<uid>.feishu.cn/docx/<aid>")
-    feishu_parser.add_argument("aid", help="<uid>.feishu.cn/docx/<aid>")
+    feishu_parser.add_argument("url", help="https://<uid>.feishu.cn/docx/<aid>")
     feishu_parser.add_argument("-c", "--cookie", default=os.environ.get('FEISHU_COOKIE', ''), help="feishu cookie")
     feishu_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
     feishu_parser.set_defaults(func=download_feishu)
