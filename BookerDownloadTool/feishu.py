@@ -58,8 +58,8 @@ def get_docx_html(uid, aid, cookie=''):
     
     data = execjs.compile(jscode).eval('window.DATA')
     '''
-    blk_ids = data['clientVars']['data']['block_sequence']
-    blk_map = data['clientVars']['data']['block_map']
+    blk_ids = data['data']['block_sequence']
+    blk_map = data['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
     blks = [b for b in blks if b['data']['type'] in ALLOW_TYPES]
     html = '\n'.join([blk2html(b) for b in blks])
