@@ -42,11 +42,11 @@ def blk2html(blk):
     else:
         raise ValueError()
 
-def get_docx_html(url, cookie=''):
-    if not re.search(r'^https://\w+\.feishu.cn/docx/\w+$', url):
-        raise ValueError('URL 格式错误：https://<user>.feishu.cn/docx/<art>')
+def get_docx_html(uid, aid):
+    url = f'https://{uid}.feishu.cn/space/api/docx/pages/client_vars?id={aid}&limit=100000'
     hdrs = default_hdrs | {'Cookie': cookie}
-    html = request_retry('GET', url, headers=hdrs).text
+    data = request_retry('GET', url, headers=hdrs).json()
+    '''
     rt = pq(html)
     el_data_sc = pq([
         el for el in rt('script')
@@ -55,7 +55,9 @@ def get_docx_html(url, cookie=''):
     if len(el_data_sc) == 0:
         raise ValueError('找不到内容元素！')
     jscode = 'var window = {};' + el_data_sc.text()
+    
     data = execjs.compile(jscode).eval('window.DATA')
+    '''
     blk_ids = data['clientVars']['data']['block_sequence']
     blk_map = data['clientVars']['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
@@ -66,8 +68,7 @@ def get_docx_html(url, cookie=''):
 def download_feishu(args):
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
-    url = args.url
-    html = get_docx_html(url, args.cookie)
+    html = get_docx_html(args.uid, args.aid, args.cookie)
     imgs = {}
     html = process_img(html, imgs, img_prefix='img/')
     html_fname = url.split('/')[-1] + '.html'
