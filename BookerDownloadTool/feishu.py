@@ -45,8 +45,8 @@ def blk2html(blk):
     else:
         raise ValueError()
 
-def get_aid_by_wid(wid, cookie=''):
-    url = f'https://jviztcgxxfy.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
+def get_aid_by_wid(uid, wid, cookie=''):
+    url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
     data = request_retry('GET', url, headers=hdrs).json()
     return data['data']['tree']['nodes'][wid]['obj_token']
@@ -86,7 +86,7 @@ def download_feishu(args):
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/<docx|wiki>/<aid>')
     uid, tp, aid = m.group(1), m.group(2), m.group(3)
     if tp == 'wiki':
-        aid = get_aid_by_wid(aid, args.cookie)
+        aid = get_aid_by_wid(uid, aid, args.cookie)
     html = get_docx_html(uid, aid, args.cookie)
     imgs = {}
     html = process_img(html, imgs, img_prefix='img/')
