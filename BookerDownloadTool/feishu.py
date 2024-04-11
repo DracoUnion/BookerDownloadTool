@@ -77,6 +77,8 @@ def get_docx_html(uid, aid, cookie=''):
     return '\n'.join(htmls)
 
 def download_feishu(args):
+    if not args.cookie:
+        raise ValueError('请设置 Cookie')
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
     m = re.search(r'(\w+).feishu.cn/(docx|wiki)/(\w+)', args.url)
