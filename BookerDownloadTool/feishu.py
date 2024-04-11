@@ -45,13 +45,13 @@ def blk2html(blk):
     else:
         raise ValueError()
 
-def get_aid_by_wid(uid, wid, cookie=''):
+def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
     data = request_retry('GET', url, headers=hdrs).json()
     return data['data']['tree']['nodes'][wid]['obj_token']
 
-def get_docx_html(uid, aid, cookie=''):
+def get_docx_html(uid, aid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/docx/pages/client_vars?id={aid}&limit=1000000000'
     hdrs = default_hdrs | {'Cookie': cookie}
     data = request_retry('GET', url, headers=hdrs).json()
