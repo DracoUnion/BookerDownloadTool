@@ -7,6 +7,7 @@ import subprocess as subp
 from .util import *
 from pyquery import PyQuery as pq
 import execjs
+from html import escape as htmlesc
 from EpubCrawler.img import process_img
 from EpubCrawler.config import config as crconf
 
@@ -20,6 +21,8 @@ ALLOW_TYPES = {
     'heading4',
     'heading5',
     'heading6',
+    'code',
+    'divider',
 }
 
 
@@ -27,7 +30,7 @@ def blk2html(blk):
     tp = blk['data']['type']
     tok2_img_tag = lambda tok: f'<img src="https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/" />'
     cont = (
-        blk['data']['text']['initialAttributedTexts']['text']['0']
+        htmlesc(blk['data']['text']['initialAttributedTexts']['text']['0'])
         if 'text' in blk['data'] else 
         tok2_img_tag(blk['data']['image']['token'])
         if 'image' in blk['data'] else ''
@@ -42,6 +45,10 @@ def blk2html(blk):
         cont = cont.replace('\n', ' ')
         tag = 'h' + tp[-1]
         return f'<{tag}>{cont}</{tag}>'
+    elif tp == 'code':
+        return f'<pre>{cont}</pre>'
+    elif tp == 'divider':
+        return '<hr />'
     else:
         raise ValueError()
 
