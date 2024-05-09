@@ -4,7 +4,8 @@ def fetch_hkrnws(args):
     url = f'https://hckrnews.com/data/{args.date}.js'
     r = request_retry(
         'GET', url, 
-        headers=default_hdrs
+        headers=default_hdrs,
+        proxies={'http': args.proxy, 'https': args.proxy},
     )
     if r.status_code == 404:
         print(f'未找到 {args.date}')
@@ -12,3 +13,5 @@ def fetch_hkrnws(args):
     j = r.json()
     links = [it['link'] for it in j]
     open(f'hkrnws_{args.date}.txt', 'w', encoding='utf8').write('\n'.join(links))
+
+def fetch_hkrnws_
