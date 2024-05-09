@@ -15,7 +15,9 @@ def fetch_hkrnws(args):
         return
     j = r.json()
     links = [it['link'] for it in j]
-    open(f'hkrnws_{args.date}.txt', 'w', encoding='utf8').write('\n'.join(links))
+    ofname = f'hkrnws_{args.date}.txt'
+    print(ofname)
+    open(ofname, 'w', encoding='utf8').write('\n'.join(links))
 
 def fetch_hkrnws_rng(args):
     st, ed = args.start, args.end
@@ -30,6 +32,7 @@ def fetch_hkrnws_rng(args):
         args.date = f'{dt.year:04d}{dt.month:02d}{dt.day:02d}'
         h = pool.submit(fetch_hkrnws, args)
         hdls.append(h)
+        dt
     for h in hdls:
         h.result()
 
