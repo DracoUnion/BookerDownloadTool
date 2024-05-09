@@ -1,5 +1,5 @@
 from .util import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import copy
 from concurrent.futures import ThreadPoolExecutor
 
@@ -32,7 +32,7 @@ def fetch_hkrnws_rng(args):
         args.date = f'{dt.year:04d}{dt.month:02d}{dt.day:02d}'
         h = pool.submit(fetch_hkrnws, args)
         hdls.append(h)
-        dt
+        dt += timedelta(days=1)
     for h in hdls:
         h.result()
 
