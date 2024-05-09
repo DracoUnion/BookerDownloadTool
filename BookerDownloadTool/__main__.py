@@ -21,6 +21,7 @@ from .yuque import *
 from .feishu import *
 from .arxiv import *
 from .gh import *
+from .hkrnws import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -330,12 +331,17 @@ def main():
     gh_repo_parser.add_argument("ofname", help="output file name")
     gh_repo_parser.set_defaults(func=gh_repo_fetch)
 
-    hkrnws_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
-    hkrnws_fetch_parser.add_argument("subject", help="subject code")
-    hkrnws_fetch_parser.add_argument("year_month", help="year and month like yymm")
-    hkrnws_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
-    hkrnws_fetch_parser.set_defaults(func=arxiv_fetch)
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-fetch", help="fetch hkrnws posts")
+    hkrnws_fetch_parser.add_argument("date", help="date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
+    hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws)
 
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-range", help="fetch multiple hkrnws posts")
+    hkrnws_fetch_parser.add_argument("start", help="starting date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("end", help="ending date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
+    hkrnws_fetch_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws_rng)
 
     args = parser.parse_args()
     args.func(args)
