@@ -1,4 +1,7 @@
 from .util import *
+from datetime import datetime
+import copy
+from concurrent.futures import ThreadPoolExecutor
 
 def fetch_hkrnws(args):
     url = f'https://hckrnews.com/data/{args.date}.js'
@@ -14,4 +17,19 @@ def fetch_hkrnws(args):
     links = [it['link'] for it in j]
     open(f'hkrnws_{args.date}.txt', 'w', encoding='utf8').write('\n'.join(links))
 
-def fetch_hkrnws_
+def fetch_hkrnws_rng(args):
+    st, ed = args.start, args.end
+    stdt = datetime(int(st[:4]), int(st[4:6]), int(st[6:8]))
+    eddt = datetime(int(ed[:4]), int(ed[4:6]), int(ed[6:8]))
+    now = datetime.now()
+    dt = stdt
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
+    while dt <= eddt and dt <= now:
+        args = copy.deepcopy(args)
+        args.date = f'{dt.year:04d}{dt.month:02d}{dt.day:02d}'
+        h = pool.submit(fetch_hkrnws, args)
+        hdls.append(h)
+    for h in hdls:
+        h.result()
+

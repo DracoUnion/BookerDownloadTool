@@ -330,6 +330,13 @@ def main():
     gh_repo_parser.add_argument("ofname", help="output file name")
     gh_repo_parser.set_defaults(func=gh_repo_fetch)
 
+    hkrnws_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
+    hkrnws_fetch_parser.add_argument("subject", help="subject code")
+    hkrnws_fetch_parser.add_argument("year_month", help="year and month like yymm")
+    hkrnws_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
+    hkrnws_fetch_parser.set_defaults(func=arxiv_fetch)
+
+
     args = parser.parse_args()
     args.func(args)
     
