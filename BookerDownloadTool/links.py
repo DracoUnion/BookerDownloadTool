@@ -134,7 +134,7 @@ def fetch_sitemap_handle(args):
             .hostname \
             .replace('.', '_') + '.txt'
     url, regex, ofname = args.url, args.regex, args.ofname
-    urls = fetch_sitemap(url, regex)
+    urls = fetch_sitemap(url, regex, args.proxy)
     f = open(ofname, 'w', encoding='utf8')
     for u in urls:
         f.write(u + '\n')
@@ -142,8 +142,12 @@ def fetch_sitemap_handle(args):
     f.close()
 
         
-def fetch_sitemap(url, rgx):
-    xml = request_retry('GET', url, headers=config['headers']).text
+def fetch_sitemap(url, rgx=None, pr=None):
+    xml = request_retry(
+        'GET', url, 
+        headers=config['headers'],
+        proxies={'http': pr, 'https': pr},
+    ).text
     urls = re.findall(r'<loc>(.+?)</loc>', xml)
     urls = [u.strip() for u in urls]
     subs = [
@@ -152,7 +156,7 @@ def fetch_sitemap(url, rgx):
     ]
     res = []
     for s in subs:
-        res += fetch_sitemap(s, rgx)
+        res += fetch_sitemap(s, rgx, pr)
     res += [
         f'{u}#0001-01-01' for u in urls
         if not u.endswith('.xml') 

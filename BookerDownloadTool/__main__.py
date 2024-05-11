@@ -235,6 +235,7 @@ def main():
     sitemap_parser.add_argument("url", help="sitemap url")
     sitemap_parser.add_argument("-r", "--regex", default="/blog/", help="link regex")
     sitemap_parser.add_argument("-o", "--ofname", help="output file name")
+    sitemap_parser.add_argument("-p", "--proxy", help="proxy")
     sitemap_parser.set_defaults(func=fetch_sitemap_handle)
 
     links_epub_parser = subparsers.add_parser("links-epub", help="batch download links to epub")
