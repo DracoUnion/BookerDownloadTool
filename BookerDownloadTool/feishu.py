@@ -23,6 +23,8 @@ ALLOW_TYPES = {
     'heading6',
     'code',
     'divider',
+    'ordered',
+    'bullet',
 }
 
 
@@ -49,6 +51,10 @@ def blk2html(blk):
         return f'<pre>{cont}</pre>'
     elif tp == 'divider':
         return '<hr />'
+    elif tp == 'ordered':
+        return f'<ol><li>{cont}</li></ol>'
+    elif tp == 'bullet':
+        return f'<ul><li>{cont}</li></ul>'
     else:
         raise ValueError()
 
