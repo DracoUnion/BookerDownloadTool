@@ -88,7 +88,7 @@ def download_feishu(args):
         raise ValueError('请设置 Cookie')
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
-    m = re.search(r'(\w+).feishu.cn/(docx|wiki)/(\w+)', args.url)
+    m = re.search(r'(\w+).feishu.cn/(docx|docs|wiki)/(\w+)', args.url)
     if not m:
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/<docx|wiki>/<aid>')
     uid, tp, aid = m.group(1), m.group(2), m.group(3)
