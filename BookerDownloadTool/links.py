@@ -130,9 +130,7 @@ def batch_links(args):
         
 def fetch_sitemap_handle(args):
     if not args.ofname:
-        args.ofname = urlparse(args.url) \
-            .hostname \
-            .replace('.', '_') + '.txt'
+        args.ofname = re.sub(r'\W', '_', args.url) + '.txt'
     url, regex, ofname = args.url, args.regex, args.ofname
     urls = fetch_sitemap(url, regex, args.proxy)
     f = open(ofname, 'w', encoding='utf8')
