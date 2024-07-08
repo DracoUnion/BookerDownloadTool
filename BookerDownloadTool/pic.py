@@ -5,6 +5,7 @@ from .util   import *
 from pyquery import PyQuery as pq
 
 def tr_download_pic(url, fname, args):
+    print(f'{fname}: {url}')
     data = request_retry(
         'GET', url, 
         proxies={'http': args.proxy, 'https': args.proxy},
@@ -26,6 +27,7 @@ def download_pixabay(args):
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i in range(args.start, args.end + 1):
+        print(f'page: {i}')
         url = f'https://pixabay.com/images/search/{kw}/?pagi={i}'
         html = request_retry(
             'GET', url, 
