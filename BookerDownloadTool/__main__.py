@@ -345,6 +345,16 @@ def main():
     hkrnws_fetch_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
     hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws_rng)
 
+    pixabay_dl_parser = subparsers.add_parser("pixabay", help="download pics in pixabay")
+    pixabay_dl_parser.add_argument("kw", help="keyword")
+    pixabay_dl_parser.add_argument("-d", "--dir", default='.', help="output dir")
+    pixabay_dl_parser.add_argument("-p", "--proxy", help="proxy")
+    pixabay_dl_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    pixabay_dl_parser.add_argument("-s", "--start", type=int, default=1, help="starting page ")
+    pixabay_dl_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page ")
+    pixabay_dl_parser.set_defaults(func=download_pixabay)
+
+
     args = parser.parse_args()
     args.func(args)
     
