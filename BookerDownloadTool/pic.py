@@ -8,6 +8,7 @@ def tr_download_pic(url, fname, args):
     print(f'{fname}: {url}')
     data = request_retry(
         'GET', url, 
+        headers=default_hdrs,
         proxies={'http': args.proxy, 'https': args.proxy},
     ).content
     ofname = path.join(args.dir, fname)
@@ -31,6 +32,7 @@ def download_pixabay(args):
         url = f'https://pixabay.com/images/search/{kw}/?pagi={i}'
         html = request_retry(
             'GET', url, 
+            headers=default_hdrs,
             proxies={'http': args.proxy, 'https': args.proxy},
         ).text
         el_pics = pq(html).find('div[class^=container]>a[class^=link]')
