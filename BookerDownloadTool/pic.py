@@ -24,17 +24,22 @@ def download_pixabay(args):
     kw = quote_plus(args.kw)
     safe_mkdir(args.dir)
 
-
+    driver = create_driver()
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
     for i in range(args.start, args.end + 1):
         print(f'page: {i}')
         url = f'https://pixabay.com/images/search/{kw}/?pagi={i}'
+        driver.get(url)
+        driver.implicitly_wait(5)
+        '''
         html = request_retry(
             'GET', url, 
             headers=default_hdrs,
             proxies={'http': args.proxy, 'https': args.proxy},
         ).text
+        '''
+        html = driver.page_source
         el_pics = pq(html).find('div[class^=container]>a[class^=link]')
         for el in el_pics:
             el = pq(el)
