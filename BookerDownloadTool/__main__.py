@@ -22,6 +22,7 @@ from .feishu import *
 from .arxiv import *
 from .gh import *
 from .hkrnws import *
+from .pic import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
