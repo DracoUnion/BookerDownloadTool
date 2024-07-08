@@ -53,6 +53,8 @@ def download_pixabay(args):
             else:
                 img_url = el_img.attr('src')
             img_fname = path.basename(el.attr('href')[:-1]) + '.png'
+            if path.isfile(path.join(args.dir, img_fname)):
+                continue
             h = pool.submit(tr_download_pic_safe, img_url, img_fname, args)
             hdls.append(h)
             if len(hdls) >= args.threads:
