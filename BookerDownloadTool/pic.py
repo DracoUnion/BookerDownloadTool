@@ -25,7 +25,7 @@ def download_pixabay(args):
 
     pool = ThreadPoolExecutor(args.threads)
     hdls = []
-    for i in range(args.st, args.ed + 1):
+    for i in range(args.start, args.end + 1):
         url = f'https://pixabay.com/images/search/{kw}/?pagi={i}'
         html = request_retry(
             'GET', url, 
