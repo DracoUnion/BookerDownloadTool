@@ -174,3 +174,45 @@ def download_bili_single(id, args):
 def download_bili(args):
     ids = args.id.split(',')
     for id in ids: download_bili_single(id, args)
+
+def download_bilisub_single(id, args):
+    sp = args.start_page
+    ep = args.end_page
+    opath = args.output_dir
+    safe_mkdir(opath)
+    av = ''
+    bv = ''
+    if id.lower().startswith('av'):
+        av = id[2:]
+    else:
+        bv = id
+    hdrs = bili_hdrs.copy()
+    hdrs['Cookie'] = args.cookie
+
+    url = f'https://api.bilibili.com/x/web-interface/view?bvid={bv}&aid={av}'
+    j = requests.get(url, headers=hdrs).json()
+    if j['code'] != 0:
+        print('获取 CID 失败：' + j['message'])
+        return
+    av = j['data']['aid']
+    bv = j['data']['bvid']
+    author = fname_escape(j['data']['owner']['name'])
+    title1 = fname_escape(j['data']['title'])
+    for it in j['data']['pages'][sp-1:ep]:
+        cid = it['cid']
+        pg = it['page']
+        title2 = fname_escape(it['part'])
+        title = (
+            f'{title1} - P{pg}' 
+            if title1 == title2
+            else f'{title1} - P{pg}：{title2}'
+        )
+        print(title, author)
+        name = f'{title} - {author} - {bv}.xml'
+        fname = path.join(opath, name)
+        if path.isfile(fname):
+            print(f'{fname} 已存在')
+            continue
+        url = f'https://comment.bilibili.com/{cid}.xml'
+        sub = requests.get(url, headers=hdrs).text
+        open(fname, 'w', encoding='utf8').write(sub)
