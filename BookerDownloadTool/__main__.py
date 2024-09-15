@@ -49,6 +49,15 @@ def main():
     bili_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
     bili_parser.set_defaults(func=download_bili)
 
+    bilisub_parser = subparsers.add_parser("bilisub", help="download bilibili subtitle")
+    bilisub_parser.add_argument("id", help="av or bv")
+    bilisub_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
+    bilisub_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
+    bilisub_parser.add_argument("--start_page", type=int, default=1, help="start page")
+    bilisub_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
+    bilisub_parser.set_defaults(func=download_bilisub)
+
+
     bili_kw_parser = subparsers.add_parser("bili-kw", help="download bilibili video by kw")
     bili_kw_parser.add_argument("kw", help="keyword")
     bili_kw_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
