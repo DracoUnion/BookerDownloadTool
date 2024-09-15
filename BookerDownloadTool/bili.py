@@ -221,7 +221,7 @@ def download_bilisub_single(id, args):
         j = requests.get(url, headers=hdrs).json()
         subtitles = j['data']['subtitle']['subtitles']
         prefs = [s for s in subtitles if s['lan'] in ['ai-zh', 'zh']]
-        if not pref:
+        if not prefs:
             print(f'{fname} 无可用字幕')
             continue
         url = 'https:' + prefs[0]['subtitle_url']
