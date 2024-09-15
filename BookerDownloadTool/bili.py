@@ -236,7 +236,7 @@ def bilisub2srt(j):
         st = float2hhmmss(sub['from'])
         ed = float2hhmmss(sub['to'])
         txt = sub['content']
-        srtpt = f'{i}\n{st} ---> {ed}\n{txt}'
+        srtpt = f'{i}\n{st} --> {ed}\n{txt}'
         srts.append(srtpt)
 
     srt = '\n\n'.join(srts)
