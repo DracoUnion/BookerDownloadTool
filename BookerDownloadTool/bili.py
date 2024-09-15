@@ -212,11 +212,18 @@ def download_bilisub_single(id, args):
             else f'{title1} - P{pg}：{title2}'
         )
         print(title, author)
-        name = f'{title} - {author} - {bv}.xml'
+        name = f'{title} - {author} - {bv}.json'
         fname = path.join(opath, name)
         if path.isfile(fname):
             print(f'{fname} 已存在')
             continue
-        url = f'https://comment.bilibili.com/{cid}.xml'
-        sub = requests.get(url, headers=hdrs).content.decode('utf8', 'ignore')
+        url = f'https://api.bilibili.com/x/player/wbi/v2?aid={av}&cid={cid}'
+        j = requests.get(url, headers=hdrs).json()
+        subtitles = j['data']['subtitle']['subtitles']
+        prefs = [s for s in subtitles if s['lan'] in ['ai-zh', 'zh']]
+        if not pref:
+            print(f'{fname} 无可用字幕')
+            continue
+        url = 'https:' + prefs[0]['subtitle_url']
+        sub =  requests.get(url, headers=hdrs).text
         open(fname, 'w', encoding='utf8').write(sub)
