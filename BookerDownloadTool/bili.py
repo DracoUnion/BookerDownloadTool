@@ -218,5 +218,5 @@ def download_bilisub_single(id, args):
             print(f'{fname} 已存在')
             continue
         url = f'https://comment.bilibili.com/{cid}.xml'
-        sub = requests.get(url, headers=hdrs).text
+        sub = requests.get(url, headers=hdrs).content.decode('utf8', 'ignore')
         open(fname, 'w', encoding='utf8').write(sub)
