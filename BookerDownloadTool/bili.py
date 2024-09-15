@@ -212,7 +212,7 @@ def download_bilisub_single(id, args):
             else f'{title1} - P{pg}：{title2}'
         )
         print(title, author)
-        name = f'{title} - {author} - {bv}.json'
+        name = f'{title} - {author} - {bv}.srt'
         fname = path.join(opath, name)
         if path.isfile(fname):
             print(f'{fname} 已存在')
@@ -225,5 +225,19 @@ def download_bilisub_single(id, args):
             print(f'{fname} 无可用字幕')
             continue
         url = 'https:' + prefs[0]['subtitle_url']
-        sub =  requests.get(url, headers=hdrs).text
-        open(fname, 'w', encoding='utf8').write(sub)
+        sub =  requests.get(url, headers=hdrs).json()
+        open(fname, 'w', encoding='utf8').write(bilisub2srt(sub))
+
+def bilisub2srt(j):
+    subs = j['body']
+
+    srts = []
+    for i, sub in enumerate(subs, start=1):
+        st = float2hhmmss(sub['from'])
+        ed = float2hhmmss(sub['to'])
+        txt = sub['content']
+        srtpt = f'{i}\n{st} ---> {ed}\n{txt}'
+        srts.append(srtpt)
+
+    srt = '\n\n'.join(srts)
+    return srt
