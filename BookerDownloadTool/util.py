@@ -163,3 +163,10 @@ def merge_video_audio(video, audio, video_fmt='mp4', audio_fmt='mp4'):
     res = open(res_fname, 'rb').read()
     safe_rmdir(tmpdir)
     return res
+
+
+def float2hhmmss(num):
+    int_ = int(num)
+    frac = int((num - int_) * 1000)
+    hr, min_, sec = int_ // 3600, int_ % 3600 // 60, int_ % 60
+    return f'{hr}:{min_:02d}:{sec:02d}.{frac:03d}'
