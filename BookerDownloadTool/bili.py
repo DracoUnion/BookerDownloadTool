@@ -173,11 +173,15 @@ def download_bili_single(id, args):
 
 def download_bili(args):
     ids = args.id.split(',')
-    for id in ids: download_bili_single(id, args)
+    for id in ids: 
+        try: download_bili_single(id, args)
+        except: traceback.print_exc()
 
 def download_bilisub(args):
     ids = args.id.split(',')
-    for id in ids: download_bilisub_single(id, args)
+    for id in ids: 
+        try: download_bilisub_single(id, args)
+        except: traceback.print_exc()
 
 def download_bilisub_single(id, args):
     sp = args.start_page
