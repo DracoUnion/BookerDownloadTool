@@ -109,6 +109,10 @@ def download_bili_safe(args):
     try: download_bili(args)
     except Exception as ex: print(ex)
 
+def download_bilisub_safe(args):
+    try: download_bilisub(args)
+    except Exception as ex: print(ex)
+
 def download_bili_single(id, args):
     to_audio = args.audio
     sp = args.start_page
@@ -245,3 +249,24 @@ def bilisub2srt(j):
 
     srt = '\n\n'.join(srts)
     return srt
+
+
+def batch_kw_bilisub(args):
+    kw = args.kw
+    st = args.start
+    ed = args.end
+    kw_enco = quote_plus(kw)
+    hdrs = bili_hdrs.copy()
+    hdrs['Cookie'] = args.cookie
+    for i in range(st, ed + 1):
+        url = f'https://api.bilibili.com/x/web-interface/wbi/search/type?__refresh__=true&page={i}&page_size=50&platform=pc&highlight=1&single_column=0&keyword={kw_enco}&source_tag=3&search_type=video&order=pubdate'
+        j = requests.get(url, headers=hdrs).json()
+        if j['code'] != 0:
+            print('解析失败：' + j['message'])
+            return
+        res = j['data']['result']
+        if len(res) == 0: break
+        for it in res:
+            bv = it['bvid']
+            args.id = bv
+            download_bilisub_safe(args)

@@ -69,6 +69,17 @@ def main():
     bili_kw_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
     bili_kw_parser.set_defaults(func=batch_kw_bili)
   
+    bilisub_kw_parser = subparsers.add_parser("bili-kw", help="download bilibili video by kw")
+    bilisub_kw_parser.add_argument("kw", help="keyword")
+    bilisub_kw_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
+    bilisub_kw_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
+    bilisub_kw_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
+    bilisub_kw_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
+    bilisub_kw_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
+    bilisub_kw_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
+    bilisub_kw_parser.set_defaults(func=batch_kw_bilisub)
+
+
     bili_home_parser = subparsers.add_parser("bili-home", help="download bilibili video by user")
     bili_home_parser.add_argument("mid", help="user id")
     bili_home_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
