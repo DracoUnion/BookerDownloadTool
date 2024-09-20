@@ -228,7 +228,7 @@ def download_bilisub_single(id, args):
         url = f'https://api.bilibili.com/x/player/wbi/v2?aid={av}&cid={cid}'
         j = requests.get(url, headers=hdrs).json()
         subtitles = j['data']['subtitle']['subtitles']
-        prefs = [s for s in subtitles if s['lan'] in ['ai-zh', 'zh']]
+        prefs = [s for s in subtitles if s['lan'] in ['ai-zh', 'zh-CN']]
         if not prefs:
             print(f'{fname} 无可用字幕')
             continue
