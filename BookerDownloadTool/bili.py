@@ -178,7 +178,9 @@ def download_bili_single(id, args):
 def download_bili(args):
     ids = args.id.split(',')
     for id in ids: 
-        try: download_bili_single(id, args)
+        try: 
+            download_bili_single(id, args)
+            download_bilisub_single(id, args)
         except: traceback.print_exc()
 
 def download_bilisub(args):
