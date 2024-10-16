@@ -72,6 +72,11 @@ def batch_home_bili(args):
     ed = args.end
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
+    # 获取 buvid3
+    url = f'https://space.bilibili.com/{args.mid}/dynamic'
+    r0 = requests.get(url, headers=hdrs)
+    buvid3 = r0.cookies['buvid3']
+    hdrs['Cookie'] += f'; buvid3={buvid3}'
     for i in range(st, ed + 1):
         url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
         j = requests.get(url, headers=hdrs).json()
