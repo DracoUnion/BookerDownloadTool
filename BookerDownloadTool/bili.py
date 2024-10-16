@@ -77,6 +77,8 @@ def batch_home_bili(args):
     r0 = requests.get(url, headers=hdrs)
     buvid3 = r0.cookies['buvid3']
     hdrs['Cookie'] += f'; buvid3={buvid3}'
+    hdrs['Referer'] = url
+    hdrs['Origin'] = 'https://space.bilibili.com/'
     for i in range(st, ed + 1):
         url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
         j = requests.get(url, headers=hdrs).json()
