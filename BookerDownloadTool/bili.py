@@ -76,7 +76,9 @@ def batch_home_bili(args):
     # 获取 buvid3
     url = f'https://space.bilibili.com/{args.mid}/dynamic'
     # 不加用户COOKIE
-    r0 = requests.get(url, headers=bili_hdrs)
+    r0 = requests.get(url, headers={
+        'User-Agent': bili_hdrs['User-Agent'],
+    })
     buvid3 = r0.cookies['buvid3']
     hdrs['Cookie'] = re.sub(r'buvid3=[\w\-]+(;\x20)?', '', hdrs['Cookie'])
     hdrs['Cookie'] += f'; buvid3={buvid3}'
