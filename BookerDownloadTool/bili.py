@@ -81,6 +81,7 @@ def batch_home_bili(args):
     buvid3 = r0.cookies['buvid3']
     print(f'buvid3: {buvid3}')
     # 鉴权
+    url = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi'
     r1 = requests.post(
         url, 
         data=bili_payload, 
