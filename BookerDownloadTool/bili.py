@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import sys
+import re
 from os import path
 from moviepy.editor import VideoFileClip
 from io import BytesIO
@@ -74,8 +75,10 @@ def batch_home_bili(args):
     hdrs['Cookie'] = args.cookie
     # 获取 buvid3
     url = f'https://space.bilibili.com/{args.mid}/dynamic'
-    r0 = requests.get(url, headers=hdrs)
+    # 不加用户COOKIE
+    r0 = requests.get(url, headers=bili_hdrs)
     buvid3 = r0.cookies['buvid3']
+    hdrs['Cookie'] = re.sub(r'buvid3=[\w\-]+(;\x20)?', '', hdrs['Cookie'])
     hdrs['Cookie'] += f'; buvid3={buvid3}'
     hdrs['Referer'] = url
     hdrs['Origin'] = 'https://space.bilibili.com/'
