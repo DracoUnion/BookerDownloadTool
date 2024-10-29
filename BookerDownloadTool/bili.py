@@ -15,6 +15,7 @@ from threading import Lock
 from .util import *
 import time
 from urllib.parse import unquote
+from . import bili_wbi
 
 def tr_download_meta_bili(idx, aid, pr, write_back, args):
     print(f'aid: {aid}')
@@ -84,9 +85,10 @@ def batch_home_bili(args):
     print(f'auth: {j}')
     # 获取 w_webid
     webid = get_w_webid(args.mid, hdrs['Cookie'])
+    w_rid, wts = bili_wbi.getWbiKeys()
     print(f'webid: {webid}')
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web&w_webid={webid}'
+        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web&w_webid={webid}&w_rid={w_rid}&wts={wts}'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
