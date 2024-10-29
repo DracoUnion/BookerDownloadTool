@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from .util import *
 import time
+from urllib.parse import unquote
 
 def tr_download_meta_bili(idx, aid, pr, write_back, args):
     print(f'aid: {aid}')
@@ -77,12 +78,15 @@ def batch_home_bili(args):
     print(f'buvid3: {buvid3}')
     hdrs['Cookie'] = re.sub(r'buvid3=[\w\-]+(;\x20)?', '', hdrs['Cookie'])
     hdrs['Cookie'] += f'; buvid3={buvid3}'
-    hdrs['Referer'] = url
+    hdrs['Referer'] = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi'
     hdrs['Origin'] = 'https://space.bilibili.com/'
-    j = buvid3_auth(hdrs['Cookie'])
-    print(j)
+    j = buvid3_auth(hdrs)
+    print(f'auth: {j}')
+    # 获取 w_webid
+    webid = get_w_webid(args.mid, hdrs['Cookie'])
+    print(f'webid: {webid}')
     for i in range(st, ed + 1):
-        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
+        url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web&w_webid={webid}'
         j = requests.get(url, headers=hdrs).json()
         if j['code'] != 0:
             print('解析失败：' + j['message'])
@@ -296,13 +300,33 @@ def get_buvid3(mid):
     buvid3 = r0.cookies['buvid3']
     return buvid3, r0.cookies
 
-def buvid3_auth(cookies):
+def buvid3_auth(hdrs):
     # 鉴权
     url = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi'
     r1 = requests.post(
         url, 
         data=bili_payload, 
-        cookies=cookies,
-        headers=bili_hdrs,
+        headers=hdrs,
     )
     return r1.json()
+
+def get_w_webid(mid, cookie):
+    dynamic_url = f"https://space.bilibili.com/{mid}/dynamic"
+    hdrs =  {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "Referer": "https://www.bilibili.com/",
+        "Cookie": cookie,
+    }
+    text = requests.get(
+        dynamic_url, 
+        headers=hdrs,
+    ).text
+
+    # <script id="__RENDER_DATA__" type="application/json">xxx</script>
+    __RENDER_DATA__ = re.search(
+        r"<script id=\"__RENDER_DATA__\" type=\"application/json\">(.*?)</script>",
+        text, re.S,
+    ).group(1)
+
+    access_id = json.loads(unquote(__RENDER_DATA__))["access_id"]
+    return access_id
