@@ -73,27 +73,14 @@ def batch_home_bili(args):
     ed = args.end
     hdrs = bili_hdrs.copy()
     hdrs['Cookie'] = args.cookie
-    # 获取 buvid3
-    url = f'https://space.bilibili.com/{args.mid}/dynamic'
-    r0 = requests.get(url, headers={
-        'User-Agent': bili_hdrs['User-Agent'],
-    })
-    buvid3 = r0.cookies['buvid3']
+    buvid3, r0_cookies = get_buvid3(args.mid)
     print(f'buvid3: {buvid3}')
-    # 鉴权
-    url = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi'
-    r1 = requests.post(
-        url, 
-        data=bili_payload, 
-        cookies=r0.cookies,
-        headers=bili_hdrs,
-    )
-    print(r1.json())
-
     hdrs['Cookie'] = re.sub(r'buvid3=[\w\-]+(;\x20)?', '', hdrs['Cookie'])
     hdrs['Cookie'] += f'; buvid3={buvid3}'
     hdrs['Referer'] = url
     hdrs['Origin'] = 'https://space.bilibili.com/'
+    j = buvid3_auth(hdrs['Cookie'])
+    print(j)
     for i in range(st, ed + 1):
         url = f'https://api.bilibili.com/x/space/wbi/arc/search?mid={mid}&tid=0&pn={i}&order=pubdate&platform=web'
         j = requests.get(url, headers=hdrs).json()
@@ -298,3 +285,24 @@ def batch_kw_bilisub(args):
             bv = it['bvid']
             args.id = bv
             download_bilisub_safe(args)
+
+
+def get_buvid3(mid):
+    # 获取 buvid3
+    url = f'https://space.bilibili.com/{mid}/dynamic'
+    r0 = requests.get(url, headers={
+        'User-Agent': bili_hdrs['User-Agent'],
+    })
+    buvid3 = r0.cookies['buvid3']
+    return buvid3, r0.cookies
+
+def buvid3_auth(cookies):
+    # 鉴权
+    url = 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi'
+    r1 = requests.post(
+        url, 
+        data=bili_payload, 
+        cookies=cookies,
+        headers=bili_hdrs,
+    )
+    return r1.json()
