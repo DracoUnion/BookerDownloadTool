@@ -63,7 +63,7 @@ def download_ln(args):
     safe_mkdir(save_path)
     
     articles = [{
-        'title': info['title'], 
+        'title': info['title'] + '-' + info['author'] + '-' info['dt'], 
         'content': f"<p>作者：{info['author']}</p>",
     }]
     url = f'http://dl.wenku8.com/down.php?type=utf8&id={id}'
