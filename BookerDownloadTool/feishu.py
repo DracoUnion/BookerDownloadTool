@@ -61,35 +61,40 @@ def parse_table(blk, blk_map):
 
 
 def get_text_blk_text(blk):
+    assert 'text' in blk['data']
     return blk['data']['text']['initialAttributedTexts']['text']['0']
+
+def get_img_blk_text(blk):
+    assert 'image' in blk['data']
+    tok = blk['data']['image']['token']
+    return f'<img src="https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/" />'
 
 def blk2html(blk, blk_map):
     tp = blk['data']['type']
-    tok2_img_tag = lambda tok: f'<img src="https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/" />'
-    cont = (
-        htmlesc(get_text_blk_text(blk))
-        if 'text' in blk['data'] else 
-        tok2_img_tag(blk['data']['image']['token'])
-        if 'image' in blk['data'] else ''
-    )
     if tp == 'page':
-        cont = cont.replace('\n', ' ')
+        cont = get_text_blk_text(blk).replace('\n', ' ')
         return f'<h1>{cont}</h1>'
-    elif tp in ['text', 'image']:
-        lines = [l.strip() for l in cont.split('\n')]
+    elif tp == 'text':
+        lines = [
+            l.strip() 
+            for l in get_text_blk_text(blk).split('\n')
+        ]
         return '\n'.join([f'<p>{l}</p>' for l in lines if l])
+    elif tp == 'image':
+        return f'<p>{get_img_blk_text(blk)}</p>'
+        
     elif tp.startswith('heading'):
-        cont = cont.replace('\n', ' ')
+        cont = get_text_blk_text(blk).replace('\n', ' ')
         tag = 'h' + tp[-1]
         return f'<{tag}>{cont}</{tag}>'
     elif tp == 'code':
-        return f'<pre>{cont}</pre>'
+        return f'<pre>{get_text_blk_text(blk)}</pre>'
     elif tp == 'divider':
         return '<hr />'
     elif tp == 'ordered':
-        return f'<ol><li>{cont}</li></ol>'
+        return f'<ol><li>{get_text_blk_text(blk)}</li></ol>'
     elif tp == 'bullet':
-        return f'<ul><li>{cont}</li></ul>'
+        return f'<ul><li>{get_text_blk_text(blk)}</li></ul>'
     elif tp == 'table':
         return parse_table(blk, blk_map)
     else:
