@@ -21,18 +21,53 @@ ALLOW_TYPES = {
     'heading4',
     'heading5',
     'heading6',
+    'heading7',
+    'heading8',
+    'heading9',
     'code',
     'divider',
     'ordered',
     'bullet',
+    "table",
 }
 
 
-def blk2html(blk):
+def parse_table(blk, blk_map):
+    assert blk['data']['type'] == 'table'
+    cont = []
+    cells = blk['data']['cell_set']
+    for r in blk['data']['rows_id']:
+        cont.append([])
+        for c in blk['data']['columns_id']:
+            k = r + c
+            if k not in cells:
+                cont[-1].append("")
+                continue
+            cid = cells[k]['block_id']
+            cell = blk_map[cid]
+            tid = cell['data']['children'][0]
+            text = get_text_blk_text(blk_map[tid]).replace('\n', ' ')
+            cont[-1].append(text)
+
+    html = '<table>'
+    for r, i in enumerate(cont):
+        html += '<tr>'
+        for v in r:
+            tag = 'td' if i != 0 else 'th'
+            html += f'<{tag}>{htmlesc(v)}</{tag}>'
+        html += '</tr>'
+    html += '</table>'
+    return html
+
+
+def get_text_blk_text(blk):
+    return blk['data']['text']['initialAttributedTexts']['text']['0']
+
+def blk2html(blk, blk_map):
     tp = blk['data']['type']
     tok2_img_tag = lambda tok: f'<img src="https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/" />'
     cont = (
-        htmlesc(blk['data']['text']['initialAttributedTexts']['text']['0'])
+        htmlesc(get_text_blk_text(blk))
         if 'text' in blk['data'] else 
         tok2_img_tag(blk['data']['image']['token'])
         if 'image' in blk['data'] else ''
@@ -55,8 +90,10 @@ def blk2html(blk):
         return f'<ol><li>{cont}</li></ol>'
     elif tp == 'bullet':
         return f'<ul><li>{cont}</li></ul>'
+    elif tp == 'table':
+        return parse_table(blk, blk_map)
     else:
-        raise ValueError()
+        return ''
 
 def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
@@ -84,7 +121,7 @@ def get_docx_html(uid, aid, cookie):
     blk_map = data['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
     blks = [b for b in blks if b['data']['type'] in ALLOW_TYPES]
-    htmls = [blk2html(b) for b in blks]
+    htmls = [blk2html(b, blk_map) for b in blks]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     htmls.insert(1, f'<blockquote>来源：<a href="{url}">{url}</a></blockquote>')
     return '\n'.join(htmls)
