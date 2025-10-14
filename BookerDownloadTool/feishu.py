@@ -82,7 +82,6 @@ def blk2html(blk, blk_map):
         return '\n'.join([f'<p>{l}</p>' for l in lines if l])
     elif tp == 'image':
         return f'<p>{get_img_blk_text(blk)}</p>'
-        
     elif tp.startswith('heading'):
         cont = get_text_blk_text(blk).replace('\n', ' ')
         tag = 'h' + tp[-1]
