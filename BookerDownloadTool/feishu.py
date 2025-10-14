@@ -125,6 +125,11 @@ def get_docx_html(uid, aid, cookie):
     blk_map = data['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
     blks = [b for b in blks if b['data']['type'] in ALLOW_TYPES]
+    # 过滤 table_cell 的 children text
+    cells = [b for b in blks if b['data']['type'] == 'table_cell']
+    chtext = [c['data']['children'] for c in cells]
+    chtextids = set(sum(chtext, []))
+    blks = [b for b in blks if b['id'] not in chtextids]
     htmls = [blk2html(b, blk_map) for b in blks]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     htmls.insert(1, f'<blockquote>来源：<a href="{url}">{url}</a></blockquote>')
