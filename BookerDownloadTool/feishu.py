@@ -50,7 +50,7 @@ def parse_table(blk, blk_map):
             cont[-1].append(text)
 
     html = '<table>'
-    for r, i in enumerate(cont):
+    for i, r in enumerate(cont):
         html += '<tr>'
         for v in r:
             tag = 'td' if i != 0 else 'th'
