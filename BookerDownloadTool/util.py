@@ -1,3 +1,4 @@
+import re
 import requests
 import os
 import shutil
@@ -292,6 +293,11 @@ DIR = path.dirname(path.abspath(__file__))
 
 d = lambda name: path.join(path.dirname(__file__), name)
 
+
+def rm_xml_tags(html):
+    html = re.sub(r'<?xml[^>]*?>', '', html)
+    html = re.sub(r'xmlns=".+?"', '', html)
+    return html
     
 def is_gbk(ch):
     try: 

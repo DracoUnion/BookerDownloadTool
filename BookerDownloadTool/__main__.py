@@ -338,8 +338,9 @@ def main():
     zhihu_ques_range_api_parser.set_defaults(func=zhihu_ques_range_api)
 
     arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
-    arxiv_fetch_parser.add_argument("subject", help="subject code")
-    arxiv_fetch_parser.add_argument("year_month", help="year and month like yymm")
+    arxiv_fetch_parser.add_argument("cate", help="category code")
+    arxiv_fetch_parser.add_argument("start", help="starting yyyymmdd")
+    arxiv_fetch_parser.add_argument("end", help="ending yyyymmdd")
     arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
     arxiv_fetch_parser.set_defaults(func=arxiv_fetch)
 

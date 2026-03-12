@@ -2,43 +2,38 @@ from .util import *
 from pyquery import PyQuery as pq
 import re
 
-def rm_xml_tags(html):
-    html = re.sub(r'<?xml[^>]*?>', '', html)
-    html = re.sub(r'xmlns=".+?"', '', html)
-    return html
+def get_arxiv_ids(html):
+    html = rm_xml_tags(html)
+    rt = pq(html)
+    return [pq(el).text().split('/')[-1] for el in rt('id')]
 
-def get_total(html):
-    rt = pq(rm_xml_tags(html))
-    txt = rt('h2+small').text()
-    m = re.search(r'(\d+)\x20entries', txt)
-    if not m: return 0
-    return int(m.group(1))
-    
-def get_ids(html):
-    rt = pq(rm_xml_tags(html))
-    el_links = rt('.list-identifier>a:first-of-type')
-    ids = [
-        pq(el).attr('href').split('/')[-1]
-        for el in el_links
-    ]
-    return ids
-    
 def arxiv_fetch(args):
-    pgsz = min(args.page_size, 2000)
-    sub = args.subject
-    yrmon = args.year_month
+    pg_size = min(args.page_size, 3000)
+    query = f'cat:{args.cate} AND submittedDate:[{args.start} TO {args.end}]'
+
+    ids = []
+    start = 0
+    while True:
+        params = {
+                'search_query': query,
+                'start': start,
+                'max_results': pg_size,  # API限制
+                'sortBy': 'submittedDate',
+                'sortOrder': 'descending'
+        }
+
+        url = f'http://export.arxiv.org/api/query'
+        html = request_retry(
+            'GET', url,
+            params=params,
+            headers=default_hdrs
+        ).text
+        ids_pt = get_arxiv_ids(html)
+        if not ids_pt: break
+        ids += ids_pt
+        print(ids_pt)
+        start += pg_size
     
-    url = f'https://arxiv.org/list/{sub}/{yrmon}'
-    html = request_retry('GET', url).text
-    total = get_total(html)
-    ofile = open(f'arxiv_{sub}_{yrmon}_{total}.txt', 'w', encoding='utf8')
-    
-    for i in range(0, total, pgsz):
-        print(f'{sub}, {yrmon}, {i+1}-{i+pgsz}')
-        url = f'https://arxiv.org/list/{sub}/{yrmon}?skip={i}&show={pgsz}'
-        html = request_retry('GET', url).text
-        ids = get_ids(html)
-        print('\n'.join(ids))
-        ofile.write('\n'.join(ids) + '\n')
-        
+    ofile = open(f'arxiv_{args.cate}_{args.start}_{args.end}.txt', 'w', encoding='utf8')
+    ofile.write('\n'.join(ids) + '\n')    
     ofile.close()
