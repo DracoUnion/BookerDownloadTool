@@ -77,7 +77,7 @@ def parse_text_block(text_data: Dict) -> str:
         return ""
 
     result = []
-    for idx in min(len(text_parts), len(attribs_parts)):
+    for idx in range(min(len(text_parts), len(attribs_parts))):
         text_str = text_parts.get(str(idx), "")
         attribs_str = attribs_parts.get(str(idx), "")
         if not text_str:
