@@ -115,7 +115,7 @@ def parse_table(blk, blk_map):
             cid = cells[k]['block_id']
             cell = blk_map[cid]
             tid = cell['data']['children'][0]
-            text = get_text_blk_text(blk_map[tid]).replace('\n', ' ')
+            text = blk2md(blk_map[tid], blk_map).replace('\n', ' ')
             cont[-1].append(text)
 
     md = ''
