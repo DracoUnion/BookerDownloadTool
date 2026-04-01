@@ -167,6 +167,8 @@ def blk2md(blk, blk_map):
         return parse_table(blk, blk_map)
     elif tp == 'file':
         return get_file_block_text(blk)
+    elif type in ['view', 'grid', 'grid_column']:
+        return ''
     else:
         print(f'未知类型： {tp}')
         return ''
