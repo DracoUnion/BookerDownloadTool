@@ -101,7 +101,7 @@ def parse_text_block(text_data: Dict) -> str:
             result.append(text_str[pos:])
     return ''.join(result)
 
-def parse_table(blk, blk_map):
+def parse_table(blk, blk_map, sync_url_map):
     assert blk['data']['type'] == 'table'
     cont = []
     cells = blk['data']['cell_set']
@@ -115,7 +115,7 @@ def parse_table(blk, blk_map):
             cid = cells[k]['block_id']
             cell = blk_map[cid]
             tid = cell['data']['children'][0]
-            text = blk2md(blk_map[tid], blk_map).replace('\n', ' ')
+            text = blk2md(blk_map[tid], blk_map, sync_url_map).replace('\n', ' ')
             cont[-1].append(text)
 
     md = ''
@@ -149,7 +149,9 @@ def text_in_quote(blk, blk_map):
     return pid in blk_map and \
         blk_map[pid]['data']['type'] in ['quote_container', 'callout']
 
-def blk2md(blk, blk_map):
+def blk2md(blk, blk_map, sync_url_map=None):
+    if sync_url_map is None:
+        sync_url_map = {}
     tp = blk['data']['type']
     if tp == 'page':
         cont = get_text_blk_text(blk).replace('\n', ' ')
@@ -177,15 +179,20 @@ def blk2md(blk, blk_map):
     elif tp == 'bullet':
         return f'+   {get_text_blk_text(blk)}'
     elif tp == 'table':
-        return parse_table(blk, blk_map)
+        return parse_table(blk, blk_map, sync_url_map)
     elif tp == 'file':
         return get_file_block_text(blk)
     elif tp == 'iframe':
         return get_iframe_blk_text(blk)
+    elif tp == 'synced_reference':
+        blk_id = blk['data']['src_block_id']
+        url = sync_url_map.get(url)
+        return f'<{url}>' if url else ''
     elif tp in [
         'view', 'grid', 'grid_column', 
         'quote_container', 'callout',
-        'table_cell',
+        'table_cell', 'synced_source',
+        'base_refer',
     ]:
         return ''
     elif tp == 'bitable':
@@ -244,13 +251,14 @@ def get_docx_md(uid, aid, cookie):
     blk_ids = data['data'].get('block_sequence', [])
     if not blk_ids: return ''
     blk_map = data['data'].get('block_map', {})
+    sync_url_map = data['data'].get('synced_block_url', {})
     blks = [blk_map[bid] for bid in blk_ids]
     # 过滤 table_cell 的 children text
     cells = [b for b in blks if b['data']['type'] == 'table_cell']
     chtext = [c['data']['children'] for c in cells]
     chtextids = set(sum(chtext, []))
     blks = [b for b in blks if b['id'] not in chtextids]
-    mds = [blk2md(b, blk_map).strip() for b in blks]
+    mds = [blk2md(b, blk_map, sync_url_map).strip() for b in blks]
     mds = [md for md in mds if md]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     mds.insert(1, f'> 来源：[{url}]({url})')
