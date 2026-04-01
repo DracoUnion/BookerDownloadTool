@@ -222,8 +222,9 @@ def get_docx_md(uid, aid, cookie):
     
     data = execjs.compile(jscode).eval('window.DATA')
     '''
-    blk_ids = data['data']['block_sequence']
-    blk_map = data['data']['block_map']
+    blk_ids = data['data'].get('block_sequence', [])
+    if not blk_ids: return ''
+    blk_map = data['data'].get('block_map', {})
     blks = [blk_map[bid] for bid in blk_ids]
     # 过滤 table_cell 的 children text
     cells = [b for b in blks if b['data']['type'] == 'table_cell']
