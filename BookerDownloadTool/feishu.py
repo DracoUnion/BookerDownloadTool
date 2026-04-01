@@ -70,13 +70,16 @@ def parse_text_block(text_data: Dict) -> str:
     """
     apool = text_data.get('apool', {})
     initial = text_data.get('initialAttributedTexts', {})
-    text_parts = initial.get('text', [])
-    attribs_parts = initial.get('attribs', [])
+    # 这俩不是数组，是键为数字字符串的字典
+    text_parts = initial.get('text', {})
+    attribs_parts = initial.get('attribs', {})
     if not text_parts:
         return ""
 
     result = []
-    for text_str, attribs_str in zip(text_parts, attribs_parts):
+    for idx in min(len(text_parts), len(attribs_parts)):
+        text_str = text_parts.get(str(idx), "")
+        attribs_str = attribs_parts.get(str(idx), "")
         if not text_str:
             continue
         intervals = parse_attribs(attribs_str)
