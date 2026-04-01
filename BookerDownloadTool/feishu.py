@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import time
 import traceback
 import json
 import re
@@ -218,7 +219,7 @@ def get_file_block_text(blk):
     cover = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/' + blk['data']['file']['token']
     return f'![]({cover})\n\n[{name}]({link})'
 
-def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10):
+def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
@@ -228,6 +229,7 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10):
         except:
             print(f'get_info retry: {i}')
             if i == retry - 1: raise
+            time.sleep(wait)
     rtli = data['data']['tree']['root_list']
     chmap = data['data']['tree']['child_map']
     return rtli, chmap
