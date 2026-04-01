@@ -150,7 +150,7 @@ def blk2md(blk, blk_map):
         return f'{get_img_blk_text(blk)}'
     elif tp.startswith('heading'):
         cont = get_text_blk_text(blk).replace('\n', ' ')
-        head = '#' * tp[-1]
+        head = '#' * int(tp[-1])
         return f'{head} {cont}'
     elif tp == 'code':
         return f'```\n{htmlesc(get_text_blk_text(blk))}\n```'
