@@ -122,7 +122,8 @@ def parse_table(blk, blk_map):
     for i, r in enumerate(cont):
         md += '| '
         for v in r:
-            md += f'{htmlesc(v)} |\n'
+            md += f'{htmlesc(v)} |'
+        md += '\n'
         if i == 0:
             md += '| ' + ' --- |' * len(r) + '\n'
     md = md.strip()
