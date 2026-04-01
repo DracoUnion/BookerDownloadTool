@@ -165,9 +165,17 @@ def blk2md(blk, blk_map):
         return f'+   {get_text_blk_text(blk)}'
     elif tp == 'table':
         return parse_table(blk, blk_map)
+    elif tp == 'file':
+        return get_file_block_text(blk)
     else:
         print(f'未知类型： {tp}')
         return ''
+
+def get_file_block_text(blk):
+    assert blk['data']['type'] == 'file'
+    name = blk['data']['file']['name']
+    link = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/all/' + blk['data']['file']['token']
+    return f'[{name}]({link})'
 
 def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
