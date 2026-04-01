@@ -169,6 +169,9 @@ def blk2md(blk, blk_map):
         return get_file_block_text(blk)
     elif tp in ['view', 'grid', 'grid_column']:
         return ''
+    elif tp == 'bitable':
+        token = blk['data']['token']
+        return f'多维表格（{token}）'
     else:
         print(f'未知类型： {tp}')
         return ''
