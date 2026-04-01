@@ -247,7 +247,7 @@ def download_feishu_all(args):
     l = len(str(len(toc)))
     for i, wid in enumerate(toc):
         print(wid)
-        aid = get_aid_by_wid(uid, aid, args.cookie)
+        aid = get_aid_by_wid(uid, wid, args.cookie)
         md = get_docx_md(uid, aid, args.cookie)
         imgs = {}
         md = process_img_md(md, imgs, img_prefix='img/')
