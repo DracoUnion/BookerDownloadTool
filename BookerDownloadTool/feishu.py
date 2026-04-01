@@ -138,6 +138,10 @@ def get_img_blk_text(blk):
     tok = blk['data']['image']['token']
     return f'![](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/{tok}/)'
 
+def text_in_quote(blk, blk_map):
+    pid = blk['data']['parent_id']
+    return pid in blk_map and blk_map[pid]['data']['type'] == 'quote_container'
+
 def blk2md(blk, blk_map):
     tp = blk['data']['type']
     if tp == 'page':
@@ -148,6 +152,8 @@ def blk2md(blk, blk_map):
             l.strip() 
             for l in get_text_blk_text(blk).split('\n')
         ]
+        if text_in_quote(blk, blk_map):
+            lines = [f'> {l}' for l in lines]
         return '\n\n'.join([l for l in lines if l])
     elif tp == 'image':
         return f'{get_img_blk_text(blk)}'
@@ -167,7 +173,7 @@ def blk2md(blk, blk_map):
         return parse_table(blk, blk_map)
     elif tp == 'file':
         return get_file_block_text(blk)
-    elif tp in ['view', 'grid', 'grid_column']:
+    elif tp in ['view', 'grid', 'grid_column', 'quote_container']:
         return ''
     elif tp == 'bitable':
         token = blk['data']['token']
