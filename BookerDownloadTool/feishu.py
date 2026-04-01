@@ -140,7 +140,8 @@ def get_img_blk_text(blk):
 
 def text_in_quote(blk, blk_map):
     pid = blk['data']['parent_id']
-    return pid in blk_map and blk_map[pid]['data']['type'] == 'quote_container'
+    return pid in blk_map and \
+        blk_map[pid]['data']['type'] in ['quote_container', 'callout']
 
 def blk2md(blk, blk_map):
     tp = blk['data']['type']
@@ -173,7 +174,10 @@ def blk2md(blk, blk_map):
         return parse_table(blk, blk_map)
     elif tp == 'file':
         return get_file_block_text(blk)
-    elif tp in ['view', 'grid', 'grid_column', 'quote_container']:
+    elif tp in [
+        'view', 'grid', 'grid_column', 
+        'quote_container', 'callout'
+    ]:
         return ''
     elif tp == 'bitable':
         token = blk['data']['token']
