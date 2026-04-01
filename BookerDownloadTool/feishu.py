@@ -192,7 +192,7 @@ def blk2md(blk, blk_map, sync_url_map=None):
         return get_iframe_blk_text(blk)
     elif tp == 'synced_reference':
         blk_id = blk['data']['src_block_id']
-        url = sync_url_map.get(url)
+        url = sync_url_map.get(blk_id)
         return f'<{url}>' if url else ''
     elif tp in [
         'view', 'grid', 'grid_column', 
