@@ -177,7 +177,8 @@ def blk2md(blk, blk_map):
         return get_file_block_text(blk)
     elif tp in [
         'view', 'grid', 'grid_column', 
-        'quote_container', 'callout'
+        'quote_container', 'callout',
+        'table_cell',
     ]:
         return ''
     elif tp == 'bitable':
