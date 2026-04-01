@@ -177,7 +177,8 @@ def get_file_block_text(blk):
     assert blk['data']['type'] == 'file'
     name = blk['data']['file']['name']
     link = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/' + blk['data']['file']['token']
-    return f'[{name}]({link})'
+    cover = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/' + blk['data']['file']['token']
+    return f'![]({cover})\n\n[{name}]({link})'
 
 def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
