@@ -321,6 +321,12 @@ def main():
     feishu_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
     feishu_parser.set_defaults(func=download_feishu)
 
+    feishu_all_parser = subparsers.add_parser("feishu-all", help="crawler feishu articles")
+    feishu_all_parser.add_argument("url", help="https://<uid>.feishu.cn/wiki/<aid>")
+    feishu_all_parser.add_argument("-c", "--cookie", default=os.environ.get('FEISHU_COOKIE', ''), help="feishu cookie")
+    feishu_all_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    feishu_all_parser.set_defaults(func=download_feishu_all)
+
     zhihu_ques_api_parser = subparsers.add_parser("zhiapi-ques", help="crawl zhihu answers of a question by **API**")
     zhihu_ques_api_parser.add_argument("qid", help="qid")
     zhihu_ques_api_parser.add_argument("-p", "--proxy", help="proxy")

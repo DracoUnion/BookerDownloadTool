@@ -183,6 +183,22 @@ def get_file_block_text(blk):
     cover = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/' + blk['data']['file']['token']
     return f'![]({cover})\n\n[{name}]({link})'
 
+def get_toc_by_wid(uid, wid, cookie):
+    url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
+    hdrs = default_hdrs | {'Cookie': cookie}
+    data = request_retry('GET', url,    headers=hdrs).json()
+    li = data['tree']['root_list']
+    chmap = data['tree']['child_map']
+    while True:
+        old_len = len(li)
+        for idx in range(len(li) - 1, -1, -1):
+            wid = li[idx]
+            children = chmap.pop(wid, [])
+            for ch in children[::-1]:
+                li.insert(idx + 1, ch)
+        if len(li) == old_len:
+            break
+
 def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
@@ -218,6 +234,27 @@ def get_docx_md(uid, aid, cookie):
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     mds.insert(1, f'> 来源：[{url}]({url})')
     return '\n\n'.join(mds)
+
+def download_feishu_all(args):
+    if not args.cookie:
+        raise ValueError('请设置 Cookie')
+    m = re.search(r'(\w+).feishu.cn/wiki/(\w+)', args.url)
+    if not m:
+        raise ValueError('URL 格式错误：https://<uid>.feishu.cn/wiki/<wid>')
+    uid, wid = m.group(1), m.group(2)
+    toc = get_toc_by_wid(uid, wid, args.cookie)
+    l = len(str(len(toc)))
+    for i, wid in enumerate(toc):
+        md = get_docx_md(uid, wid, args.cookie)
+        imgs = {}
+        md = process_img_md(md, imgs, img_prefix='img/')
+        md_fname = str(i).zfill(l) + '_' + wid + '.md'
+        open(md_fname, 'w', encoding='utf8').write(md)
+    if not path.isdir('img'):
+        os.makedirs('img')
+    for name, img in imgs.items():
+        img_fname = path.join('img', name)
+        open(img_fname, 'wb').write(img)
 
 def download_feishu(args):
     if not args.cookie:
