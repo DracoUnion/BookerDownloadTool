@@ -226,6 +226,8 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
         try:
             data = request_retry('GET', url,    headers=hdrs).json()
             break
+        except KeyboardInterrupt:
+            raise
         except:
             print(f'get_info retry: {i}')
             if i == retry - 1: raise
