@@ -194,13 +194,13 @@ def get_docx_md(uid, aid, cookie):
     blk_ids = data['data']['block_sequence']
     blk_map = data['data']['block_map']
     blks = [blk_map[bid] for bid in blk_ids]
-    allow_blks = blks
     # 过滤 table_cell 的 children text
     cells = [b for b in blks if b['data']['type'] == 'table_cell']
     chtext = [c['data']['children'] for c in cells]
     chtextids = set(sum(chtext, []))
-    allow_blks = [b for b in allow_blks if b['id'] not in chtextids]
-    mds = [blk2md(b, blk_map).strip() for b in allow_blks]
+    blks = [b for b in blks if b['id'] not in chtextids]
+    mds = [blk2md(b, blk_map).strip() for b in blks]
+    mds = [b for b in blks if b]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     mds.insert(1, f'> 来源：![{url}]({url})')
     return '\n\n'.join(mds)
