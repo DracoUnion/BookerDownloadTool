@@ -13,6 +13,7 @@ from EpubCrawler.img import process_img
 from EpubCrawler.config import config as crconf
 from typing import List, Tuple, Dict, Any
 from .process_img_md import process_img_md
+from .process_img_md import config as proc_cfg
 
 def parse_attribs(attribs_str: str) -> List[Tuple[List[int], int]]:
     """
@@ -273,6 +274,9 @@ def get_docx_md(uid, aid, cookie):
 def download_feishu_all(args):
     if not args.cookie:
         raise ValueError('请设置 Cookie')
+    proc_cfg['headers'] |= {
+        'Cookie': args.cookie,
+    }
     m = re.search(r'(\w+).feishu.cn/wiki/(\w+)', args.url)
     if not m:
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/wiki/<wid>')
@@ -296,6 +300,9 @@ def download_feishu_all(args):
 def download_feishu(args):
     if not args.cookie:
         raise ValueError('请设置 Cookie')
+    proc_cfg['headers'] |= {
+        'Cookie': args.cookie,
+    }
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
     m = re.search(r'(\w+).feishu.cn/(docx|docs|wiki)/(\w+)', args.url)

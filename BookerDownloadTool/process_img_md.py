@@ -6,6 +6,10 @@ import traceback
 from imgyaso.quant import pngquant
 from urllib.parse import urljoin
 
+config = {
+    'headers': {}
+}
+
 def process_img_md(md, imgs, base_url='', img_prefix='img/'):
     mts = list(re.finditer(r'!\[[^\]]*\]\(([^\)]+)\)', md))
     for m in mts:
@@ -17,7 +21,10 @@ def process_img_md(md, imgs, base_url='', img_prefix='img/'):
                 continue
             print(url)
             hash_ = hashlib.md5(url.encode('utf8')).hexdigest()
-            data = requests.get(url).content
+            data = requests.get(
+                url,
+                headers=config.get('headers', {}),
+            ).content
             data = pngquant(data)
             imgs[f'{hash_}.png'] = data
             md = md.replace(url, f'{img_prefix}{hash_}.png')
