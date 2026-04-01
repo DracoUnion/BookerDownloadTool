@@ -120,12 +120,12 @@ def parse_table(blk, blk_map, sync_url_map):
 
     md = ''
     for i, r in enumerate(cont):
-        md += '| '
+        md += '|'
         for v in r:
-            md += f'{htmlesc(v)} |'
+            md += ' ' + f'{htmlesc(v)} |'
         md += '\n'
         if i == 0:
-            md += '| ' + ' --- |' * len(r) + '\n'
+            md += '|' + ' --- |' * len(r) + '\n'
     md = md.strip()
     return md
 
