@@ -248,7 +248,7 @@ def get_toc_by_wid(uid, wid, cookie, retry=10, wait=1):
     while idx < len(toc):
         wid = toc[idx]
         print(f'toc: {wid}')
-        _, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
+        _, chmap = get_rtli_chmap_by_wid(uid, wid, cookie, retry=retry, wait=wait)
         children = chmap.pop(wid, [])
         for ch in children[::-1]:
             toc.insert(idx + 1, ch)
@@ -287,7 +287,7 @@ def get_docx_md(uid, aid, cookie, retry=10, wait=1):
         except KeyboardInterrupt:
             raise
         except:
-            print(f'get_info retry: {i}')
+            print(f'client_vars retry: {i}')
             if i == retry - 1: raise
             time.sleep(wait)
     '''
