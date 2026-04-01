@@ -128,7 +128,7 @@ def parse_table(blk, blk_map):
 
 def get_text_blk_text(blk):
     assert 'text' in blk['data']
-    return parse_text_block(blk['data'])
+    return parse_text_block(blk['data']['text'])
 
 def get_img_blk_text(blk):
     assert 'image' in blk['data']
