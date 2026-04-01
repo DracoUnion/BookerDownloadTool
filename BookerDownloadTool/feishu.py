@@ -297,6 +297,7 @@ def download_feishu_all(args):
     proc_cfg['headers'] |= {
         'Cookie': args.cookie,
     }
+    proc_cfg['threads'] = args.threads
     m = re.search(r'(\w+).feishu.cn/wiki/(\w+)', args.url)
     if not m:
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/wiki/<wid>')
