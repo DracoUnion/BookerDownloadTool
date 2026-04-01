@@ -213,7 +213,7 @@ def get_docx_md(uid, aid, cookie):
     mds = [blk2md(b, blk_map).strip() for b in blks]
     mds = [md for md in mds if md]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
-    mds.insert(1, f'> 来源：![{url}]({url})')
+    mds.insert(1, f'> 来源：[{url}]({url})')
     return '\n\n'.join(mds)
 
 def download_feishu(args):
