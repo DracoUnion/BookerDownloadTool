@@ -39,7 +39,6 @@ dependencies = [
     "selenium",
     "imgyaso",
     "pyexecjs",
-    "BookerWikiTool",
     "img2jb2pdf",
     "pandas",
     "sqlalchemy",
