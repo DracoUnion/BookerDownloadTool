@@ -200,7 +200,7 @@ def get_docx_md(uid, aid, cookie):
     chtext = [c['data']['children'] for c in cells]
     chtextids = set(sum(chtext, []))
     allow_blks = [b for b in allow_blks if b['id'] not in chtextids]
-    mds = [blk2md(b, blk_map) for b in allow_blks]
+    mds = [blk2md(b, blk_map).strip() for b in allow_blks]
     url = f'https://{uid}.feishu.cn/docx/{aid}'
     mds.insert(1, f'> 来源：![{url}]({url})')
     return '\n\n'.join(mds)
