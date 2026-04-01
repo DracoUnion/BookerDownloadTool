@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """BookerDownloadTool
-https://github.com/apachecnBookerDownloadTool"""
+https://github.com/DracoUnion/BookerDownloadTool"""
 
 __author__ = "wizardforcel"
 __email__ = "wizard.z@qq.com"
 __license__ = "SATA"
-__version__ = "2023.8.30.0"
+__version__ = "2025.3.25.0"
