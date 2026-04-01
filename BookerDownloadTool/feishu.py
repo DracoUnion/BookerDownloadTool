@@ -134,6 +134,11 @@ def get_text_blk_text(blk):
     assert 'text' in blk['data']
     return parse_text_block(blk['data']['text'])
 
+def get_iframe_blk_text(blk):
+    assert 'iframe' in blk['data']
+    url = blk['data']['iframe']['component']['url']
+    return f'<{url}>'
+
 def get_img_blk_text(blk):
     assert 'image' in blk['data']
     tok = blk['data']['image']['token']
@@ -175,6 +180,8 @@ def blk2md(blk, blk_map):
         return parse_table(blk, blk_map)
     elif tp == 'file':
         return get_file_block_text(blk)
+    elif tp == 'iframe':
+        return get_iframe_blk_text(blk)
     elif tp in [
         'view', 'grid', 'grid_column', 
         'quote_container', 'callout',
