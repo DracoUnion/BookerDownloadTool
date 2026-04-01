@@ -226,7 +226,7 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10):
             data = request_retry('GET', url,    headers=hdrs).json()
             break
         except:
-            print(f'retry: {i}')
+            print(f'get_info retry: {i}')
             if i == retry - 1: raise
     rtli = data['data']['tree']['root_list']
     chmap = data['data']['tree']['child_map']
