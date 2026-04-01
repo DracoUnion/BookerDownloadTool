@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+import traceback
 import json
 import re
 from EpubCrawler.util import request_retry
@@ -271,6 +273,24 @@ def get_docx_md(uid, aid, cookie):
     mds.insert(1, f'> 来源：[{url}]({url})')
     return '\n\n'.join(mds)
 
+def tr_download_single_safe(uid, wid, idx, l, args):
+    try:
+        tr_download_single(uid, wid, idx, l, args)
+    except:
+        traceback.print_exc()
+
+def tr_download_single(uid, wid, idx, l, args):
+    print(wid)
+    aid = get_aid_by_wid(uid, wid, args.cookie)
+    md = get_docx_md(uid, aid, args.cookie)
+    imgs = {}
+    md = process_img_md(md, imgs, img_prefix='img/')
+    md_fname = str(idx).zfill(l) + '_' + wid + '.md'
+    open(md_fname, 'w', encoding='utf8').write(md)
+    for name, img in imgs.items():
+        img_fname = path.join('img', name)
+        open(img_fname, 'wb').write(img)
+
 def download_feishu_all(args):
     if not args.cookie:
         raise ValueError('请设置 Cookie')
@@ -285,17 +305,20 @@ def download_feishu_all(args):
     l = len(str(len(toc)))
     if not path.isdir('img'):
         os.makedirs('img')
+    pool = ThreadPoolExecutor(args.threads)
+    hdls = []
     for i, wid in enumerate(toc):
-        print(wid)
-        aid = get_aid_by_wid(uid, wid, args.cookie)
-        md = get_docx_md(uid, aid, args.cookie)
-        imgs = {}
-        md = process_img_md(md, imgs, img_prefix='img/')
-        md_fname = str(i).zfill(l) + '_' + wid + '.md'
-        open(md_fname, 'w', encoding='utf8').write(md)
-        for name, img in imgs.items():
-            img_fname = path.join('img', name)
-            open(img_fname, 'wb').write(img)
+        h = pool.submit(
+            tr_download_single_safe, 
+            uid, wid, i, l, args,
+        )
+        hdls.append(h)
+        if len(hdls) > args.threads:
+            for h in hdls: h.result()
+            hdls = []
+    for h in hdls: 
+        h.result()
+        
 
 def download_feishu(args):
     if not args.cookie:
