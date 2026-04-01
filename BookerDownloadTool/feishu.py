@@ -218,10 +218,16 @@ def get_file_block_text(blk):
     cover = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/' + blk['data']['file']['token']
     return f'![]({cover})\n\n[{name}]({link})'
 
-def get_rtli_chmap_by_wid(uid, wid, cookie):
+def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
-    data = request_retry('GET', url,    headers=hdrs).json()
+    for i in range(retry):
+        try:
+            data = request_retry('GET', url,    headers=hdrs).json()
+            break
+        except:
+            print(f'retry: {i}')
+            if i == retry - 1: raise
     rtli = data['data']['tree']['root_list']
     chmap = data['data']['tree']['child_map']
     return rtli, chmap
