@@ -283,6 +283,8 @@ def download_feishu_all(args):
     uid, wid = m.group(1), m.group(2)
     toc = get_toc_by_wid(uid, wid, args.cookie)
     l = len(str(len(toc)))
+    if not path.isdir('img'):
+        os.makedirs('img')
     for i, wid in enumerate(toc):
         print(wid)
         aid = get_aid_by_wid(uid, wid, args.cookie)
@@ -291,11 +293,9 @@ def download_feishu_all(args):
         md = process_img_md(md, imgs, img_prefix='img/')
         md_fname = str(i).zfill(l) + '_' + wid + '.md'
         open(md_fname, 'w', encoding='utf8').write(md)
-    if not path.isdir('img'):
-        os.makedirs('img')
-    for name, img in imgs.items():
-        img_fname = path.join('img', name)
-        open(img_fname, 'wb').write(img)
+        for name, img in imgs.items():
+            img_fname = path.join('img', name)
+            open(img_fname, 'wb').write(img)
 
 def download_feishu(args):
     if not args.cookie:
