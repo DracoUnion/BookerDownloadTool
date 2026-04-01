@@ -224,7 +224,10 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry('GET', url,    headers=hdrs).json()
+            data = request_retry(
+                'GET', url,    headers=hdrs,
+                retry=retry,
+            ).json()
             break
         except KeyboardInterrupt:
             raise
@@ -258,7 +261,10 @@ def get_aid_by_wid(uid, wid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry('GET', url, headers=hdrs).json()
+            data = request_retry(
+                'GET', url, headers=hdrs,
+                retry=retry,
+            ).json()
             break
         except KeyboardInterrupt:
             raise
@@ -273,7 +279,10 @@ def get_docx_md(uid, aid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry('GET', url, headers=hdrs).json()
+            data = request_retry(
+                'GET', url, headers=hdrs,
+                retry=retry,
+            ).json()
             break
         except KeyboardInterrupt:
             raise
