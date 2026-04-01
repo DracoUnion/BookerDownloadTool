@@ -227,17 +227,17 @@ def get_rtli_chmap_by_wid(uid, wid, cookie):
     return rtli, chmap
 
 def get_toc_by_wid(uid, wid, cookie):
-    toc, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
-    while True:
-        old_len = len(toc)
-        for idx in range(len(toc) - 1, -1, -1):
-            wid = toc[idx]
-            _, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
-            children = chmap.pop(wid, [])
-            for ch in children[::-1]:
-                toc.insert(idx + 1, ch)
-        if len(toc) == old_len:
-            break
+    toc, _ = get_rtli_chmap_by_wid(uid, wid, cookie)
+    vis = set()
+    idx = 0
+    while idx < len(toc):
+        wid = toc[idx]
+        print(f'toc: {wid}')
+        _, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
+        children = chmap.pop(wid, [])
+        for ch in children[::-1]:
+            toc.insert(idx + 1, ch)
+        idx += 1
     return toc
 
 def get_aid_by_wid(uid, wid, cookie):
