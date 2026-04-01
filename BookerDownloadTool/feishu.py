@@ -164,6 +164,12 @@ def blk2md(blk, blk_map, sync_url_map=None):
         if text_in_quote(blk, blk_map):
             lines = [f'> {l}' for l in lines]
         return '\n\n'.join([l for l in lines if l])
+    elif tp == 'quote':
+        lines = [
+            '> ' + l.strip() 
+            for l in get_text_blk_text(blk).split('\n')
+        ]
+        return '\n\n'.join([l for l in lines if l])
     elif tp == 'image':
         return f'{get_img_blk_text(blk)}'
     elif tp.startswith('heading'):
