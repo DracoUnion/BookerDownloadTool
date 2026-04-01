@@ -218,16 +218,21 @@ def get_file_block_text(blk):
     cover = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/' + blk['data']['file']['token']
     return f'![]({cover})\n\n[{name}]({link})'
 
-def get_toc_by_wid(uid, wid, cookie):
+def get_rtli_chmap_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
     data = request_retry('GET', url,    headers=hdrs).json()
-    toc = data['data']['tree']['root_list']
+    rtli = data['data']['tree']['root_list']
     chmap = data['data']['tree']['child_map']
+    return rtli, chmap
+
+def get_toc_by_wid(uid, wid, cookie):
+    toc, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
     while True:
         old_len = len(toc)
         for idx in range(len(toc) - 1, -1, -1):
             wid = toc[idx]
+            _, chmap = get_rtli_chmap_by_wid(uid, wid, cookie)
             children = chmap.pop(wid, [])
             for ch in children[::-1]:
                 toc.insert(idx + 1, ch)
