@@ -1,3 +1,4 @@
+from .util import request_retry
 import re
 import hashlib
 import requests
@@ -10,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 config = {
     'headers': {},
     'threads': 8,
+    'retry': 10,
 }
 
 def tr_download_img_safe(url, imgs):
@@ -21,9 +23,10 @@ def tr_download_img_safe(url, imgs):
 def tr_download_img(url, imgs):
     print(url)
     hash_ = hashlib.md5(url.encode('utf8')).hexdigest()
-    data = requests.get(
-        url,
+    data = request_retry(
+        'GET', url,
         headers=config.get('headers', {}),
+        retry=config['retry'],
     ).content
     data = pngquant(data)
     imgs[f'{hash_}.png'] = data

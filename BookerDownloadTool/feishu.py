@@ -236,11 +236,11 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
     chmap = data['data']['tree']['child_map']
     return rtli, chmap
 
-def get_toc_by_wid(uid, wid, cookie):
+def get_toc_by_wid(uid, wid, cookie, retry=10, wait=1):
     cache_fname = tempfile.gettempdir() + f'/feishu_toc_{uid}_{wid}.json'
     if path.isfile(cache_fname):
         return json.loads(open(cache_fname, encoding='utf8').read())
-    toc, _ = get_rtli_chmap_by_wid(uid, wid, cookie)
+    toc, _ = get_rtli_chmap_by_wid(uid, wid, cookie, retry=retry, wait=wait)
     idx = 0
     while idx < len(toc):
         wid = toc[idx]
@@ -253,16 +253,34 @@ def get_toc_by_wid(uid, wid, cookie):
     open(cache_fname, 'w', encoding='utf8').write(json.dumps(toc))
     return toc
 
-def get_aid_by_wid(uid, wid, cookie):
+def get_aid_by_wid(uid, wid, cookie, retry=10, wait=1):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
-    data = request_retry('GET', url, headers=hdrs).json()
+    for i in range(retry):
+        try:
+            data = request_retry('GET', url, headers=hdrs).json()
+            break
+        except KeyboardInterrupt:
+            raise
+        except:
+            print(f'get_info retry: {i}')
+            if i == retry - 1: raise
+            time.sleep(wait)
     return data['data']['tree']['nodes'][wid]['obj_token']
 
-def get_docx_md(uid, aid, cookie):
+def get_docx_md(uid, aid, cookie, retry=10, wait=1):
     url = f'https://{uid}.feishu.cn/space/api/docx/pages/client_vars?id={aid}&limit=1000000000'
     hdrs = default_hdrs | {'Cookie': cookie}
-    data = request_retry('GET', url, headers=hdrs).json()
+    for i in range(retry):
+        try:
+            data = request_retry('GET', url, headers=hdrs).json()
+            break
+        except KeyboardInterrupt:
+            raise
+        except:
+            print(f'get_info retry: {i}')
+            if i == retry - 1: raise
+            time.sleep(wait)
     '''
     rt = pq(html)
     el_data_sc = pq([
@@ -299,8 +317,8 @@ def tr_download_single_safe(uid, wid, idx, l, args):
 
 def tr_download_single(uid, wid, idx, l, args):
     print(wid)
-    aid = get_aid_by_wid(uid, wid, args.cookie)
-    md = get_docx_md(uid, aid, args.cookie)
+    aid = get_aid_by_wid(uid, wid, args.cookie, retry=args.retry, wait=args.wait)
+    md = get_docx_md(uid, aid, args.cookie, retry=args.retry, wait=args.wait)
     imgs = {}
     md = process_img_md(md, imgs, img_prefix='img/')
     md_fname = str(idx).zfill(l) + '_' + wid + '.md'
@@ -316,11 +334,12 @@ def download_feishu_all(args):
         'Cookie': args.cookie,
     }
     proc_cfg['threads'] = args.threads
+    proc_cfg['retry'] = args.retry
     m = re.search(r'(\w+).feishu.cn/wiki/(\w+)', args.url)
     if not m:
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/wiki/<wid>')
     uid, wid = m.group(1), m.group(2)
-    toc = get_toc_by_wid(uid, wid, args.cookie)
+    toc = get_toc_by_wid(uid, wid, args.cookie, retry=args.retry, wait=args.wait)
     l = len(str(len(toc)))
     if not path.isdir('img'):
         os.makedirs('img')
@@ -345,6 +364,7 @@ def download_feishu(args):
     proc_cfg['headers'] |= {
         'Cookie': args.cookie,
     }
+    proc_cfg['retry'] = args.retry
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
     m = re.search(r'(\w+).feishu.cn/(docx|docs|wiki)/(\w+)', args.url)
@@ -352,8 +372,8 @@ def download_feishu(args):
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/<docx|wiki>/<aid>')
     uid, tp, aid = m.group(1), m.group(2), m.group(3)
     if tp == 'wiki':
-        aid = get_aid_by_wid(uid, aid, args.cookie)
-    md = get_docx_md(uid, aid, args.cookie)
+        aid = get_aid_by_wid(uid, aid, args.cookie, retry=args.retry, wait=args.wait)
+    md = get_docx_md(uid, aid, args.cookie, retry=args.retry, wait=args.wait)
     imgs = {}
     md = process_img_md(md, imgs, img_prefix='img/')
     md_fname = args.url.split('/')[-1] + '.md'
