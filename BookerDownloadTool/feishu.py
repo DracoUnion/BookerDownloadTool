@@ -237,8 +237,10 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
     return rtli, chmap
 
 def get_toc_by_wid(uid, wid, cookie):
+    cache_fname = tempfile.gettempdir() + f'/feishu_toc_{uid}_{wid}.json'
+    if path.isfile(cache_fname):
+        return json.loads(open(cache_fname, encoding='utf8').read())
     toc, _ = get_rtli_chmap_by_wid(uid, wid, cookie)
-    vis = set()
     idx = 0
     while idx < len(toc):
         wid = toc[idx]
@@ -248,6 +250,7 @@ def get_toc_by_wid(uid, wid, cookie):
         for ch in children[::-1]:
             toc.insert(idx + 1, ch)
         idx += 1
+    open(cache_fname, 'w', encoding='utf8').write(json.dumps(toc))
     return toc
 
 def get_aid_by_wid(uid, wid, cookie):
