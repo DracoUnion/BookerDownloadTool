@@ -12,6 +12,7 @@ from html import escape as htmlesc
 from EpubCrawler.img import process_img
 from EpubCrawler.config import config as crconf
 from typing import List, Tuple, Dict, Any
+from .process_img_md import process_img_md
 
 def parse_attribs(attribs_str: str) -> List[Tuple[List[int], int]]:
     """
@@ -212,11 +213,11 @@ def download_feishu(args):
     uid, tp, aid = m.group(1), m.group(2), m.group(3)
     if tp == 'wiki':
         aid = get_aid_by_wid(uid, aid, args.cookie)
-    html = get_docx_md(uid, aid, args.cookie)
+    md = get_docx_md(uid, aid, args.cookie)
     imgs = {}
-    html = process_img(html, imgs, img_prefix='img/')
-    html_fname = args.url.split('/')[-1] + '.html'
-    open(html_fname, 'w', encoding='utf8').write(html)
+    md = process_img_md(md, imgs, img_prefix='img/')
+    md_fname = args.url.split('/')[-1] + '.md'
+    open(md_fname, 'w', encoding='utf8').write(md)
     if not path.isdir('img'):
         os.makedirs('img')
     for name, img in imgs.items():
