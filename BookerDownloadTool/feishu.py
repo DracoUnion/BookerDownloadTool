@@ -187,17 +187,18 @@ def get_toc_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
     hdrs = default_hdrs | {'Cookie': cookie}
     data = request_retry('GET', url,    headers=hdrs).json()
-    li = data['data']['tree']['root_list']
+    toc = data['data']['tree']['root_list']
     chmap = data['data']['tree']['child_map']
     while True:
-        old_len = len(li)
-        for idx in range(len(li) - 1, -1, -1):
-            wid = li[idx]
+        old_len = len(toc)
+        for idx in range(len(toc) - 1, -1, -1):
+            wid = toc[idx]
             children = chmap.pop(wid, [])
             for ch in children[::-1]:
-                li.insert(idx + 1, ch)
-        if len(li) == old_len:
+                toc.insert(idx + 1, ch)
+        if len(toc) == old_len:
             break
+    return toc
 
 def get_aid_by_wid(uid, wid, cookie):
     url = f'https://{uid}.feishu.cn/space/api/wiki/v2/tree/get_info/?wiki_token={wid}'
