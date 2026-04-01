@@ -174,7 +174,7 @@ def blk2md(blk, blk_map):
 def get_file_block_text(blk):
     assert blk['data']['type'] == 'file'
     name = blk['data']['file']['name']
-    link = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/all/' + blk['data']['file']['token']
+    link = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/' + blk['data']['file']['token']
     return f'[{name}]({link})'
 
 def get_aid_by_wid(uid, wid, cookie):
