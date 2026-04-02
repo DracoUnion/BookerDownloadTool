@@ -33,6 +33,7 @@ def tr_download_img(url, imgs):
                 retry=config['retry'],
             ).content
             _ = Image.open(BytesIO(data))
+            break
         except KeyboardInterrupt:
             raise
         except:
