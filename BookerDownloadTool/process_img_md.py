@@ -7,6 +7,8 @@ import traceback
 from imgyaso.quant import pngquant
 from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor
+from PIL import Image
+from io import BytesIO
 
 config = {
     'headers': {},
@@ -23,11 +25,19 @@ def tr_download_img_safe(url, imgs):
 def tr_download_img(url, imgs):
     print(url)
     hash_ = hashlib.md5(url.encode('utf8')).hexdigest()
-    data = request_retry(
-        'GET', url,
-        headers=config.get('headers', {}),
-        retry=config['retry'],
-    ).content
+    for i in range(config['retry']):
+        try:
+            data = request_retry(
+                'GET', url,
+                headers=config.get('headers', {}),
+                retry=config['retry'],
+            ).content
+            _ = Image.open(BytesIO(data))
+        except KeyboardInterrupt:
+            raise
+        except:
+            print(f'check_img retry {i}')
+            if i == config['retry'] - 1: raise
     data = pngquant(data)
     imgs[f'{hash_}.png'] = data
 
