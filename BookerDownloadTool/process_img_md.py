@@ -1,6 +1,7 @@
 from .util import request_retry
 import re
 import hashlib
+import time
 import requests
 from os import path
 import traceback
@@ -14,6 +15,7 @@ config = {
     'headers': {},
     'threads': 8,
     'retry': 10,
+    'wait': 1,
 }
 
 def tr_download_img_safe(url, imgs):
@@ -39,6 +41,7 @@ def tr_download_img(url, imgs):
         except:
             print(f'check_img retry {i}')
             if i == config['retry'] - 1: raise
+            time.sleep(config['wait'])
     data = pngquant(data)
     imgs[f'{hash_}.png'] = data
 

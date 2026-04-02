@@ -344,6 +344,7 @@ def download_feishu_all(args):
     }
     proc_cfg['threads'] = args.threads
     proc_cfg['retry'] = args.retry
+    proc_cfg['wait'] = args.wait
     m = re.search(r'(\w+).feishu.cn/wiki/(\w+)', args.url)
     if not m:
         raise ValueError('URL 格式错误：https://<uid>.feishu.cn/wiki/<wid>')
@@ -374,6 +375,7 @@ def download_feishu(args):
         'Cookie': args.cookie,
     }
     proc_cfg['retry'] = args.retry
+    proc_cfg['wait'] = args.wait
     crconf['optiMode'] = args.opti_mode
     crconf['headers']['Cookie'] = args.cookie
     m = re.search(r'(\w+).feishu.cn/(docx|docs|wiki)/(\w+)', args.url)
