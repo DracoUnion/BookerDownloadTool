@@ -361,7 +361,7 @@ def anime4k_auto(img):
     fname = path.join(tempfile.gettempdir(), uuid.uuid4().hex + '.png')
     open(fname, 'wb').write(img)
     subp.Popen(
-        ['wiki-tool', 'anime4k-auto', fname, '-G'], 
+        ['pdf-tool', 'anime4k-auto', fname, '-G'], 
         shell=True,
     ).communicate()
     img = open(fname, 'rb').read()
