@@ -59,6 +59,8 @@ def tr_get_next_safe(i, url, res, args):
         print(url)
         ns = get_next(url, args)
         res[i] = ns
+    except KeyboardInterrupt:
+        raise
     except:
         traceback.print_exc()
 

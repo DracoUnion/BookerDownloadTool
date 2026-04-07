@@ -321,6 +321,8 @@ def get_docx_md(uid, aid, cookie, retry=10, wait=1):
 def tr_download_single_safe(uid, wid, idx, l, args):
     try:
         tr_download_single(uid, wid, idx, l, args)
+    except KeyboardInterrupt:
+        raise
     except:
         traceback.print_exc()
 

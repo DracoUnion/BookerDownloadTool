@@ -114,6 +114,8 @@ def zhihu_ques_api(args):
 def zhihu_ques_api_safe(args):
     try:
         zhihu_ques_api(args)
+    except KeyboardInterrupt:
+        raise
     except:
         traceback.print_exc()
         

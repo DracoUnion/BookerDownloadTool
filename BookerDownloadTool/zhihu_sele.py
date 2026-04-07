@@ -128,6 +128,8 @@ def zhihu_topic_batch_sele(args):
     for t in tids:
         args.tid = t
         try: zhihu_topic_sele(args)
+        except KeyboardInterrupt:
+            raise
         except: traceback.print_exc()
 
 def zhihu_topic_sele(args):
@@ -157,6 +159,8 @@ def zhihu_topic_sele(args):
             else:
                 cntr = 0
             last_count = count
+        except KeyboardInterrupt:
+            raise
         except:
             traceback.print_exc()
     html = get_html(driver)
@@ -172,6 +176,8 @@ def zhihu_ques_batch_sele(args):
     for q in qids:
         args.qid = q
         try: zhihu_ques_sele(args)
+        except KeyboardInterrupt:
+            raise
         except: traceback.print_exc()
 
 def zhihu_ques_sele(args):
@@ -209,6 +215,8 @@ def zhihu_ques_sele(args):
             print(f'reach bottom: false, count: {cnt}/{total}')
             scroll_to_bottom(driver)
             # time.sleep(1)
+        except KeyboardInterrupt:
+            raise
         except:
             traceback.print_exc()
     

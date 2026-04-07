@@ -17,6 +17,8 @@ def tr_download_pic(url, fname, args):
 def tr_download_pic_safe(*args, **kw):
     try:
         tr_download_pic(*args, **kw)
+    except KeyboardInterrupt:
+        raise
     except:
         traceback.print_exc()
 

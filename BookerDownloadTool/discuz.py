@@ -125,6 +125,8 @@ def get_info_by_tid(host, tid, is_all, cookie):
 
 def download_dz_safe(args):
     try: download_dz(args)
+    except KeyboardInterrupt:
+        raise
     except: traceback.print_exc()
      
 def download_dz(args):

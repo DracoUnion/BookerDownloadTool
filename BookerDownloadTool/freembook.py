@@ -41,6 +41,8 @@ def tr_download_fmb(i, ssid, pr, writeback):
     
 def tr_download_fmb_safe(*args, **kw):
     try: tr_download_fmb(*args, **kw)
+    except KeyboardInterrupt:
+        raise
     except: traceback.print_exc()
 
 def download_fmb(args):

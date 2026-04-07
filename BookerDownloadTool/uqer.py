@@ -21,6 +21,8 @@ def download_uqer_batch(args):
      
 def download_uqer_safe(*args, **kw):
     try: download_uqer(*args, **kw)
+    except KeyboardInterrupt:
+        raise
     except: traceback.print_exc()
      
 

@@ -37,6 +37,8 @@ def tr_download_meta_bili(idx, aid, pr, write_back, args):
     
 def tr_download_meta_bili_safe(*args, **kw):
     try: tr_download_meta_bili(*args, **kw)
+    except KeyboardInterrupt:
+        raise
     except: traceback.print_exc()
 
 def download_meta_bili(args):
@@ -196,12 +198,16 @@ def download_bili(args):
         try: 
             download_bili_single(id, args)
             download_bilisub_single(id, args)
+        except KeyboardInterrupt:
+            raise
         except: traceback.print_exc()
 
 def download_bilisub(args):
     ids = args.id.split(',')
     for id in ids: 
         try: download_bilisub_single(id, args)
+        except KeyboardInterrupt:
+            raise
         except: traceback.print_exc()
 
 def download_bilisub_single(id, args):

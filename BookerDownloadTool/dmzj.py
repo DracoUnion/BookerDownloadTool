@@ -63,6 +63,8 @@ def tr_download_dmzj_img(url, imgs, k):
     
 def download_dmzj_ch_safe(url, info, odir):
     try: download_dmzj_ch(url, info, odir)
+    except KeyboardInterrupt:
+        raise
     except Exception as ex: traceback.print_exc()
     
 def download_dmzj_ch(url, info, odir):
@@ -129,6 +131,8 @@ def download_dmzj(args, block=True):
 def download_dmzj_safe(id, block=True):
     try: 
         return download_dmzj(id, block)
+    except KeyboardInterrupt:
+        raise
     except Exception as ex: 
         traceback.print_exc()
         return []

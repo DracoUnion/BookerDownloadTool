@@ -21,6 +21,8 @@ config = {
 def tr_download_img_safe(url, imgs):
     try:
         tr_download_img(url, imgs)
+    except KeyboardInterrupt:
+        raise
     except:
         traceback.print_exc()
 
