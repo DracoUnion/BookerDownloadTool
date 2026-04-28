@@ -1,4 +1,4 @@
-from .util import requests.request
+
 import re
 import hashlib
 import time
