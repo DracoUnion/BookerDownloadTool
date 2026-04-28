@@ -1,4 +1,4 @@
-from .util import request_retry
+from .util import requests.request
 import re
 import hashlib
 import time
@@ -31,10 +31,9 @@ def tr_download_img(url, imgs):
     hash_ = hashlib.md5(url.encode('utf8')).hexdigest()
     for i in range(config['retry']):
         try:
-            data = request_retry(
+            data = requests.request(
                 'GET', url,
                 headers=config.get('headers', {}),
-                retry=config['retry'],
             ).content
             _ = Image.open(BytesIO(data))
             break
