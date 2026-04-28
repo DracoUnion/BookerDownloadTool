@@ -225,7 +225,6 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
         try:
             data = requests.request(
                 'GET', url,    headers=hdrs,
-                retry=retry,
             ).json()
             break
         except KeyboardInterrupt:
@@ -262,7 +261,6 @@ def get_aid_by_wid(uid, wid, cookie, retry=10, wait=1):
         try:
             data = requests.request(
                 'GET', url, headers=hdrs,
-                retry=retry,
             ).json()
             break
         except KeyboardInterrupt:
@@ -280,7 +278,6 @@ def get_docx_md(uid, aid, cookie, retry=10, wait=1):
         try:
             data = requests.request(
                 'GET', url, headers=hdrs,
-                retry=retry,
             ).json()
             break
         except KeyboardInterrupt:
