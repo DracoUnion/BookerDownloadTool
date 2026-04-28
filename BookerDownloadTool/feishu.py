@@ -3,7 +3,6 @@ import time
 import traceback
 import json
 import re
-from EpubCrawler.util import request_retry
 import argparse
 from os import path
 import subprocess as subp
@@ -224,7 +223,7 @@ def get_rtli_chmap_by_wid(uid, wid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry(
+            data = requests.request(
                 'GET', url,    headers=hdrs,
                 retry=retry,
             ).json()
@@ -261,7 +260,7 @@ def get_aid_by_wid(uid, wid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry(
+            data = requests.request(
                 'GET', url, headers=hdrs,
                 retry=retry,
             ).json()
@@ -279,7 +278,7 @@ def get_docx_md(uid, aid, cookie, retry=10, wait=1):
     hdrs = default_hdrs | {'Cookie': cookie}
     for i in range(retry):
         try:
-            data = request_retry(
+            data = requests.request(
                 'GET', url, headers=hdrs,
                 retry=retry,
             ).json()
