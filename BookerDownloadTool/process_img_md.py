@@ -58,9 +58,9 @@ def process_img_md(md, imgs, base_url='', img_prefix='img/'):
             continue
         h = pool.submit(tr_download_img_safe, url, imgs)
         hdls.append(h)
-        if len(hdls) > config['threads']:
-            for h in hdls: h.result()
-            hdls = []
+        # if len(hdls) > config['threads']:
+        #     for h in hdls: h.result()
+        #     hdls = []
         hash_ = hashlib.md5(url.encode('utf8')).hexdigest()
         md = md.replace(url, f'{img_prefix}{hash_}.png')
     for h in hdls: 

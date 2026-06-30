@@ -59,7 +59,7 @@ def download_pixabay(args):
                 continue
             h = pool.submit(tr_download_pic_safe, img_url, img_fname, args)
             hdls.append(h)
-            if len(hdls) >= args.threads:
-                for h in hdls: h.result()
+            # if len(hdls) >= args.threads:
+            #     for h in hdls: h.result()
 
         for h in hdls: h.result()

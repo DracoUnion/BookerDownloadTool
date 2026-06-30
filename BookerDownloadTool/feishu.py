@@ -359,9 +359,9 @@ def download_feishu_all(args):
             uid, wid, i, l, args,
         )
         hdls.append(h)
-        if len(hdls) > args.threads:
-            for h in hdls: h.result()
-            hdls = []
+        # if len(hdls) > args.threads:
+        #     for h in hdls: h.result()
+        #     hdls = []
     for h in hdls: 
         h.result()
         
