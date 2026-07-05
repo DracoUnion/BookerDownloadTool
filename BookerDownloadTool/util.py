@@ -392,8 +392,8 @@ def create_driver():
     driver = webdriver.Chrome(options=options)
     driver.set_script_timeout(1000)
     # StealthJS
-    stealth = open(d('stealth.min.js')).read()
-    patch = open(d('patch_env_mock_wasm.js')).read()
+    stealth = open(d('stealth.min.js'), encoding='utf8').read()
+    patch = open(d('patch_env_mock_wasm.js'), encoding='utf8').read()
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
         "source": patch + '\n\n' + stealth
     })
