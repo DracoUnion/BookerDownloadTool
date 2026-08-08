@@ -10,6 +10,7 @@ import uuid
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from functools import reduce
+from http.cookies import SimpleCookie
 
 RE_INFO = r'\[(.+?)\]([^\[]+)'
 
@@ -439,3 +440,32 @@ def float2hhmmss(num):
     hr, min_, sec = int_ // 3600, int_ % 3600 // 60, int_ % 60
     return f'{hr}:{min_:02d}:{sec:02d}.{frac:03d}'
 
+def cookie_dict_to_str(cookie_dict: dict) -> str:
+    """
+    将 Cookie 字典转为合法的 HTTP Cookie 头字符串。
+    若值包含逗号、分号、空格等特殊字符，自动用双引号包裹。
+    """
+    if not cookie_dict:
+        return ""
+    
+    cookie = SimpleCookie()
+    for key, val in cookie_dict.items():
+        # 确保值是字符串，避免数字/布尔值报错
+        cookie[key] = str(val)
+    
+    # attrs=[] 去掉多余属性, header='' 去掉 Set-Cookie 前缀
+    return cookie.output(attrs=[], header='', sep='; ').strip()
+
+def cookie_str_to_dict(cookie_str: str) -> dict:
+    """
+    将 Cookie 字符串解析为字典。
+    自动兼容 '; ' (浏览器)分隔符，
+    并能正确还原被双引号包裹的特殊字符值。
+    """
+    cookie_str = cookie_str.strip()
+    if not cookie_str:
+        return {}
+    
+    # 标准 ; 或 ; 分隔，用 SimpleCookie 解析（自动去引号）
+    cookie = SimpleCookie(cookie_str)
+    return {key: val.value for key, val in cookie.items()}
