@@ -13,8 +13,7 @@ import subprocess as subp
 from pyquery import PyQuery as pq
 import random
 from urllib.parse import quote_plus
-from playwright.sync_api import sync_playwright
-from .util import plrt_new_browser, plrt_new_context, request_retry, fname_escape
+from .util import plrt_create_driver, request_retry, fname_escape
 
 HOST = 'annas-archive.gl'
 
@@ -84,11 +83,7 @@ def annas_fetch(args):
     # https://annas-archive.gl/search
     # ?index=&page=1&sort=newest&content=book_nonfiction
     # &content=book_unknown&ext=pdf&ext=epub&lang=en&display=&q=tarot
-    with sync_playwright() as p:
-        browser = plrt_new_browser(p, args.np_headless)
-        context = plrt_new_context(browser)
-        page = context.new_page()
-    
+    with plrt_create_driver(args.no_headless) as (browser, context, page):    
         f = open(args.ofname, 'a', encoding='utf8')
         qry_ext = ''.join(f'&ext={e}' for e in args.ext)
         qry_cont = ''.join(f'&content={c}' for c in args.content)
@@ -119,11 +114,7 @@ def annas_fetch(args):
         browser.close()
 
 def download_annas(args):
-    with sync_playwright() as p:
-        browser = plrt_new_browser(p, args.no_headless)
-        context = plrt_new_context(browser)
-        page = context.new_page()
-
+    with plrt_create_driver(args.no_headless) as (browser, context, page):    
         hash_ = args.hash
         url = f'https://{HOST}/md5/{hash_}'
         # html = request_retry('GET', url).text

@@ -1,3 +1,4 @@
+from playwright.sync_api import sync_playwright
 import re
 import requests
 import os
@@ -7,6 +8,7 @@ import imgyaso
 import subprocess as subp
 import tempfile
 import uuid
+from contextlib import contextmanager
 from camoufox.sync_api import Camoufox
 from playwright.sync_api import sync_playwright
 from functools import reduce
@@ -149,8 +151,30 @@ class CamoufoxDriver:
 def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
     if isinstance(cookie, str):
         cookie = parse_cookie(cookie)
-    for k, v in cookie.items():
-        driver.add_cookie({'name': k, 'value': v, 'url': url})
+    cookies = [
+        {'name': k, 'value': v, 'url': url}
+        for k, v in cookie.items()
+    ]
+    if hasattr(driver, 'add_cookies'):
+        driver.add_cookies(cookies)
+    else:
+        for item in cookies:
+            driver.add_cookie(item)
+
+
+@contextmanager
+def camoufox_create_driver(headless=True):
+    """Yield a native Camoufox page and its context."""
+    with Camoufox(headless=headless) as browser:
+        context = browser.new_context(user_agent=UA)
+        page = context.new_page()
+        page.set_default_timeout(30_000)
+        page.set_default_navigation_timeout(30_000)
+        try:
+            yield browser, context, page
+        finally:
+            page.close()
+            context.close()
 
 
 def create_driver(headless=True):
@@ -219,3 +243,18 @@ def plrt_new_browser(plrt, headless=True):
             "--start-maximized",
         ],
     )
+
+@contextmanager
+def plrt_create_driver(headless=True):
+    """Yield a native Camoufox page and its context."""
+    with sync_playwright() as p:
+        browser = plrt_new_browser(p, headless)
+        context = plrt_new_context(browser)
+        page = context.new_page()
+        page.set_default_timeout(30_000)
+        page.set_default_navigation_timeout(30_000)
+        try:
+            yield browser, context, page
+        finally:
+            page.close()
+            context.close()

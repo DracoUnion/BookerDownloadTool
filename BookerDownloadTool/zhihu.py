@@ -15,57 +15,55 @@ from collections import deque
 from .util import *
 
 # 滚动到底
-def scroll_to_bottom(driver):
-    driver.execute_script('''
+def scroll_to_bottom(page):
+    page.evaluate('''
         document.documentElement.scrollTop -= 50
         document.documentElement.scrollTop = 100000000
     ''')
     
 # 判断是否到底
-def if_reach_bottom(driver):
-    return driver.execute_script('''
+def if_reach_bottom(page):
+    return page.evaluate('''
         return document.querySelector('.QuestionAnswers-answerButton') != null
     ''')    
     
 # 获取最后一个 AID
-def get_last_aid(driver):
-    return driver.execute_script('''
+def get_last_aid(page):
+    return page.evaluate('''
         var ansLi = document.querySelectorAll('.AnswerItem')
         return (ansLi.length == 0)? '': ansLi[ansLi.length - 1].getAttribute('name')
     ''')   
 
 # 获取 AID 数量
-def get_ans_count(driver):
-    return driver.execute_script('''
+def get_ans_count(page):
+    return page.evaluate('''
         var ansLi = document.querySelectorAll('.AnswerItem')
         return ansLi.length
     ''')  
     
 # 获取回答数量
-def get_ans_total(driver):
-    return driver.execute_script('''
+def get_ans_total(page):
+    return page.evaluate('''
         var el = document.querySelector('h4.List-headerText')
         if (!el) return 0
         var text = el.innerText.replace(',', '')
-        var m = /\d+/.exec(text)
+        var m = /\\d+/.exec(text)
         if (!m) return 0
         return Number.parseInt(m[0])
     ''')  
 
-def get_ques_count(driver):
-    return driver.execute_script('''
+def get_ques_count(page):
+    return page.evaluate('''
         var els = document.querySelectorAll('h2.ContentItem-title')
         return els.length
     ''')  
 
 # 获取整个页面 HTML
-def get_html(driver):
-    return driver.execute_script('''
-        return document.documentElement.outerHTML
-    ''')    
+def get_html(page):
+    return page.content()    
 
-def close_login_dialog(driver):
-    driver.execute_script('''
+def close_login_dialog(page):
+    page.evaluate('''
         var cls_btn = document.querySelector('.Modal-closeButton')
         if (cls_btn) cls_btn.click()
     ''')
@@ -140,30 +138,29 @@ def zhihu_topic_sele(args):
         print(f'话题 [tid={tid}] 不存在')
         return
     title = rt('.TopicMetaCard-title').text()
-    driver = create_driver(args.no_headless)
-    driver.get(url)
-    close_login_dialog(driver)
-    last_count = 0
-    cntr = 0
-    while True:
-        try:
-            scroll_to_bottom(driver)
-            time.sleep(0.5)
-            count = get_ques_count(driver)
-            print(f'count: {count}')
-            if count == last_count:
-                cntr += 1
-                if cntr == 10: break
-            else:
-                cntr = 0
-            last_count = count
-        except KeyboardInterrupt:
-            raise
-        except:
-            traceback.print_exc()
-    html = get_html(driver)
+    with camoufox_create_driver(args.no_headless) as (page, context):
+        page.goto(url, wait_until='domcontentloaded', timeout=30_000)
+        close_login_dialog(page)
+        last_count = 0
+        cntr = 0
+        while True:
+            try:
+                scroll_to_bottom(page)
+                page.wait_for_timeout(500)
+                count = get_ques_count(page)
+                print(f'count: {count}')
+                if count == last_count:
+                    cntr += 1
+                    if cntr == 10: break
+                else:
+                    cntr = 0
+                last_count = count
+            except KeyboardInterrupt:
+                raise
+            except:
+                traceback.print_exc()
+        html = get_html(page)
     qids = get_qids(html)
-    driver.close()
     fname = f'zhihu_ques_{tid}_{fname_escape(title)}.txt'
     open(fname, 'w').write('\n'.join(qids) + '\n')
 
@@ -185,41 +182,34 @@ def zhihu_ques_sele(args):
     
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
-    driver = create_driver(args.no_headless)
-    driver.get(url)
-    rt = pq(driver.page_source)
-    if '你似乎来到了没有知识存在的荒原' in rt('title').text():
-        print(f'问题 [qid={qid}] 不存在')
-        return
-    if len(rt('h4.List-headerText')) == 0:
-        print(f'问题 [qid={qid}] 无回答')
-        return
-    fname = '知乎问答：' + fname_escape(rt('h1.QuestionHeader-title').eq(0).text()) + '.epub'
-    if path.isfile(fname):
-        print(f'问题 [qid={qid}] 已抓取')
-        return
-    # 关闭登录对话框
-    close_login_dialog(driver)
-    total = get_ans_total(driver)
-    if total == 0:
-        print(f'问题 [qid={qid}] 无回答')
-        driver.close()
-        return
-    # 如果没有到底就一直滚动
-    while not if_reach_bottom(driver):
-        try:
-            cnt = get_ans_count(driver)
-            print(f'reach bottom: false, count: {cnt}/{total}')
-            scroll_to_bottom(driver)
-            # time.sleep(1)
-        except KeyboardInterrupt:
-            raise
-        except:
-            traceback.print_exc()
-    
-    html = get_html(driver)
-    # time.sleep(3600)
-    driver.close()
+    with camoufox_create_driver(args.no_headless) as (page, context):
+        page.goto(url, wait_until='domcontentloaded', timeout=30_000)
+        rt = pq(page.content())
+        if '你似乎来到了没有知识存在的荒原' in rt('title').text():
+            print(f'问题 [qid={qid}] 不存在')
+            return
+        if len(rt('h4.List-headerText')) == 0:
+            print(f'问题 [qid={qid}] 无回答')
+            return
+        fname = '知乎问答：' + fname_escape(rt('h1.QuestionHeader-title').eq(0).text()) + '.epub'
+        if path.isfile(fname):
+            print(f'问题 [qid={qid}] 已抓取')
+            return
+        close_login_dialog(page)
+        total = get_ans_total(page)
+        if total == 0:
+            print(f'问题 [qid={qid}] 无回答')
+            return
+        while not if_reach_bottom(page):
+            try:
+                cnt = get_ans_count(page)
+                print(f'reach bottom: false, count: {cnt}/{total}')
+                scroll_to_bottom(page)
+            except KeyboardInterrupt:
+                raise
+            except:
+                traceback.print_exc()
+        html = get_html(page)
     articles = get_articles(html, qid)
     imgs = {}
     
@@ -254,23 +244,23 @@ def zhihu_all_topics_sele(args):
         vis = set()
         q = deque([root_tid])
         rec_file.write(root_tid + '\n')
-    driver = create_driver()
-    driver.get(f'https://www.zhihu.com/topic/{root_tid}')
-    set_driver_cookie(driver, args.cookie)
-    while q:
-        tid = q.popleft()
-        print(f'tid: {tid}')
-        ofile.write(tid + '\n')
-        url = f'https://www.zhihu.com/topic/{tid}'
-        driver.get(url)
-        subs = get_sub_tids(get_html(driver))
-        rec_file.write('-1\n')
-        for s in subs:
-            if s not in vis:
-                vis.add(s)
-                q.append(s)
-                rec_file.write(s + '\n')
-        time.sleep(0.5)
+    with camoufox_create_driver() as (page, context):
+        set_driver_cookie(context, args.cookie)
+        page.goto(f'https://www.zhihu.com/topic/{root_tid}', wait_until='domcontentloaded', timeout=30_000)
+        while q:
+            tid = q.popleft()
+            print(f'tid: {tid}')
+            ofile.write(tid + '\\n')
+            url = f'https://www.zhihu.com/topic/{tid}'
+            page.goto(url, wait_until='domcontentloaded', timeout=30_000)
+            subs = get_sub_tids(get_html(page))
+            rec_file.write('-1\\n')
+            for s in subs:
+                if s not in vis:
+                    vis.add(s)
+                    q.append(s)
+                    rec_file.write(s + '\\n')
+            page.wait_for_timeout(500)
     ofile.close()
     rec_file.close()
 
