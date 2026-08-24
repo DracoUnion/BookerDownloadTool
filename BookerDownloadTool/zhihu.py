@@ -17,28 +17,36 @@ from .util import *
 # 滚动到底
 def scroll_to_bottom(page):
     page.evaluate('''
-        document.documentElement.scrollTop -= 50
-        document.documentElement.scrollTop = 100000000
+        () => {
+            document.documentElement.scrollTop -= 50
+            document.documentElement.scrollTop = 100000000
+        }
     ''')
     
 # 判断是否到底
 def if_reach_bottom(page):
     return page.evaluate('''
-        return document.querySelector('.QuestionAnswers-answerButton') != null
+        () => {
+            return document.querySelector('.QuestionAnswers-answerButton') != null
+        }
     ''')    
     
 # 获取最后一个 AID
 def get_last_aid(page):
     return page.evaluate('''
-        var ansLi = document.querySelectorAll('.AnswerItem')
-        return (ansLi.length == 0)? '': ansLi[ansLi.length - 1].getAttribute('name')
+        () => {
+            var ansLi = document.querySelectorAll('.AnswerItem')
+            return (ansLi.length == 0)? '': ansLi[ansLi.length - 1].getAttribute('name')
+        }
     ''')   
 
 # 获取 AID 数量
 def get_ans_count(page):
     return page.evaluate('''
-        var ansLi = document.querySelectorAll('.AnswerItem')
-        return ansLi.length
+        () => {
+            var ansLi = document.querySelectorAll('.AnswerItem')
+            return ansLi.length
+        }
     ''')  
     
 # 获取回答数量
@@ -56,8 +64,10 @@ def get_ans_total(page):
 
 def get_ques_count(page):
     return page.evaluate('''
-        var els = document.querySelectorAll('h2.ContentItem-title')
-        return els.length
+        () => {
+            var els = document.querySelectorAll('h2.ContentItem-title')
+            return els.length
+        }
     ''')  
 
 # 获取整个页面 HTML
