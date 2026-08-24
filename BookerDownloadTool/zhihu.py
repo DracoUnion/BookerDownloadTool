@@ -44,12 +44,14 @@ def get_ans_count(page):
 # 获取回答数量
 def get_ans_total(page):
     return page.evaluate('''
-        var el = document.querySelector('h4.List-headerText')
-        if (!el) return 0
-        var text = el.innerText.replace(',', '')
-        var m = /\\d+/.exec(text)
-        if (!m) return 0
-        return Number.parseInt(m[0])
+        () => {
+            var el = document.querySelector('h4.List-headerText')
+            if (!el) return 0
+            var text = el.innerText.replace(',', '')
+            var m = /\\d+/.exec(text)
+            if (!m) return 0
+            return Number.parseInt(m[0])
+        }
     ''')  
 
 def get_ques_count(page):
