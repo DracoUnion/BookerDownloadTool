@@ -107,46 +107,6 @@ def parse_cookie(cookie):
     kvs = [kv.split('=') for kv in cookie.split('; ')]
     res = {kv[0]:kv[1] for kv in kvs if len(kv) >= 2}
     return res
-        
-class CamoufoxDriver:
-    """Small driver adapter backed by a Camoufox page."""
-
-    def __init__(self, headless=True):
-        self._browser_manager = Camoufox(headless=headless)
-        self._browser = self._browser_manager.__enter__()
-        self._context = self._browser.new_context(user_agent=UA)
-        self._page = self._context.new_page()
-        self._page.set_default_timeout(1000)
-        self._page.set_default_navigation_timeout(30_000)
-
-    def get(self, url):
-        r = self._page.goto(url)
-        self._page.wait_for_load_state('domcontentloaded')
-        return r
-
-    def execute_script(self, script):
-        return self._page.evaluate(script)
-
-    @property
-    def page_source(self):
-        return self._page.content()
-
-    def implicitly_wait(self, seconds):
-        self._page.set_default_timeout(seconds * 1000)
-
-    def add_cookie(self, cookie):
-        self._context.add_cookies([cookie])
-
-    def close(self):
-        if self._page is None:
-            return
-        try:
-            self._page.close()
-            self._context.close()
-        finally:
-            self._browser_manager.__exit__(None, None, None)
-            self._page = None
-
 
 def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
     if isinstance(cookie, str):
@@ -178,9 +138,6 @@ def camou_create_driver(headless=True):
             page.close()
             context.close()
 
-
-def create_driver(headless=True):
-    return CamoufoxDriver(headless=headless)
 
 def dict_get_recur(obj, keys):
     res = [obj]
