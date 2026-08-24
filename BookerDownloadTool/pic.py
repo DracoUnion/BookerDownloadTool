@@ -34,17 +34,12 @@ def download_pixabay(args):
             url = f'https://pixabay.com/images/search/{kw}/?pagi={i}'
             page.goto(url, wait_until='domcontentloaded', timeout=30_000)
             page.evaluate('''
-                document.body.style.zoom = '1%';
-                window.scrollTo(0, document.body.scrollHeight);
+                () => {
+                    document.body.style.zoom = '1%';
+                    window.scrollTo(0, document.body.scrollHeight);
+                }
             ''')
             page.wait_for_timeout(5_000)
-            '''
-            html = request_retry(
-                'GET', url,
-                headers=default_hdrs,
-                proxies={'http': args.proxy, 'https': args.proxy},
-            ).text
-            '''
             html = page.content()
             el_pics = pq(html).find('div[class^=container]>a[class^=link]')
             for el in el_pics:
