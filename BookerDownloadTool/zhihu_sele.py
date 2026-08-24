@@ -185,8 +185,9 @@ def zhihu_ques_sele(args):
     
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
-    html = request_retry('GET', url).text
-    rt = pq(html)
+    driver = create_driver(args.headless)
+    driver.get(url)
+    rt = pq(driver.page_source)
     if '你似乎来到了没有知识存在的荒原' in rt('title').text():
         print(f'问题 [qid={qid}] 不存在')
         return
@@ -197,8 +198,6 @@ def zhihu_ques_sele(args):
     if path.isfile(fname):
         print(f'问题 [qid={qid}] 已抓取')
         return
-    driver = create_driver()
-    driver.get(url)
     # 关闭登录对话框
     close_login_dialog(driver)
     total = get_ans_total(driver)

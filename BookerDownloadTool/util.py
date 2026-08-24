@@ -387,7 +387,9 @@ class CamoufoxDriver:
         self._page.set_default_navigation_timeout(30_000)
 
     def get(self, url):
-        return self._page.goto(url)
+        r = self._page.goto(url)
+        self._page.wait_for_load_state('domcontentloaded')
+        return r
 
     def execute_script(self, script):
         return self._page.evaluate(script)
