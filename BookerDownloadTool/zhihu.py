@@ -138,7 +138,7 @@ def zhihu_topic_sele(args):
         print(f'话题 [tid={tid}] 不存在')
         return
     title = rt('.TopicMetaCard-title').text()
-    with camoufox_create_driver(args.no_headless) as (page, context):
+    with camou_create_driver(args.no_headless) as (page, context):
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
         close_login_dialog(page)
         last_count = 0
@@ -182,7 +182,7 @@ def zhihu_ques_sele(args):
     
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
-    with camoufox_create_driver(args.no_headless) as (page, context):
+    with camou_create_driver(args.no_headless) as (browser, context, page):
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
         rt = pq(page.content())
         if '你似乎来到了没有知识存在的荒原' in rt('title').text():
@@ -244,7 +244,7 @@ def zhihu_all_topics_sele(args):
         vis = set()
         q = deque([root_tid])
         rec_file.write(root_tid + '\n')
-    with camoufox_create_driver() as (page, context):
+    with camou_create_driver() as (browser, context, page):
         set_driver_cookie(context, args.cookie)
         page.goto(f'https://www.zhihu.com/topic/{root_tid}', wait_until='domcontentloaded', timeout=30_000)
         while q:

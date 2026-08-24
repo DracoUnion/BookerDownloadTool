@@ -163,7 +163,7 @@ def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
 
 
 @contextmanager
-def camoufox_create_driver(headless=True):
+def camou_create_driver(headless=True):
     """Yield a native Camoufox page and its context."""
     with Camoufox(headless=headless) as browser:
         context = browser.new_context(user_agent=UA)
@@ -258,3 +258,4 @@ def plrt_create_driver(headless=True):
         finally:
             page.close()
             context.close()
+            browser.close()
