@@ -109,9 +109,9 @@ def parse_cookie(cookie):
     res = {kv[0]:kv[1] for kv in kvs if len(kv) >= 2}
     return res
 
-def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
+def set_driver_cookie(driver, cookie, url):
     if isinstance(cookie, str):
-        cookie = parse_cookie(cookie)
+        cookie = cookie_str_to_dict(cookie)
     cookies = [
         {'name': k, 'value': v, 'url': url}
         for k, v in cookie.items()

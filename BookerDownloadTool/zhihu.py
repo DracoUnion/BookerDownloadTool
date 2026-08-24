@@ -245,7 +245,7 @@ def zhihu_all_topics_sele(args):
         q = deque([root_tid])
         rec_file.write(root_tid + '\n')
     with camou_create_driver(args.no_headless) as (browser, context, page):
-        set_driver_cookie(context, args.cookie)
+        set_driver_cookie(context, args.cookie, 'https://www.zhihu.com/')
         page.goto(f'https://www.zhihu.com/topic/{root_tid}', wait_until='domcontentloaded', timeout=30_000)
         while q:
             tid = q.popleft()
