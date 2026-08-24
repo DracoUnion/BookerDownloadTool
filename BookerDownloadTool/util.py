@@ -203,6 +203,7 @@ def plrt_new_context(browser):
             timezone_id="Asia/Shanghai"
         )
     context.add_init_script(d('patch_env_mock_wasm.js'))
+    context.add_init_script(d('stealth.min.js'))
     return context
 
 def plrt_new_browser(plrt, headless=True):
