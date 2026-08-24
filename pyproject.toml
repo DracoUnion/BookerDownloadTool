@@ -37,6 +37,7 @@ dependencies = [
     "pyquery",
     "EpubCrawler",
     "camoufox",
+    "playwright",
     "imgyaso",
     "pyexecjs",
     "img2jb2pdf",
