@@ -3,7 +3,6 @@ import sys
 import os
 from . import __version__
 from .zhihu_sele import *
-from .zhihu_api import *
 from .lightnovel import *
 from .dl_gh_book import *
 from .discuz import *
@@ -247,22 +246,6 @@ def main():
     feishu_all_parser.add_argument("-r", "--retry", type=int, default=10, help="num of threads'")
     feishu_all_parser.add_argument("-w", "--wait", type=int, default=1, help="num of threads'")
     feishu_all_parser.set_defaults(func=download_feishu_all)
-
-    zhihu_ques_api_parser = subparsers.add_parser("zhiapi-ques", help="crawl zhihu answers of a question by **API**")
-    zhihu_ques_api_parser.add_argument("qid", help="qid")
-    zhihu_ques_api_parser.add_argument("-p", "--proxy", help="proxy")
-    zhihu_ques_api_parser.add_argument("-m", "--opti-mode", default="thres", help="img opti mode")
-    zhihu_ques_api_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
-    zhihu_ques_api_parser.set_defaults(func=zhihu_ques_api)
-
-    zhihu_ques_range_api_parser = subparsers.add_parser("zhiapi-ques-range", help="crawl zhihu answers of a question by **API**")
-    zhihu_ques_range_api_parser.add_argument("start", type=int, help="starting qid")
-    zhihu_ques_range_api_parser.add_argument("end", type=int, help="ending qid")
-    zhihu_ques_range_api_parser.add_argument("-p", "--proxy", help="proxy")
-    zhihu_ques_range_api_parser.add_argument("-m", "--opti-mode", default="thres", help="img opti mode")
-    zhihu_ques_range_api_parser.add_argument("-t", "--threads", type=int, default=8, help="thread num")
-    zhihu_ques_range_api_parser.add_argument("-r", "--retry", type=int, default=10, help="retry count")
-    zhihu_ques_range_api_parser.set_defaults(func=zhihu_ques_range_api)
 
     arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
     arxiv_fetch_parser.add_argument("cate", help="category code")
