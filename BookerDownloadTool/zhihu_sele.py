@@ -140,7 +140,7 @@ def zhihu_topic_sele(args):
         print(f'话题 [tid={tid}] 不存在')
         return
     title = rt('.TopicMetaCard-title').text()
-    driver = create_driver()
+    driver = create_driver(args.headless)
     driver.get(url)
     close_login_dialog(driver)
     last_count = 0
