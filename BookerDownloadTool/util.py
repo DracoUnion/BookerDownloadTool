@@ -123,15 +123,20 @@ def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
 
 
 @contextmanager
-def camou_create_driver(headless=True):
+def camou_create_driver(headless=True, timeout=30_000):
     """Yield a native Camoufox page and its context."""
     with Camoufox(headless=headless) as browser:
-        context = browser.new_context(user_agent=UA)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            viewport={"width":1920,"height":1080},
+            locale="zh-CN",
+            timezone_id="Asia/Shanghai"
+        )
         context.add_init_script(d('patch_env_mock_wasm.js'))
         context.add_init_script(d('stealth.min.js'))
         page = context.new_page()
-        page.set_default_timeout(30_000)
-        page.set_default_navigation_timeout(30_000)
+        page.set_default_timeout(timeout)
+        page.set_default_navigation_timeout(timeout)
         try:
             yield browser, context, page
         finally:
@@ -204,14 +209,14 @@ def plrt_new_browser(plrt, headless=True):
     )
 
 @contextmanager
-def plrt_create_driver(headless=True):
-    """Yield a native Camoufox page and its context."""
+def plrt_create_driver(headless=True, timeout=30_000):
+    """Yield a native Playwright page and its context."""
     with sync_playwright() as p:
         browser = plrt_new_browser(p, headless)
         context = plrt_new_context(browser)
         page = context.new_page()
-        page.set_default_timeout(30_000)
-        page.set_default_navigation_timeout(30_000)
+        page.set_default_timeout(timeout)
+        page.set_default_navigation_timeout(timeout)
         try:
             yield browser, context, page
         finally:
