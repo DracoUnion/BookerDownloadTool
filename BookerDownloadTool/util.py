@@ -167,6 +167,8 @@ def camou_create_driver(headless=True):
     """Yield a native Camoufox page and its context."""
     with Camoufox(headless=headless) as browser:
         context = browser.new_context(user_agent=UA)
+        context.add_init_script(d('patch_env_mock_wasm.js'))
+        context.add_init_script(d('stealth.min.js'))
         page = context.new_page()
         page.set_default_timeout(30_000)
         page.set_default_navigation_timeout(30_000)
