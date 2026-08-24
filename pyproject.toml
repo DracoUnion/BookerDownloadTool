@@ -7,7 +7,7 @@ name = "BookerDownloadTool"
 version = "2025.4.1.0"
 description = "book download tool for DracoUnion"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 license = {text = "SATA"}
 authors = [
     {name = "wizardforcel", email = "wizard.z@qq.com"},
@@ -36,7 +36,7 @@ dependencies = [
     "requests",
     "pyquery",
     "EpubCrawler",
-    "selenium",
+    "camoufox",
     "imgyaso",
     "pyexecjs",
     "img2jb2pdf",

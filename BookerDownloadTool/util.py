@@ -7,8 +7,7 @@ import imgyaso
 import subprocess as subp
 import tempfile
 import uuid
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from camoufox.sync_api import Camoufox
 from functools import reduce
 
 RE_INFO = r'\[(.+?)\]([^\[]+)'
@@ -376,29 +375,53 @@ def parse_cookie(cookie):
     res = {kv[0]:kv[1] for kv in kvs if len(kv) >= 2}
     return res
         
-def set_driver_cookie(driver, cookie):
+class CamoufoxDriver:
+    """Small driver adapter backed by a Camoufox page."""
+
+    def __init__(self, headless=True):
+        self._browser_manager = Camoufox(headless=headless)
+        self._browser = self._browser_manager.__enter__()
+        self._context = self._browser.new_context(user_agent=UA)
+        self._page = self._context.new_page()
+        self._page.set_default_timeout(1000)
+        self._page.set_default_navigation_timeout(30_000)
+
+    def get(self, url):
+        return self._page.goto(url)
+
+    def execute_script(self, script):
+        return self._page.evaluate(script)
+
+    @property
+    def page_source(self):
+        return self._page.content()
+
+    def implicitly_wait(self, seconds):
+        self._page.set_default_timeout(seconds * 1000)
+
+    def add_cookie(self, cookie):
+        self._context.add_cookies([cookie])
+
+    def close(self):
+        if self._page is None:
+            return
+        try:
+            self._page.close()
+            self._context.close()
+        finally:
+            self._browser_manager.__exit__(None, None, None)
+            self._page = None
+
+
+def set_driver_cookie(driver, cookie, url='https://www.zhihu.com/'):
     if isinstance(cookie, str):
         cookie = parse_cookie(cookie)
     for k, v in cookie.items():
-        driver.add_cookie({'name': k, 'value': v})
+        driver.add_cookie({'name': k, 'value': v, 'url': url})
+
 
 def create_driver(headless=True):
-    options = Options()
-    if headless:
-        options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--log-level=3')
-    options.add_argument(f'--user-agent={UA}')
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = webdriver.Chrome(options=options)
-    driver.set_script_timeout(1000)
-    # StealthJS
-    stealth = open(d('stealth.min.js'), encoding='utf8').read()
-    patch = open(d('patch_env_mock_wasm.js'), encoding='utf8').read()
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        "source": patch + '\n\n' + stealth
-    })
-    return driver
+    return CamoufoxDriver(headless=headless)
 
 def dict_get_recur(obj, keys):
     res = [obj]

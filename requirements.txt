@@ -1,7 +1,7 @@
 requests
 pyquery
 EpubCrawler
-selenium
+camoufox
 imgyaso
 pyexecjs
 img2jb2pdf

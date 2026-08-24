@@ -10,8 +10,6 @@ from EpubCrawler.img import process_img
 from EpubCrawler.config import config as cralwer_config
 from datetime import datetime
 from GenEpub import gen_epub
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from concurrent.futures import ThreadPoolExecutor
 from collections import deque
 from .util import *
