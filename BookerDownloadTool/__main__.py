@@ -5,6 +5,7 @@ from . import __version__
 from .zhihu_sele import *
 from .lightnovel import *
 from .dl_gh_book import *
+from .annas import *
 from .discuz import *
 from .zsxq import *
 from .whole_site import *
@@ -286,6 +287,37 @@ def main():
     pixabay_dl_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page ")
     pixabay_dl_parser.set_defaults(func=download_pixabay)
 
+    dl_annas_parser = subparsers.add_parser("annas", help="download file")
+    dl_annas_parser.add_argument("hash", help="file hash")
+    dl_annas_parser.add_argument("-H", "--headless", action='store_true', help="headless")
+    dl_annas_parser.set_defaults(func=download_annas)
+
+    annas_batch_parser = subparsers.add_parser("annas-batch", help="download file")
+    annas_batch_parser.add_argument("flist", help="JSONL list file")
+    annas_batch_parser.add_argument("-t", "--threads", type=int, default=8, help="threads num")
+    annas_batch_parser.add_argument("-s", "--site", default='annas', choices=['slow', 'bt', 'lgli'],  help="site")
+    annas_batch_parser.add_argument("-st", "--start", type=int, default=0,  help="start")
+    # annas_batch_parser.add_argument("-H", "--headless", action='store_true', help="headless")
+    annas_batch_parser.set_defaults(func=annas_batch)
+
+
+    annas_fetch_parser = subparsers.add_parser("annas-fetch", help="download file")
+    annas_fetch_parser.add_argument("-s", "--start", type=int, default=1, help="start page")
+    annas_fetch_parser.add_argument("query", help="query kw")
+    annas_fetch_parser.add_argument("ofname", help="output file name")
+    annas_fetch_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="end page")
+    annas_fetch_parser.add_argument("-r", "--sort", default='newest', help="sort by")
+    annas_fetch_parser.add_argument("-c", "--content", default=[], nargs='+', help="content")
+    annas_fetch_parser.add_argument("-l", "--lang", default=[], nargs='+', help="lang")
+    annas_fetch_parser.add_argument("-x", "--ext", default=[], nargs='+', help="ext name")
+    # annas_fetch_parser.add_argument("-H", "--headless", action='store_true', help="headless")
+    annas_fetch_parser.add_argument("-R", "--retry", type=int, default=10, help="retry")
+    annas_fetch_parser.set_defaults(func=annas_fetch)
+
+    annas_dedup_parser = subparsers.add_parser("ammas-dedup", help="dedup file")
+    annas_dedup_parser.add_argument("flist", help="JSONL list file")
+    annas_dedup_parser.add_argument("-s", "--sim", type=float, default=0.8, help="similarity")
+    annas_dedup_parser.set_defaults(func=annas_dedup)
 
     args = parser.parse_args()
     args.func(args)
