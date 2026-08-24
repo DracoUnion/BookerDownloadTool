@@ -76,8 +76,10 @@ def get_html(page):
 
 def close_login_dialog(page):
     page.evaluate('''
-        var cls_btn = document.querySelector('.Modal-closeButton')
-        if (cls_btn) cls_btn.click()
+        () => {
+            var cls_btn = document.querySelector('.Modal-closeButton')
+            if (cls_btn) cls_btn.click()
+        }
     ''')
     
 def get_qids(html):
