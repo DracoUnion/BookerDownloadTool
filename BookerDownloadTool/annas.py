@@ -85,7 +85,7 @@ def annas_fetch(args):
     # ?index=&page=1&sort=newest&content=book_nonfiction
     # &content=book_unknown&ext=pdf&ext=epub&lang=en&display=&q=tarot
     with sync_playwright() as p:
-        browser = plrt_new_browser(p, args.headless)
+        browser = plrt_new_browser(p, args.np_headless)
         context = plrt_new_context(browser)
         page = context.new_page()
     
@@ -120,7 +120,7 @@ def annas_fetch(args):
 
 def download_annas(args):
     with sync_playwright() as p:
-        browser = plrt_new_browser(p, args.headless)
+        browser = plrt_new_browser(p, args.no_headless)
         context = plrt_new_context(browser)
         page = context.new_page()
 

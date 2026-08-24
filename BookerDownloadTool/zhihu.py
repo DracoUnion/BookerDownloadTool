@@ -140,7 +140,7 @@ def zhihu_topic_sele(args):
         print(f'话题 [tid={tid}] 不存在')
         return
     title = rt('.TopicMetaCard-title').text()
-    driver = create_driver(args.headless)
+    driver = create_driver(args.no_headless)
     driver.get(url)
     close_login_dialog(driver)
     last_count = 0
@@ -185,7 +185,7 @@ def zhihu_ques_sele(args):
     
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
-    driver = create_driver(args.headless)
+    driver = create_driver(args.no_headless)
     driver.get(url)
     rt = pq(driver.page_source)
     if '你似乎来到了没有知识存在的荒原' in rt('title').text():
