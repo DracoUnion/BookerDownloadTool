@@ -183,6 +183,7 @@ def zhihu_ques_sele(args):
     # 检查是否存在
     url = f'https://www.zhihu.com/question/{qid}'
     with camou_create_driver(args.no_headless) as (browser, context, page):
+        set_driver_cookie(context, args.cookie, 'https://www.zhihu.com/')
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
         rt = pq(page.content())
         if '你似乎来到了没有知识存在的荒原' in rt('title').text():
