@@ -139,6 +139,7 @@ def zhihu_topic_sele(args):
         return
     title = rt('.TopicMetaCard-title').text()
     with camou_create_driver(args.no_headless) as (page, context):
+        set_driver_cookie(context, args.cookie, 'https://www.zhihu.com/')
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
         close_login_dialog(page)
         last_count = 0
