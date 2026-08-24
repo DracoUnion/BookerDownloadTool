@@ -6,8 +6,6 @@ from .zhihu_sele import *
 from .zhihu_api import *
 from .lightnovel import *
 from .dl_gh_book import *
-from .bili import *
-from .dmzj import *
 from .discuz import *
 from .zsxq import *
 from .whole_site import *
@@ -39,66 +37,6 @@ def main():
     gh_book_parser.add_argument("-p", "--proxy", help="proxy")
     gh_book_parser.add_argument("-a", "--article", default='article', help="article selector")
     gh_book_parser.set_defaults(func=dl_gh_book)
-    
-    bili_parser = subparsers.add_parser("bili", help="download bilibili video")
-    bili_parser.add_argument("id", help="av or bv")
-    bili_parser.add_argument("-a", "--audio", action='store_true', help="whether to convert to audio")
-    bili_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
-    bili_parser.add_argument("--start_page", type=int, default=1, help="start page")
-    bili_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
-    bili_parser.set_defaults(func=download_bili)
-
-    bilisub_parser = subparsers.add_parser("bilisub", help="download bilibili subtitle")
-    bilisub_parser.add_argument("id", help="av or bv")
-    bilisub_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bilisub_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
-    bilisub_parser.add_argument("--start_page", type=int, default=1, help="start page")
-    bilisub_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page")
-    bilisub_parser.set_defaults(func=download_bilisub)
-
-
-    bili_kw_parser = subparsers.add_parser("bili-kw", help="download bilibili video by kw")
-    bili_kw_parser.add_argument("kw", help="keyword")
-    bili_kw_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
-    bili_kw_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
-    bili_kw_parser.add_argument("-a", "--audio", action='store_true', help="whether to convert to audio")
-    bili_kw_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
-    bili_kw_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
-    bili_kw_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_kw_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
-    bili_kw_parser.set_defaults(func=batch_kw_bili)
-  
-    bilisub_kw_parser = subparsers.add_parser("bilisub-kw", help="download bilibili video by kw")
-    bilisub_kw_parser.add_argument("kw", help="keyword")
-    bilisub_kw_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
-    bilisub_kw_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
-    bilisub_kw_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
-    bilisub_kw_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
-    bilisub_kw_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bilisub_kw_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
-    bilisub_kw_parser.set_defaults(func=batch_kw_bilisub)
-
-
-    bili_home_parser = subparsers.add_parser("bili-home", help="download bilibili video by user")
-    bili_home_parser.add_argument("mid", help="user id")
-    bili_home_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
-    bili_home_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
-    bili_home_parser.add_argument("-a", "--audio", action='store_true', help="whether to convert to audio")
-    bili_home_parser.add_argument("--start_page", type=int, default=1, help="start page for every video")
-    bili_home_parser.add_argument("--end_page", type=int, default=1_000_000, help="end page for every video")
-    bili_home_parser.add_argument("-o", "--output_dir", default='.', help="output dir")
-    bili_home_parser.add_argument("-c", "--cookie", default=bili_cookie, help="cookie")
-    bili_home_parser.set_defaults(func=batch_home_bili)
-    
-    bili_meta_parser = subparsers.add_parser("bili-meta", help="download bilibili meta")
-    bili_meta_parser.add_argument("-s", "--start", type=int, default=1, help="starting page for video list")
-    bili_meta_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page for video list")
-    bili_meta_parser.add_argument("-t", "--threads", type=int, default=1, help="thread num")
-    bili_meta_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
-    bili_meta_parser.add_argument("-w", "--wait", type=float, default=0, help="sec to wait")
-    bili_meta_parser.add_argument("-p", "--proxy", default='', help="proxies splitted by ';'")
-    bili_meta_parser.set_defaults(func=download_meta_bili)
 
     ln_parser = subparsers.add_parser("ln", help="download lightnovel")
     ln_parser.add_argument("id", help="id")
@@ -142,28 +80,6 @@ def main():
     zhihu_topics_parser.add_argument("root", help="root tid")
     zhihu_topics_parser.add_argument("-c", "--cookie", default='', help="zhihu cookie")
     zhihu_topics_parser.set_defaults(func=zhihu_all_topics_sele)
-
-    dmzj_dl_parser = subparsers.add_parser("dmzj", help="download dmzj comic")
-    dmzj_dl_parser.add_argument("id", help="id")
-    dmzj_dl_parser.add_argument("-o", "--out", default="out", help="output dir")
-    dmzj_dl_parser.add_argument("--img-threads", type=int, default=8, help="image threads")
-    dmzj_dl_parser.add_argument("--ch-threads", type=int, default=8, help="chapter threads")
-    dmzj_dl_parser.add_argument("-l", "--exi-list", default="dmzj_exi.json", help="fname for existed comic")
-    dmzj_dl_parser.set_defaults(func=download_dmzj)
-
-    dmzj_fetch_parser = subparsers.add_parser("fetch-dmzj", help="fetch dmzj comic ids")
-    dmzj_fetch_parser.add_argument("fname", help="fname containing ids")
-    dmzj_fetch_parser.add_argument("-s", "--start", help="starting date")
-    dmzj_fetch_parser.add_argument("-e", "--end", help="ending date")
-    dmzj_fetch_parser.set_defaults(func=fetch_dmzj)
-
-    dmzj_batch_parser = subparsers.add_parser("batch-dmzj", help="download dmzj comic in batch")
-    dmzj_batch_parser.add_argument("fname", help="fname containing ids")
-    dmzj_batch_parser.add_argument("-o", "--out", default="out", help="output dir")
-    dmzj_batch_parser.add_argument("--img-threads", type=int, default=8, help="image threads")
-    dmzj_batch_parser.add_argument("--ch-threads", type=int, default=8, help="chapter threads")
-    dmzj_batch_parser.add_argument("-l", "--exi-list", default="dmzj_exi.json", help="fname for existed comic")
-    dmzj_batch_parser.set_defaults(func=batch_dmzj)
 
     dl_dz_parser = subparsers.add_parser("dz", help="download a page of dz")
     dl_dz_parser.add_argument("host", help="host: <domain>:<port>/<path>")
