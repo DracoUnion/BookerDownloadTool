@@ -7,7 +7,7 @@ def extract_cookies(browser, domain):
     cookies = {
         c.name:c.value
         for c in jar
-        if c.domain == domain
+        if domain in c.domain
     }
     return cookies
 
