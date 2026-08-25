@@ -146,7 +146,7 @@ def camou_create_driver(headless=True, timeout=30_000):
     with Camoufox(**opts) as browser:
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            viewport={"width":1920,"height":1080},
+            viewport={"width":1200,"height":640},
             locale="zh-CN",
             timezone_id="Asia/Shanghai"
         )
