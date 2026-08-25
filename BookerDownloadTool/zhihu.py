@@ -152,7 +152,7 @@ def zhihu_topic_sele(args):
         print(f'话题 [tid={tid}] 不存在')
         return
     title = rt('.TopicMetaCard-title').text()
-    with camou_create_driver(args.no_headless) as (page, context):
+    with camou_create_driver(args.no_headless) as (browser, context, page):
         set_driver_cookie(context, args.cookie, 'zhihu.com')
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
         close_login_dialog(page)

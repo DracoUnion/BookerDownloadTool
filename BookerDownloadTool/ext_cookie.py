@@ -13,4 +13,4 @@ def extract_cookies(browser, domain):
 
 def ext_cookies_hdl(args):
     cookies = cookie_dict_to_str(extract_cookies(args.browser, args.domain))
-    print(f'获取结果：\n{cookies}')
+    print(cookies)
