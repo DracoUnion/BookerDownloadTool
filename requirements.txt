@@ -8,3 +8,4 @@ pyexecjs
 img2jb2pdf
 pandas
 sqlalchemy
+browser_cookie3

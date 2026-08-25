@@ -21,6 +21,7 @@ from .arxiv import *
 from .gh import *
 from .hkrnws import *
 from .pic import *
+from .ext_cookie import *
 
 def main():
     bili_cookie = os.environ.get('BILI_COOKIE', '')
@@ -322,6 +323,11 @@ def main():
     annas_dedup_parser.add_argument("flist", help="JSONL list file")
     annas_dedup_parser.add_argument("-s", "--sim", type=float, default=0.8, help="similarity")
     annas_dedup_parser.set_defaults(func=annas_dedup)
+
+    ext_cookies_parser = subparsers.add_parser("ext-cookies", help="extract cookies")
+    ext_cookies_parser.add_argument("browser", choices=bc.all_browsers, help="browser")
+    ext_cookies_parser.add_argument("domain", help="domain (xxx.yyy.com)")
+    ext_cookies_parser.set_defaults(func=ext_cookies_hdl)
 
     args = parser.parse_args()
     args.func(args)
