@@ -126,11 +126,7 @@ def set_driver_cookie(driver, cookie, domain):
         }
         for k, v in cookie.items()
     ]
-    if hasattr(driver, 'add_cookies'):
-        driver.add_cookies(cookies)
-    else:
-        for item in cookies:
-            driver.add_cookie(item)
+    driver.add_cookies(cookies)
 
 
 @contextmanager
