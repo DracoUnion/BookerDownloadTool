@@ -120,7 +120,7 @@ def set_driver_cookie(driver, cookie, domain):
             'domain': '.' + domain,
             'path': '/',
             "expires": -1,
-            "secure": True,
+            "secure": False,
             "httpOnly": False,
             "sameSite": "Lax",
         }
