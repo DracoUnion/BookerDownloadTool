@@ -2,7 +2,7 @@ import browser_cookie3 as bc
 from .util import  cookie_dict_to_str
 
 def extract_cookies(browser, domain):
-    assert browser in bc.all_browsers
+    assert browser in [f.__name__ for f in bc.all_browsers]
     jar = getattr(bc, browser)()
     cookies = {
         c.name:c.value
