@@ -10,6 +10,7 @@ import tempfile
 import uuid
 from contextlib import contextmanager
 from camoufox.sync_api import Camoufox
+from camoufox import DefaultAddons
 from playwright.sync_api import sync_playwright
 from functools import reduce
 from http.cookies import SimpleCookie
@@ -126,7 +127,14 @@ def set_driver_cookie(driver, cookie, url):
 @contextmanager
 def camou_create_driver(headless=True, timeout=30_000):
     """Yield a native Camoufox page and its context."""
-    with Camoufox(headless=headless) as browser:
+    opts = {
+        "headless": headless,
+        "humanize": True,
+        "locale": "en-US",
+        "os": ("windows",),
+        "exclude_addons": [DefaultAddons.UBO],
+    }
+    with Camoufox(**opts) as browser:
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             viewport={"width":1920,"height":1080},
