@@ -118,6 +118,10 @@ def set_driver_cookie(driver, cookie, url):
             'name': k, 
             'value': v, 
             'url': url,
+            "expires": -1,
+            "secure": True,
+            "httpOnly": False,
+            "sameSite": "Lax",
         }
         for k, v in cookie.items()
     ]
