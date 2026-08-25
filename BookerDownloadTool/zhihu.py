@@ -200,7 +200,7 @@ def zhihu_ques_sele(args):
     with camou_create_driver(args.no_headless) as (browser, context, page):
         set_driver_cookie(context, args.cookie, 'https://zhihu.com')
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
-        page.pause()
+        print('Cookies: ', page.cookies())
         rt = pq(page.content())
         if '你似乎来到了没有知识存在的荒原' in rt('title').text():
             print(f'问题 [qid={qid}] 不存在')
