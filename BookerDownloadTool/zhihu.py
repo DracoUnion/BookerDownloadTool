@@ -200,11 +200,12 @@ def zhihu_ques_sele(args):
     with camou_create_driver(args.no_headless) as (browser, context, page):
         set_driver_cookie(context, args.cookie, 'https://zhihu.com')
         page.goto(url, wait_until='domcontentloaded', timeout=30_000)
+        page.pause()
         rt = pq(page.content())
         if '你似乎来到了没有知识存在的荒原' in rt('title').text():
             print(f'问题 [qid={qid}] 不存在')
             return
-        if len(rt('h4.List-headerText')) == 0:
+        if len(rt('.AnswerItem')) == 0:
             print(f'问题 [qid={qid}] 无回答')
             return
         fname = '知乎问答：' + fname_escape(rt('h1.QuestionHeader-title').eq(0).text()) + '.epub'
@@ -212,10 +213,10 @@ def zhihu_ques_sele(args):
             print(f'问题 [qid={qid}] 已抓取')
             return
         close_login_dialog(page)
-        total = get_ans_total(page)
-        if total == 0:
-            print(f'问题 [qid={qid}] 无回答')
-            return
+        # total = get_ans_total(page)
+        # if total == 0:
+        #     print(f'问题 [qid={qid}] 无回答')
+        #     return
         while not if_reach_bottom(page):
             try:
                 cnt = get_ans_count(page)
