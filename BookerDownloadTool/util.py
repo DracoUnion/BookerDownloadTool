@@ -110,19 +110,14 @@ def parse_cookie(cookie):
     res = {kv[0]:kv[1] for kv in kvs if len(kv) >= 2}
     return res
 
-def set_driver_cookie(driver, cookie, domain):
+def set_driver_cookie(driver, cookie, url):
     if isinstance(cookie, str):
         cookie = cookie_str_to_dict(cookie)
     cookies = [
         {
             'name': k, 
             'value': v, 
-            'path': "/",
-            'domain': '.' + domain,
-            'expires': -1,
-            "httpOnly": False, 
-            "secure": False, 
-            "sameSite": "Lax",
+            'url': url,
         }
         for k, v in cookie.items()
     ]
