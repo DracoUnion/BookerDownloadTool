@@ -117,7 +117,7 @@ def get_articles(html, qid):
         au_url = el_au.attr('href') or ''
         el_time = el.find('.ContentItem-time>a')
         co_url = el_time.attr('href')
-        vote = el.find('.VoteButton--up').attr('aria-label').strip()[3:]
+        vote = el.find('.VoteButton').eq(0).attr('aria-label').strip()[3:]
         upd_time = el_time.text().strip()[4:]
         co = el.find('.RichText').html()
         co = f'''
