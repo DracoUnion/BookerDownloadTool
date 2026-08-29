@@ -182,7 +182,7 @@ def annas_dedup(args):
         kept.append(it)
 
     li = [json.dumps(it) for it in kept]
-    open(args.flist, 'w', encoding='utf8').write(li)
+    open(args.flist, 'w', encoding='utf8').write('\n'.join(li))
     print('done...')
 
 def main():
