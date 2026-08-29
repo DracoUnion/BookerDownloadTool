@@ -13,7 +13,7 @@ import subprocess as subp
 from pyquery import PyQuery as pq
 import random
 from urllib.parse import quote_plus
-from .util import plrt_create_driver, request_retry, fname_escape
+from .util import plrt_create_driver, request_retry, fname_escape, to_kebab
 
 HOST = 'annas-archive.gl'
 

@@ -271,3 +271,9 @@ def cookie_str_to_dict(cookie_str: str) -> dict:
     # 标准 ; 或 ; 分隔，用 SimpleCookie 解析（自动去引号）
     cookie = SimpleCookie(cookie_str)
     return {key: val.value for key, val in cookie.items()}
+
+def to_kebab(name: str) -> str:
+    """将技能名转为 kebab-case slug"""
+    s = re.sub(r"[^\w\s\u4e00-\u9fff\-]", "", name)
+    s = re.sub(r"[\s_]+", "-", s).strip("-").lower()
+    return s[:60] or "unnamed"
