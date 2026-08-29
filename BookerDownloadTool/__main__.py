@@ -317,6 +317,7 @@ def main():
     annas_fetch_parser.add_argument("-x", "--ext", default=[], nargs='+', help="ext name")
     # annas_fetch_parser.add_argument("-H", "--headless", action='store_true', help="headless")
     annas_fetch_parser.add_argument("-R", "--retry", type=int, default=10, help="retry")
+    annas_fetch_parser.add_argument("-y", "--year", type=int, help="year")
     annas_fetch_parser.set_defaults(func=annas_fetch)
 
     annas_dedup_parser = subparsers.add_parser("ammas-dedup", help="dedup file")

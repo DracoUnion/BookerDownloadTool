@@ -88,11 +88,12 @@ def annas_fetch(args):
         qry_ext = ''.join(f'&ext={e}' for e in args.ext)
         qry_cont = ''.join(f'&content={c}' for c in args.content)
         qry_lang = ''.join(f'&lang={l}' for l in args.lang)
+        qry_yr = f'&termtype_1=year&termval_1={args.year}' if args.year else ''
         for i in range(args.start, args.end + 1):
             url = (
                 f'https://{HOST}/search' + 
                 f'?page={i}&sort={args.sort}&q={quote_plus(args.query)}' + 
-                f'{qry_ext}{qry_cont}{qry_lang}'
+                f'{qry_ext}{qry_cont}{qry_lang}{qry_yr}'
             )
             print(url)
             html = plrt_get_html_retry(page, url, '.header-inner-top')
