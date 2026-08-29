@@ -320,7 +320,7 @@ def main():
     annas_fetch_parser.add_argument("-y", "--year", type=int, help="year")
     annas_fetch_parser.set_defaults(func=annas_fetch)
 
-    annas_dedup_parser = subparsers.add_parser("ammas-dedup", help="dedup file")
+    annas_dedup_parser = subparsers.add_parser("annas-dedup", help="dedup file")
     annas_dedup_parser.add_argument("flist", help="JSONL list file")
     annas_dedup_parser.add_argument("-s", "--sim", type=float, default=0.8, help="similarity")
     annas_dedup_parser.set_defaults(func=annas_dedup)
