@@ -112,7 +112,6 @@ def annas_fetch(args):
                 }) + '\n')
                 f.flush()
         f.close()
-        browser.close()
 
 def download_annas(args):
     with plrt_create_driver(args.no_headless) as (browser, context, page):    
@@ -157,7 +156,6 @@ def download_annas(args):
                 f.write(data)
                 f.flush()
         os.rename(fname_bak, fname)
-        browser.close()
 
     
 
