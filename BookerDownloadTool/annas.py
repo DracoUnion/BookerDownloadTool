@@ -142,7 +142,7 @@ def download_annas(args):
         # url = f'https://{HOST}/slow_download/{hash_}/0/{idx}'
         html = plrt_get_html_retry(page, url, '.bg-gray-200')
         rt = pq(html)
-        link = rt.find('.bg-gray-200').text().strip()
+        link = rt.find('.bg-gray-200').eq(0).text().strip()
         r = request_retry('GET', link, headers=dft_hdr, stream=True)
         r.raise_for_status()
         fsize = int(r.headers['Content-Length'])
