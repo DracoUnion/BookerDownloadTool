@@ -46,3 +46,16 @@ def fetch_webarchive(args):
             print(f'https://web.archive.org/web/{url}')
         
     ofile.close()
+
+
+def reg_subparser(subparsers):
+    war_parser = subparsers.add_parser("web-archive", help="fetch web archive")
+    war_parser.add_argument("host", help="host")
+    war_parser.add_argument("-s", "--start", type=int, default=1, help="starting page")
+    war_parser.add_argument("-e", "--end", type=int, default=1_000_000_000, help="ending page")
+    war_parser.add_argument("-r", "--regex", default='.', help="regex to match urls")
+    war_parser.add_argument("-q", "--query", action='store_true', help="whether to deduplicate with query")
+    war_parser.add_argument("-f", "--fragment", action='store_true', help="whether to deduplicate with fragment")
+    war_parser.add_argument("-p", "--proxy", help="proxy")
+    war_parser.set_defaults(vis=set())
+    war_parser.set_defaults(func=fetch_webarchive)

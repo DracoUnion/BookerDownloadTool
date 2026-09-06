@@ -173,3 +173,12 @@ def download_zsxq(args):
     gen_epub(articles, imgs)
     
 if __name__ == '__main__': main()
+
+def reg_subparser(subparsers):
+    now = datetime.now()
+    zsxq_parser = subparsers.add_parser("zsxq", help="download zsxq")
+    zsxq_parser.add_argument('-s', '--start', default='00010101', help="starting date")
+    zsxq_parser.add_argument('-e', '--end', default=f'{now.year}{now.month:02d}{now.day:02d}', help="ending date")
+    zsxq_parser.add_argument('-c', '--cookie', default=os.environ.get('ZSXQ_COOKIE'), help="zsxq cookie, default as $ZSXQ_COOKIE")
+    zsxq_parser.add_argument('id', help='zsxq group id')
+    zsxq_parser.set_defaults(func=download_zsxq)

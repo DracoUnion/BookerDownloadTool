@@ -73,3 +73,15 @@ def download_uqer(args):
     
         
     
+
+def reg_subparser(subparsers):
+    uqer_parser = subparsers.add_parser("uqer", help="download uqer post")
+    uqer_parser.add_argument("tid", help="uqer tid")
+    uqer_parser.add_argument("-d", "--dir", default='.',  help="output dir")
+    uqer_parser.set_defaults(func=download_uqer)
+
+    uqer_batch_parser = subparsers.add_parser("batch-uqer", help="download uqer post in batch")
+    uqer_batch_parser.add_argument("fname", help="file name of uqer tids")
+    uqer_batch_parser.add_argument("-d", "--dir", default='.',  help="output dir")
+    uqer_batch_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
+    uqer_batch_parser.set_defaults(func=download_uqer_batch)

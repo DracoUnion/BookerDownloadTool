@@ -223,3 +223,21 @@ def exp_whole_site(args):
         print('\n'.join(urls))
         ofile.write('\n'.join(urls) + '\n')
     ofile.close()
+
+def reg_subparser(subparsers):
+    whole_site_parser = subparsers.add_parser("whole-site", help="crawl whole site urls")
+    whole_site_parser.add_argument("site", help="site url")
+    whole_site_parser.add_argument("db", help="db fname")
+    whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="times to retry")
+    whole_site_parser.add_argument("-p", "--proxy", help="proxy")
+    whole_site_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    whole_site_parser.add_argument("-c", "--cookie", help="cookie")
+    whole_site_parser.add_argument("-B", "--nonblank", help="selector for nonblank element. the check will fail if they are blank")
+    whole_site_parser.add_argument("--re", help="pattern to match links")
+    whole_site_parser.add_argument("--qs", action='store_true', help="whether to consider query string")
+    whole_site_parser.set_defaults(func=whole_site)
+
+    exp_whole_site_parser = subparsers.add_parser("exp-whole-site", help="export whole site urls")
+    exp_whole_site_parser.add_argument("db", help="db fname")
+    exp_whole_site_parser.add_argument("-s", "--batch-size", type=int, default=1000, help="db fname")
+    exp_whole_site_parser.set_defaults(func=exp_whole_site)

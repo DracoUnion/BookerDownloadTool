@@ -37,3 +37,11 @@ def arxiv_fetch(args):
     ofile = open(f'arxiv_{args.cate}_{args.start}_{args.end}.txt', 'w', encoding='utf8')
     ofile.write('\n'.join(ids) + '\n')    
     ofile.close()
+
+def reg_subparser(subparsers):
+    arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
+    arxiv_fetch_parser.add_argument("cate", help="category code")
+    arxiv_fetch_parser.add_argument("start", help="starting yyyymmdd")
+    arxiv_fetch_parser.add_argument("end", help="ending yyyymmdd")
+    arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
+    arxiv_fetch_parser.set_defaults(func=arxiv_fetch)

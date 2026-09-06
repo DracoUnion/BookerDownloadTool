@@ -163,3 +163,37 @@ def fetch_sitemap(url, rgx=None, pr=None):
     return res
 
     
+
+def reg_subparser(subparsers):
+    links_parser = subparsers.add_parser("links", help="fetch links in pages")
+    links_parser.add_argument("url", help="url with {i} as page num")
+    links_parser.add_argument("link", help="link selector")
+    links_parser.add_argument("ofname", help="output file name")
+    links_parser.add_argument("-s", "--start", type=int, default=1, help="starting page")
+    links_parser.add_argument("-e", "--end", type=int, default=10000000, help="ending page")
+    links_parser.add_argument("-t", "--time", help="time selector")
+    links_parser.add_argument("-r", "--time-regex", default=r"\d+-\d+-\d+", help="time regex")
+    links_parser.add_argument("-p", "--proxy", help="proxy")
+    links_parser.add_argument("-H", "--headers", help="headers in JSON")
+    links_parser.add_argument("-J", "--json", action='store_true', help="treat output as JSON not HTML")
+    links_parser.set_defaults(func=fetch_links)
+
+    sitemap_parser = subparsers.add_parser("sitemap", help="fetch links in sitemap")
+    sitemap_parser.add_argument("url", help="sitemap url")
+    sitemap_parser.add_argument("-r", "--regex", default="/blog/", help="link regex")
+    sitemap_parser.add_argument("-o", "--ofname", help="output file name")
+    sitemap_parser.add_argument("-p", "--proxy", help="proxy")
+    sitemap_parser.set_defaults(func=fetch_sitemap_handle)
+
+    links_epub_parser = subparsers.add_parser("links-epub", help="batch download links to epub")
+    links_epub_parser.add_argument("links", help="name of file storing links")
+    links_epub_parser.add_argument("--name", help="epub name")
+    links_epub_parser.add_argument("-t", "--title", default="", help="title selector")
+    links_epub_parser.add_argument("-c", "--content", default="", help="content selector")
+    links_epub_parser.add_argument("-r", "--remove", default="", help="remove elems selector")
+    links_epub_parser.add_argument("-n", "--num", default=500, type=int, help="num of articles in one epub")
+    links_epub_parser.add_argument("-m", "--opti-mode", default='quant', help="img optimization mode")
+    links_epub_parser.add_argument("-l", "--size-limit", default='100m', help="epub size limit")
+    links_epub_parser.add_argument("-g", "--time-regex", default=r'(\d+)-(\d+)-(\d+)', help="time regex")
+    links_epub_parser.add_argument("-E", "--exec", action='store_true', help="whether to execute EpubCrawler on config files")
+    links_epub_parser.set_defaults(func=batch_links)

@@ -52,3 +52,10 @@ def crawl_wx(args):
             config_fname = f'config_{gzh_name}_{st}_{ed}.json'
             open(config_fname, 'w', encoding='utf8').write(json.dumps(config))
             subp.Popen(['crawl-epub', config_fname], shell=True).communicate()
+
+def reg_subparser(subparsers):
+    wx_parser = subparsers.add_parser("wx", help="crawler weixin articles")
+    wx_parser.add_argument("fname", help="XLSX fname")
+    wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
+    wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    wx_parser.set_defaults(func=crawl_wx)

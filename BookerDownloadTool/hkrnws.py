@@ -36,3 +36,17 @@ def fetch_hkrnws_rng(args):
     for h in hdls:
         h.result()
 
+
+
+def reg_subparser(subparsers):
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-fetch", help="fetch hkrnws posts")
+    hkrnws_fetch_parser.add_argument("date", help="date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
+    hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws)
+
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-range", help="fetch multiple hkrnws posts")
+    hkrnws_fetch_parser.add_argument("start", help="starting date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("end", help="ending date YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
+    hkrnws_fetch_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws_rng)

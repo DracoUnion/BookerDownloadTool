@@ -36,3 +36,12 @@ def fetch_medium(args):
         dt = dt + timedelta(days=1)
     ofile.close()
     
+
+
+def reg_subparser(subparsers):
+    med_parser = subparsers.add_parser("medium", help="fetch medium toc")
+    med_parser.add_argument("host", help="medium blog host: xxx.medium.com or medium.com/xxx")
+    med_parser.add_argument('-s', '--start', default='20150101', help="starting date")
+    med_parser.add_argument('-e', '--end', default='99991231', help="ending date")
+    med_parser.add_argument('-p', '--proxy', help="proxy")
+    med_parser.set_defaults(func=fetch_medium)

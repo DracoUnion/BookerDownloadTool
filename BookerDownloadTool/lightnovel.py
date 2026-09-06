@@ -149,3 +149,29 @@ def fetch_ln(args):
     
     
 if __name__ == '__main__': main()  
+
+
+def reg_subparser(subparsers):
+    wk8_cookie = os.environ.get('WK8_COOKIE', '')
+
+    ln_parser = subparsers.add_parser("ln", help="download lightnovel")
+    ln_parser.add_argument("id", help="id")
+    ln_parser.add_argument("-s", "--save-path", default='out', help="path to save")
+    ln_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_parser.add_argument("-r", "--retry", type=int, default=10, help="retry times")
+    ln_parser.set_defaults(func=download_ln)
+
+    ln_batch_parser = subparsers.add_parser("batch-ln", help="download lightnovel in batch")
+    ln_batch_parser.add_argument("fname", help="file name of ids")
+    ln_batch_parser.add_argument("-s", "--save-path", default='out', help="path to save")
+    ln_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_batch_parser.add_argument("-t", "--threads", type=int, default=5, help="thread count")
+    ln_batch_parser.add_argument("-r", "--retry", type=int, default=1_000_000, help="retry times")
+    ln_batch_parser.set_defaults(func=batch_ln)
+
+    ln_fetch_parser = subparsers.add_parser("fetch-ln", help="fetch lightnovel ids")
+    ln_fetch_parser.add_argument("fname", help="file fname")
+    ln_fetch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8.net cookie")
+    ln_fetch_parser.add_argument("-s", "--start", required=True, help="starting date (YYYYMMDD)")
+    ln_fetch_parser.add_argument("-e", "--end", required=True, help="ending date (YYYYMMDD)")
+    ln_fetch_parser.set_defaults(func=fetch_ln)

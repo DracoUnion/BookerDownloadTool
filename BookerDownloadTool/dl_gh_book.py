@@ -48,3 +48,11 @@ def dl_gh_book(args):
     subp.Popen('crawl-epub', shell=True).communicate()
     os.remove('config.json')
             
+
+def reg_subparser(subparsers):
+    gh_book_parser = subparsers.add_parser("gh-book", help="download books from github")
+    gh_book_parser.add_argument("url", help="SUMMARY.md url")
+    gh_book_parser.add_argument("-t", "--threads", type=int, default=5, help="num of threads")
+    gh_book_parser.add_argument("-p", "--proxy", help="proxy")
+    gh_book_parser.add_argument("-a", "--article", default='article', help="article selector")
+    gh_book_parser.set_defaults(func=dl_gh_book)
