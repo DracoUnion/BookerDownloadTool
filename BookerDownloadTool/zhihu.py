@@ -267,16 +267,16 @@ def zhihu_all_topics_sele(args):
         while q:
             tid = q.popleft()
             print(f'tid: {tid}')
-            ofile.write(tid + '\\n')
+            ofile.write(tid + '\n')
             url = f'https://www.zhihu.com/topic/{tid}'
             page.goto(url, wait_until='domcontentloaded', timeout=30_000)
             subs = get_sub_tids(get_html(page))
-            rec_file.write('-1\\n')
+            rec_file.write('-1\n')
             for s in subs:
                 if s not in vis:
                     vis.add(s)
                     q.append(s)
-                    rec_file.write(s + '\\n')
+                    rec_file.write(s + '\n')
             page.wait_for_timeout(500)
     ofile.close()
     rec_file.close()
