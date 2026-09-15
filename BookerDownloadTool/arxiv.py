@@ -31,7 +31,7 @@ def arxiv_fetch(args):
         num_retries=100_000
     )
     
-    results = list(cl.results(search, start))
+    results = list(cl.results(search))
     ids = [r.entry_id.split('/')[-1] for r in results]
     
     ofile = open(f'arxiv_{args.kw}_{args.cate}_{args.start}_{args.end}.txt', 'w', encoding='utf8')
