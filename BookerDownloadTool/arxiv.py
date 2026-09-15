@@ -21,12 +21,12 @@ def arxiv_fetch(args):
 
     search = arxiv.Search(
         query = query,
-        max_results = None,
+        max_results = pg_size,
         sort_by = arxiv.SortCriterion.SubmittedDate,
         sort_order = arxiv.SortOrder.Descending,
     )
     cl = arxiv.Client(
-        page_size=pg_size, 
+        # page_size=pg_size, 
         delay_seconds=1, 
         num_retries=100_000
     )
