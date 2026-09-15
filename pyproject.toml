@@ -44,6 +44,7 @@ dependencies = [
     "pandas",
     "sqlalchemy",
     "browser_cookie3",
+    "arxiv",
 ]
 
 [project.urls]
