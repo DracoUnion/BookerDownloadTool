@@ -10,6 +10,8 @@ def get_arxiv_ids(html):
 def arxiv_fetch(args):
     pg_size = min(args.page_size, 3000)
     query = f'cat:{args.cate} AND submittedDate:[{args.start} TO {args.end}]'
+    if args.kw:
+        quer += f' AND all:{args.kw}'
 
     ids = []
     start = 0
@@ -44,4 +46,5 @@ def reg_subparser(subparsers):
     arxiv_fetch_parser.add_argument("start", help="starting yyyymmdd")
     arxiv_fetch_parser.add_argument("end", help="ending yyyymmdd")
     arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
+    arxiv_fetch_parser.add_argument("--kw", default="", help="key words")
     arxiv_fetch_parser.set_defaults(func=arxiv_fetch)
