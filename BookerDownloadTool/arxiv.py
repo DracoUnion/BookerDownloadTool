@@ -21,25 +21,18 @@ def arxiv_fetch(args):
 
     search = arxiv.Search(
         query = query,
-        max_results = pg_size,
+        max_results = None,
         sort_by = arxiv.SortCriterion.SubmittedDate,
         sort_order = arxiv.SortOrder.Descending,
     )
     cl = arxiv.Client(
-        # page_size=pg_size, 
+        page_size=pg_size, 
         delay_seconds=1, 
         num_retries=100_000
     )
     
-    ids = []
-    start = 0
-    while True:
-        results = list(cl.results(search, start))
-        ids_pt = [r.entry_id.split('/')[-1] for r in results]
-        if not ids_pt: break
-        ids += ids_pt
-        print(ids_pt)
-        start += pg_size
+    results = list(cl.results(search, start))
+    ids = [r.entry_id.split('/')[-1] for r in results]
     
     ofile = open(f'arxiv_{args.kw}_{args.cate}_{args.start}_{args.end}.txt', 'w', encoding='utf8')
     ofile.write('\n'.join(ids) + '\n')    
