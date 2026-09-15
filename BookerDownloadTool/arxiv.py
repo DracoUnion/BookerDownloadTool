@@ -50,6 +50,6 @@ def reg_subparser(subparsers):
     arxiv_fetch_parser.add_argument("-c", "--cate", help="category code")
     arxiv_fetch_parser.add_argument("-s", "--start", help="starting yyyymmdd")
     arxiv_fetch_parser.add_argument("-e", "--end", help="ending yyyymmdd")
-    arxiv_fetch_parser.add_argument("-s", "--page-size", type=int, default=2000, help="page size")
+    arxiv_fetch_parser.add_argument("-ps", "--page-size", type=int, default=2000, help="page size")
     arxiv_fetch_parser.add_argument("--kw", default="", help="key words")
     arxiv_fetch_parser.set_defaults(func=arxiv_fetch)
