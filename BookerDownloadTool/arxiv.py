@@ -1,6 +1,7 @@
 from .util import *
 from pyquery import PyQuery as pq
 import re
+import arxiv
 
 def get_arxiv_ids(html):
     html = rm_xml_tags(html)
@@ -18,24 +19,23 @@ def arxiv_fetch(args):
         query_list.append(f'all:{args.kw}')
     query = ' AND '.join(query_list)
 
+    search = arxiv.Search(
+        query = query,
+        max_results = None,
+        sort_by = arxiv.SortCriterion.SubmittedDate,
+        sort_order = arxiv.SortOrder.Descending,
+    )
+    cl = arxiv.Client(
+        page_size=pg_size, 
+        delay_seconds=1, 
+        num_retries=100_000
+    )
+    
     ids = []
     start = 0
     while True:
-        params = {
-                'search_query': query,
-                'start': start,
-                'max_results': pg_size,  # API限制
-                'sortBy': 'submittedDate',
-                'sortOrder': 'descending'
-        }
-
-        url = f'http://export.arxiv.org/api/query'
-        html = request_retry(
-            'GET', url,
-            params=params,
-            headers=default_hdrs
-        ).text
-        ids_pt = get_arxiv_ids(html)
+        results = cl.results(search, start)
+        ids_pt = [r.entry_id.split('/')[-1] for r in results]
         if not ids_pt: break
         ids += ids_pt
         print(ids_pt)
