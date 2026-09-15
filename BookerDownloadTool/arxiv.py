@@ -34,7 +34,7 @@ def arxiv_fetch(args):
     ids = []
     start = 0
     while True:
-        results = cl.results(search, start)
+        results = list(cl.results(search, start))
         ids_pt = [r.entry_id.split('/')[-1] for r in results]
         if not ids_pt: break
         ids += ids_pt
