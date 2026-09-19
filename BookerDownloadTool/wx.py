@@ -54,8 +54,8 @@ def crawl_wx(args):
             subp.Popen(['crawl-epub', config_fname], shell=True).communicate()
 
 def reg_subparser(subparsers):
-    wx_parser = subparsers.add_parser("wx", help="crawler weixin articles")
-    wx_parser.add_argument("fname", help="XLSX fname")
-    wx_parser.add_argument("-n", "--size", type=int, default=500, help="num of articles per ebook")
-    wx_parser.add_argument("-o", "--opti-mode", default='thres', help="img optimization mode, default 'thres'")
+    wx_parser = subparsers.add_parser("wx", help="抓取微信公众号文章")
+    wx_parser.add_argument("fname", help="Excel 文件名")
+    wx_parser.add_argument("-n", "--size", type=int, default=500, help="每本电子书文章数")
+    wx_parser.add_argument("-o", "--opti-mode", default='thres', help="图片优化模式，默认 'thres'")
     wx_parser.set_defaults(func=crawl_wx)

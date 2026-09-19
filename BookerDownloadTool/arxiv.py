@@ -39,10 +39,10 @@ def arxiv_fetch(args):
     ofile.close()
 
 def reg_subparser(subparsers):
-    arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="fetch arxiv ids")
-    arxiv_fetch_parser.add_argument("-c", "--cate", default="", help="category code")
-    arxiv_fetch_parser.add_argument("-s", "--start", default="", help="starting yyyymmdd")
-    arxiv_fetch_parser.add_argument("-e", "--end", default="", help="ending yyyymmdd")
-    arxiv_fetch_parser.add_argument("-ps", "--page-size", type=int, default=2000, help="page size")
-    arxiv_fetch_parser.add_argument("--kw", default="", help="key words")
+    arxiv_fetch_parser = subparsers.add_parser("arxiv-fetch", help="抓取 arXiv id")
+    arxiv_fetch_parser.add_argument("-c", "--cate", default="", help="分类代码")
+    arxiv_fetch_parser.add_argument("-s", "--start", default="", help="起始日期 yyyymmdd")
+    arxiv_fetch_parser.add_argument("-e", "--end", default="", help="结束日期 yyyymmdd")
+    arxiv_fetch_parser.add_argument("-ps", "--page-size", type=int, default=2000, help="每页数量")
+    arxiv_fetch_parser.add_argument("--kw", default="", help="关键词")
     arxiv_fetch_parser.set_defaults(func=arxiv_fetch)

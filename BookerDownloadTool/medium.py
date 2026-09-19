@@ -39,9 +39,9 @@ def fetch_medium(args):
 
 
 def reg_subparser(subparsers):
-    med_parser = subparsers.add_parser("medium", help="fetch medium toc")
-    med_parser.add_argument("host", help="medium blog host: xxx.medium.com or medium.com/xxx")
-    med_parser.add_argument('-s', '--start', default='20150101', help="starting date")
-    med_parser.add_argument('-e', '--end', default='99991231', help="ending date")
-    med_parser.add_argument('-p', '--proxy', help="proxy")
+    med_parser = subparsers.add_parser("medium", help="抓取 Medium 文章列表")
+    med_parser.add_argument("host", help="Medium 博客主机: xxx.medium.com 或 medium.com/xxx")
+    med_parser.add_argument('-s', '--start', default='20150101', help="起始日期")
+    med_parser.add_argument('-e', '--end', default='99991231', help="结束日期")
+    med_parser.add_argument('-p', '--proxy', help="代理")
     med_parser.set_defaults(func=fetch_medium)

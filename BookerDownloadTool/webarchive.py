@@ -49,13 +49,13 @@ def fetch_webarchive(args):
 
 
 def reg_subparser(subparsers):
-    war_parser = subparsers.add_parser("web-archive", help="fetch web archive")
-    war_parser.add_argument("host", help="host")
-    war_parser.add_argument("-s", "--start", type=int, default=1, help="starting page")
-    war_parser.add_argument("-e", "--end", type=int, default=1_000_000_000, help="ending page")
-    war_parser.add_argument("-r", "--regex", default='.', help="regex to match urls")
-    war_parser.add_argument("-q", "--query", action='store_true', help="whether to deduplicate with query")
-    war_parser.add_argument("-f", "--fragment", action='store_true', help="whether to deduplicate with fragment")
-    war_parser.add_argument("-p", "--proxy", help="proxy")
+    war_parser = subparsers.add_parser("web-archive", help="抓取 Wayback 存档")
+    war_parser.add_argument("host", help="主机")
+    war_parser.add_argument("-s", "--start", type=int, default=1, help="起始页")
+    war_parser.add_argument("-e", "--end", type=int, default=1_000_000_000, help="结束页码")
+    war_parser.add_argument("-r", "--regex", default='.', help="匹配 URL 的正则")
+    war_parser.add_argument("-q", "--query", action='store_true', help="是否按 query 去重")
+    war_parser.add_argument("-f", "--fragment", action='store_true', help="是否按 fragment 去重")
+    war_parser.add_argument("-p", "--proxy", help="代理")
     war_parser.set_defaults(vis=set())
     war_parser.set_defaults(func=fetch_webarchive)

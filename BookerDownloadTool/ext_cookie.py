@@ -16,11 +16,11 @@ def ext_cookies_hdl(args):
     print(cookies)
 
 def reg_subparser(subparsers):
-    ext_cookies_parser = subparsers.add_parser("ext-cookies", help="extract cookies")
+    ext_cookies_parser = subparsers.add_parser("ext-cookies", help="提取 Cookie")
     ext_cookies_parser.add_argument(
         "browser",
         choices=[f.__name__ for f in bc.all_browsers],
-        help="browser"
+        help="浏览器"
     )
-    ext_cookies_parser.add_argument("domain", help="domain (xxx.yyy.com)")
+    ext_cookies_parser.add_argument("domain", help="域名 (xxx.yyy.com)")
     ext_cookies_parser.set_defaults(func=ext_cookies_hdl)

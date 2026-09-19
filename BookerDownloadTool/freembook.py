@@ -71,9 +71,9 @@ def download_fmb(args):
     f.close()
 
 def reg_subparser(subparsers):
-    fmb_parser = subparsers.add_parser("freembook", help="download freembook info")
-    fmb_parser.add_argument("start", type=int, help="starting ssid")
-    fmb_parser.add_argument("end", type=int, help="ending ssid")
-    fmb_parser.add_argument("-t", "--threads", type=int, default=8,  help="thread count")
-    fmb_parser.add_argument("-p", "--proxy", default='',  help="proxy splitted by ';'")
+    fmb_parser = subparsers.add_parser("freembook", help="下载 freembook 图书信息")
+    fmb_parser.add_argument("start", type=int, help="起始 ssid")
+    fmb_parser.add_argument("end", type=int, help="结束 ssid")
+    fmb_parser.add_argument("-t", "--threads", type=int, default=8,  help="线程数")
+    fmb_parser.add_argument("-p", "--proxy", default='',  help="代理，用 ';' 分隔")
     fmb_parser.set_defaults(func=download_fmb)

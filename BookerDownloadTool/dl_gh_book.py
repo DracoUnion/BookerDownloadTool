@@ -50,9 +50,9 @@ def dl_gh_book(args):
             
 
 def reg_subparser(subparsers):
-    gh_book_parser = subparsers.add_parser("gh-book", help="download books from github")
-    gh_book_parser.add_argument("url", help="SUMMARY.md url")
-    gh_book_parser.add_argument("-t", "--threads", type=int, default=5, help="num of threads")
-    gh_book_parser.add_argument("-p", "--proxy", help="proxy")
-    gh_book_parser.add_argument("-a", "--article", default='article', help="article selector")
+    gh_book_parser = subparsers.add_parser("gh-book", help="从 GitHub 下载书籍")
+    gh_book_parser.add_argument("url", help="SUMMARY.md 链接")
+    gh_book_parser.add_argument("-t", "--threads", type=int, default=5, help="线程数")
+    gh_book_parser.add_argument("-p", "--proxy", help="代理")
+    gh_book_parser.add_argument("-a", "--article", default='article', help="article 选择器")
     gh_book_parser.set_defaults(func=dl_gh_book)

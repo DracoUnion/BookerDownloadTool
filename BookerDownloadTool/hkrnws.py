@@ -39,14 +39,14 @@ def fetch_hkrnws_rng(args):
 
 
 def reg_subparser(subparsers):
-    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-fetch", help="fetch hkrnws posts")
-    hkrnws_fetch_parser.add_argument("date", help="date YYYYMMDD")
-    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-fetch", help="抓取 hckrnews 链接")
+    hkrnws_fetch_parser.add_argument("date", help="日期 YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="代理")
     hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws)
 
-    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-range", help="fetch multiple hkrnws posts")
-    hkrnws_fetch_parser.add_argument("start", help="starting date YYYYMMDD")
-    hkrnws_fetch_parser.add_argument("end", help="ending date YYYYMMDD")
-    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="proxy")
-    hkrnws_fetch_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
+    hkrnws_fetch_parser = subparsers.add_parser("hkrnws-range", help="批量抓取 hckrnews 链接")
+    hkrnws_fetch_parser.add_argument("start", help="起始日期 YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("end", help="结束日期 YYYYMMDD")
+    hkrnws_fetch_parser.add_argument("-p", "--proxy", help="代理")
+    hkrnws_fetch_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
     hkrnws_fetch_parser.set_defaults(func=fetch_hkrnws_rng)

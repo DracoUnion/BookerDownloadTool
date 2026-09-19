@@ -61,11 +61,11 @@ def download_pixabay(args):
 
 
 def reg_subparser(subparsers):
-    pixabay_dl_parser = subparsers.add_parser("pixabay", help="download pics in pixabay")
-    pixabay_dl_parser.add_argument("kw", help="keyword")
-    pixabay_dl_parser.add_argument("-d", "--dir", default='.', help="output dir")
-    pixabay_dl_parser.add_argument("-p", "--proxy", help="proxy")
-    pixabay_dl_parser.add_argument("-t", "--threads", type=int, default=8, help="num of threads")
-    pixabay_dl_parser.add_argument("-s", "--start", type=int, default=1, help="starting page ")
-    pixabay_dl_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="ending page ")
+    pixabay_dl_parser = subparsers.add_parser("pixabay", help="下载 Pixabay 图片")
+    pixabay_dl_parser.add_argument("kw", help="关键词")
+    pixabay_dl_parser.add_argument("-d", "--dir", default='.', help="输出目录")
+    pixabay_dl_parser.add_argument("-p", "--proxy", help="代理")
+    pixabay_dl_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
+    pixabay_dl_parser.add_argument("-s", "--start", type=int, default=1, help="起始页")
+    pixabay_dl_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="结束页码")
     pixabay_dl_parser.set_defaults(func=download_pixabay)
