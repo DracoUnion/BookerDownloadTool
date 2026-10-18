@@ -39,6 +39,7 @@ dependencies = [
     "camoufox",
     "playwright",
     "imgyaso",
+    "img2pdf",
     "pyexecjs",
     "img2jb2pdf",
     "pandas",

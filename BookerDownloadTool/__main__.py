@@ -3,7 +3,7 @@ from . import __version__
 from . import (
     annas, arxiv, discuz, dl_gh_book, ext_cookie, feishu, freembook,
     gh, hkrnws, lightnovel, links, medium, pic, uqer, webarchive,
-    whole_site, wx, yuque, zhihu, zsxq,
+    whole_site, wenku, wx, yuque, zhihu, zsxq,
 )
 
 
@@ -32,6 +32,7 @@ def main():
     gh.reg_subparser(subparsers)
     hkrnws.reg_subparser(subparsers)
     pic.reg_subparser(subparsers)
+    wenku.reg_subparser(subparsers)
     annas.reg_subparser(subparsers)
     ext_cookie.reg_subparser(subparsers)
 

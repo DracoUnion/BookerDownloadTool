@@ -61,6 +61,7 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | --- | --- | --- |
 | `gh-book` | 抓取 GitHub 仓库的书籍（SUMMARY.md） | EPUB |
 | `ln` / `batch-ln` / `fetch-ln` | 下载 / 批量下载 / 按日期抓取 wenku8 轻小说 | EPUB / id 列表 |
+| `wenku` | 下载百度文库预览文档 | PDF |
 | `zhihu-ques` / `zhihu-ques-batch` | 抓取知乎问题下的回答 | EPUB |
 | `zhihu-topic` / `zhihu-topic-batch` / `zhihu-topics` | 抓取知乎话题下的问题、递归抓取子话题 | id 列表 |
 | `dz` / `fetch-dz` / `batch-dz` | 下载 Discuz 论坛帖子 / 抓取 tid / 批量下载 | EPUB / id 列表 |
@@ -137,6 +138,20 @@ bdt zhihu-topics 19550235 -c "<zhihu cookie>"
 ```
 
 典型流程：`zhihu-topics` 得到全部 tid → `zhihu-topic-batch` 得到全部 qid → `zhihu-ques-batch` 逐个生成 EPUB。
+
+### 百度文库
+
+通过文档预览图片生成 PDF，仅适用于当前账号/文档允许预览的页面。参数直接传入文档 `doc_id`：
+
+```bash
+# 下载全部可用预览页，并发数默认为 8
+bdt wenku <doc_id> -d out
+
+# 只下载前 5 页，并发下载
+bdt wenku <doc_id> -s 1 -e 5 -t 8 -d out
+```
+
+也可以使用 `-o/--output` 指定 PDF 文件名；页面下载失败时不会生成不完整的 PDF。
 
 ### Discuz 论坛
 
