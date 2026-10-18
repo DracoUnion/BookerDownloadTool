@@ -77,6 +77,7 @@ def zh_fetch_topic_qids(tid, cookie):
     limit = ZH_TOPIC_QUES_LIMIT
     while True:
         url = f'{ZH_TOPIC_QUES_API.format(tid=tid)}?offset={offset}&limit={limit}'
+        print(url)
         r = request_retry('GET', url, headers=zh_topic_headers(cookie, tid, url), check_status=False, retry=10, timeout=15)
         if r.status_code == 403:
             raise RuntimeError(f'问题列表 API 返回 403（可能需要登录 Cookie 或触发风控），tid={tid}')
@@ -88,6 +89,7 @@ def zh_fetch_topic_qids(tid, cookie):
                 qid = str(tgt['id'])
                 if qid not in seen:
                     seen.add(qid)
+                    print(qid)
                     qids.append(qid)
         paging = d.get('paging', {})
         if paging.get('is_end'):
@@ -149,7 +151,7 @@ def get_zh_cookie(args):
     if args.cookie:
         return args.cookie
     # 从浏览器提取（Chrome 解密失败时降级到 Firefox）
-    for br in ['firefox', 'chrome']:
+    for br in ['firefox', 'chrome', 'edge']:
         try:
             ck = cookie_dict_to_str(extract_cookies(br, 'zhihu.com'))
             if ck:
@@ -178,6 +180,7 @@ def zh_fetch_answers(qid, cookie):
     limit = 20
     while True:
         url = f'{ZH_ANS_API.format(qid=qid)}?include={ZH_INCLUDE}&limit={limit}&offset={offset}'
+        print(url)
         r = request_retry('GET', url, headers=hdrs, check_status=False, retry=10, timeout=15)
         if r.status_code == 403:
             # 未登录 / 风控：尝试用问题页判断是否存在
@@ -188,6 +191,7 @@ def zh_fetch_answers(qid, cookie):
         d = r.json()
         if title is None and d['data']:
             title = d['data'][0]['question']['title']
+        print(d['data'])
         answers.extend(d['data'])
         paging = d.get('paging', {})
         if paging.get('is_end'):
