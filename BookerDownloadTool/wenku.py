@@ -119,6 +119,7 @@ def build_page_url(info, page):
 
 def _download_page(page, url, headers, proxy, retry):
     proxies = {'http': proxy, 'https': proxy} if proxy else None
+    print(f'下载页面 {page}：{url}')
     response = request_retry(
         'GET', url,
         headers=headers,
@@ -127,8 +128,9 @@ def _download_page(page, url, headers, proxy, retry):
         check_status=True,
     )
     data = response.content
-    if not data.startswith(b'\xff\xd8\xff'):
-        raise ValueError(f'第 {page} 页接口响应不是有效 JPEG 图片')
+    if not data.startswith(b'\xff\xd8\xff') and \
+       not data.startswith(b'\x89PNG'):
+        raise ValueError(f'第 {page} 页接口响应不是有效 JPEG 或 PNG 图片')
     return data
 
 
@@ -165,16 +167,8 @@ def download_wenku(args):
 
         output_dir = args.dir
         os.makedirs(output_dir, exist_ok=True)
-        if args.output:
-            output_path = args.output
-            if not path.isabs(output_path):
-                output_path = path.join(output_dir, output_path)
-            if not output_path.lower().endswith('.pdf'):
-                output_path += '.pdf'
-        else:
-            output_path = path.join(output_dir, _output_title(info['title'], doc_id) + '.pdf')
-
-        if path.exists(output_path) and not args.overwrite:
+        output_path = path.join(output_dir, _output_title(info['title'], doc_id) + '.pdf')
+        if path.exists(output_path):
             raise FileExistsError(f'输出文件已存在：{output_path}（使用 --overwrite 覆盖）')
 
         image_data = {}
@@ -224,12 +218,10 @@ def download_wenku(args):
 def reg_subparser(subparsers):
     wenku_parser = subparsers.add_parser('wenku', help='下载百度文库预览文档为 PDF')
     wenku_parser.add_argument('doc_id', help='百度文库文档 ID（十六进制字符串）')
-    wenku_parser.add_argument('-o', '--output', default='', help='输出 PDF 文件名或路径')
     wenku_parser.add_argument('-d', '--dir', default='.', help='输出目录')
     wenku_parser.add_argument('-s', '--start', type=int, default=1, help='起始页（从 1 开始）')
     wenku_parser.add_argument('-e', '--end', type=int, help='结束页（默认至文档末页）')
     wenku_parser.add_argument('-t', '--threads', type=int, default=8, help='并发线程数')
     wenku_parser.add_argument('-r', '--retry', type=int, default=10, help='每页重试次数')
     wenku_parser.add_argument('-p', '--proxy', default='', help='HTTP/HTTPS 代理地址')
-    wenku_parser.add_argument('--overwrite', action='store_true', help='覆盖已有 PDF 文件')
     wenku_parser.set_defaults(func=download_wenku)
