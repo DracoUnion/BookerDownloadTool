@@ -1,9 +1,6 @@
-import os
 import re
-import sys
 import time
 import traceback
-import copy
 from os import path
 from pyquery import PyQuery as pq
 from EpubCrawler.util import request_retry
@@ -11,61 +8,14 @@ from EpubCrawler.img import process_img
 from EpubCrawler.config import config as cralwer_config
 from datetime import datetime
 from GenEpub import gen_epub
-from concurrent.futures import ThreadPoolExecutor
 from collections import deque
 from .util import *
 from .ext_cookie import extract_cookies
-
-# 滚动到底
-def scroll_to_bottom(page):
-    page.evaluate('''
-        () => {
-            document.documentElement.scrollTop -= 50
-            document.documentElement.scrollTop = 100000000
-        }
-    ''')
-
-# 获取回答数量
-def get_ans_total(page):
-    return page.evaluate('''
-        () => {
-            var el = document.querySelector('h4.List-headerText')
-            if (!el) return 0
-            var text = el.innerText.replace(',', '')
-            var m = /\\d+/.exec(text)
-            if (!m) return 0
-            return Number.parseInt(m[0])
-        }
-    ''')  
-
-def get_ques_count(page):
-    return page.evaluate('''
-        () => {
-            var els = document.querySelectorAll('h2.ContentItem-title')
-            return els.length
-        }
-    ''')  
+from . import zhihu_sign
 
 # 获取整个页面 HTML
 def get_html(page):
-    return page.content()    
-
-def close_login_dialog(page):
-    page.evaluate('''
-        () => {
-            var cls_btn = document.querySelector('.Modal-closeButton')
-            if (cls_btn) cls_btn.click()
-        }
-    ''')
-    
-def get_qids(html):
-    rt = pq(html)
-    el_links = rt('h2.ContentItem-title meta[itemprop="url"]')
-    qids = [
-        pq(el).attr('content').split('/')[-1]
-        for el in el_links
-    ]
-    return qids
+    return page.content()
 
 def get_sub_tids(html):
     rt = pq(html)
@@ -76,7 +26,6 @@ def get_sub_tids(html):
     ]
     return tids
 
-# 获取文章列表（由 zh_articles 替代，见 API 抓取逻辑）
 def zhihu_topic_batch_sele(args):
     fname = args.fname
     tids = open(fname, encoding='utf8').read().split('\n')
@@ -88,42 +37,95 @@ def zhihu_topic_batch_sele(args):
             raise
         except: traceback.print_exc()
 
+
+# 知乎话题 API 基础 URL 与请求头
+ZH_TOPIC_INFO_API = 'https://www.zhihu.com/api/v4/topics/{tid}'
+ZH_TOPIC_QUES_API = 'https://www.zhihu.com/api/v5.1/topics/{tid}/feeds/new_question/v2'
+ZH_TOPIC_QUES_LIMIT = 20
+
+
+def zh_topic_headers(cookie, tid, url):
+    """话题接口请求头（含 x-zse-93 / x-zse-96 签名）。"""
+    dc0 = zhihu_sign.get_dc0_from_cookie(cookie)
+    hdrs = zhihu_sign.make_headers(url, dc0)
+    hdrs.update({
+        'User-Agent': ZH_UA,
+        'Referer': f'https://www.zhihu.com/topic/{tid}',
+        'Accept': 'application/json, text/plain, */*',
+        'Cookie': cookie,
+    })
+    return hdrs
+
+
+def zh_fetch_topic_title(tid, cookie):
+    """通过话题信息 API 获取话题标题；话题不存在时抛 FileNotFoundError。"""
+    url = ZH_TOPIC_INFO_API.format(tid=tid)
+    r = request_retry('GET', url, headers=zh_topic_headers(cookie, tid, url), check_status=False, retry=10, timeout=15)
+    if r.status_code == 404:
+        raise FileNotFoundError(f'话题 [tid={tid}] 不存在')
+    if r.status_code == 403:
+        raise RuntimeError(f'话题 API 返回 403（可能需要登录 Cookie），tid={tid}')
+    r.raise_for_status()
+    return r.json().get('name', '')
+
+
+def zh_fetch_topic_qids(tid, cookie):
+    """分页抓取话题下的新问题，返回 qid 列表（去重保序）。"""
+    qids = []
+    seen = set()
+    offset = 0
+    limit = ZH_TOPIC_QUES_LIMIT
+    while True:
+        url = f'{ZH_TOPIC_QUES_API.format(tid=tid)}?offset={offset}&limit={limit}'
+        r = request_retry('GET', url, headers=zh_topic_headers(cookie, tid, url), check_status=False, retry=10, timeout=15)
+        if r.status_code == 403:
+            raise RuntimeError(f'问题列表 API 返回 403（可能需要登录 Cookie 或触发风控），tid={tid}')
+        r.raise_for_status()
+        d = r.json()
+        for item in d.get('data', []):
+            tgt = item.get('target') or {}
+            if tgt.get('type') == 'question' and tgt.get('id'):
+                qid = str(tgt['id'])
+                if qid not in seen:
+                    seen.add(qid)
+                    qids.append(qid)
+        paging = d.get('paging', {})
+        if paging.get('is_end'):
+            break
+        # 下一 offset（next 形如 ...?offset=40&limit=20&）
+        nxt = paging.get('next', '')
+        m = re.search(r'offset=(\d+)', nxt)
+        if not m:
+            break
+        offset = int(m.group(1))
+        time.sleep(1)   # 控制频率，避免触发风控
+    return qids
+
+
 def zhihu_topic_sele(args):
     tid = args.tid
-    # 检查是否存在
-    url = f'https://www.zhihu.com/topic/{tid}'
-    html = request_retry('GET', url).text
-    rt = pq(html)
-    if '你似乎来到了没有知识存在的荒原' in rt('title').text():
+    cookie = get_zh_cookie(args)
+    if not cookie:
+        print(f'话题 [tid={tid}] 缺少知乎 Cookie')
+        return
+    if not zhihu_sign.get_dc0_from_cookie(cookie):
+        print(f'话题 [tid={tid}] Cookie 缺少 d_c0，无法签名')
+        return
+    try:
+        title = zh_fetch_topic_title(tid, cookie)
+        qids = zh_fetch_topic_qids(tid, cookie)
+    except FileNotFoundError:
         print(f'话题 [tid={tid}] 不存在')
         return
-    title = rt('.TopicMetaCard-title').text()
-    with camou_create_driver(args.no_headless) as (browser, context, page):
-        set_driver_cookie(context, args.cookie, 'zhihu.com')
-        page.goto(url, wait_until='domcontentloaded', timeout=30_000)
-        close_login_dialog(page)
-        last_count = 0
-        cntr = 0
-        while True:
-            try:
-                scroll_to_bottom(page)
-                page.wait_for_timeout(500)
-                count = get_ques_count(page)
-                print(f'count: {count}')
-                if count == last_count:
-                    cntr += 1
-                    if cntr == 10: break
-                else:
-                    cntr = 0
-                last_count = count
-            except KeyboardInterrupt:
-                raise
-            except:
-                traceback.print_exc()
-        html = get_html(page)
-    qids = get_qids(html)
+    except RuntimeError as e:
+        print(e)
+        return
+    if not qids:
+        print(f'话题 [tid={tid}] 无新问题')
+        return
     fname = f'zhihu_ques_{tid}_{fname_escape(title)}.txt'
-    open(fname, 'w').write('\n'.join(qids) + '\n')
+    open(fname, 'w', encoding='utf8').write('\n'.join(qids) + '\n')
+    print(f'共 {len(qids)} 个问题，写入 {fname}')
 
 def zhihu_ques_batch_sele(args):
     fname = args.fname
@@ -319,8 +321,6 @@ def zhihu_all_topics_sele(args):
 
 
 def reg_subparser(subparsers):
-    wk8_cookie = os.environ.get('WK8_COOKIE', '')
-
     zhihu_ques_parser = subparsers.add_parser("zhihu-ques", help="通过官方 API 爬取知乎问题下的回答")
     zhihu_ques_parser.add_argument("qid", help="问题 id")
     zhihu_ques_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
@@ -331,14 +331,14 @@ def reg_subparser(subparsers):
     zhihu_ques_batch_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
     zhihu_ques_batch_parser.set_defaults(func=zhihu_ques_batch_sele)
 
-    zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="通过 **Camoufox** 爬取知乎话题下的问题")
+    zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="通过官方 API 爬取知乎话题下的问题")
     zhihu_topic_parser.add_argument("tid", help="话题 tid")
-    zhihu_topic_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8 论坛 Cookie")
+    zhihu_topic_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
     zhihu_topic_parser.set_defaults(func=zhihu_topic_sele)
 
-    zhihu_topic_batch_parser = subparsers.add_parser("zhihu-topic-batch", help="通过 **Camoufox** 爬取知乎话题下的问题")
+    zhihu_topic_batch_parser = subparsers.add_parser("zhihu-topic-batch", help="通过官方 API 爬取知乎话题下的问题")
     zhihu_topic_batch_parser.add_argument("fname", help="tid 列表文件名")
-    zhihu_topic_batch_parser.add_argument("-c", "--cookie", default=wk8_cookie, help="wenku8 论坛 Cookie")
+    zhihu_topic_batch_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
     zhihu_topic_batch_parser.set_defaults(func=zhihu_topic_batch_sele)
 
     zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="通过 **Camoufox** 爬取知乎子话题")

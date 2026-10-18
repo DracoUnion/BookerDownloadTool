@@ -38,6 +38,7 @@ dependencies = [
     "EpubCrawler",
     "camoufox",
     "playwright",
+    "quickjs",
     "imgyaso",
     "img2pdf",
     "pyexecjs",
