@@ -1,0 +1,1 @@
+62845:function(ei,eo,ec){"use strict";ec.d(eo,{F:function(){return ef}});var eu,ef="2.0";!function(ei){ei.iOS="5_2.0",ei.Android="4_2.0",ei.Web="3_2.0"}(eu||(eu={}))},
