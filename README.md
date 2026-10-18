@@ -118,10 +118,10 @@ bdt ln 123456 -s out
 
 ### 知乎
 
-知乎相关命令均基于 Camoufox 浏览器边滚动边抓取，Cookie 可通过 `-c` 传入（默认取 `WK8_COOKIE`）。
+`zhihu-ques` / `zhihu-ques-batch` 通过官方 API（`api/v4/questions/{qid}/answers`）抓取问题下全部回答并生成 EPUB；Cookie 缺省用 `browser_cookie3` 从 Firefox/Chrome 浏览器提取，也可用 `-c` 显式传入。`zhihu-topic` 系列仍基于 Camoufox 浏览器边滚动边抓取。
 
 ```bash
-# 抓取单个问题下全部回答，生成 EPUB
+# 抓取单个问题下全部回答，生成 EPUB（自动从浏览器取 Cookie）
 bdt zhihu-ques 295617378
 
 # 批量抓取（文件每行一个 qid）
@@ -325,4 +325,4 @@ bdt exp-whole-site example.db > urls.txt
 
 - 绝大多数下载命令输出到**当前工作目录**（EPUB、txt、md、JSONL、`out/` 等），可用 `-o/--out`、`-d/--dir`、`-s/--save-path` 等参数指定输出位置。
 - 使用代理的公共参数 `-p/--proxy`，如 `http://127.0.0.1:7890`；`freembook` 的 `-p` 支持用 `;` 分隔多个代理轮换。
-- 需要浏览器环境的命令（知乎、Pixabay、Anna's Archive 单本下载）基于 Camoufox，首次运行会自动下载浏览器内核；抓取时可用全局 `-H` 打开可见窗口观察行为。
+- 需要浏览器环境的命令（知乎 `zhihu-topic` 系列、Pixabay、Anna's Archive 单本下载）基于 Camoufox，首次运行会自动下载浏览器内核；`zhihu-ques` 系列改用官方 API，不依赖浏览器。抓取时可用全局 `-H` 打开可见窗口观察行为。
