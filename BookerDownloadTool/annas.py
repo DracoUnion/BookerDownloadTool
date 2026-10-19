@@ -125,7 +125,9 @@ def download_annas(args):
         ext = rt.find('.text-gray-800').text().split(' · ')[1].lower()
         fname = fname_escape(f'{title[:200]}.{ext}')
         fname_bak = fname_escape(f'{fname}.bak')
-        if os.path.isfile(fname):
+        skip_fname = re.sub(r'\.\w+$', '', fname) + '.skip'
+        if os.path.isfile(fname) or \
+           os.path.isfile(skip_fname):
             print(f'{fname} 已存在')
             return
         print(f'fname: {fname}')
