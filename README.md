@@ -118,7 +118,7 @@ bdt ln 123456 -s out
 
 ### 知乎
 
-`zhihu-ques` / `zhihu-ques-batch` 通过官方 API（`api/v4/questions/{qid}/answers`）抓取问题下全部回答并生成 EPUB；`zhihu-topic` / `zhihu-topic-batch` 通过官方 API（`api/v5.1/topics/{tid}/feeds/new_question/v2`）抓取话题下的问题 id 列表。两者都需要签名请求头（`x-zse-93` / `x-zse-96`，算法见 `doc/zhihu_sign.md`），Cookie 缺省用 `browser_cookie3` 从 Firefox/Chrome 浏览器提取，也可用 `-c` 显式传入。`zhihu-topics` 仍基于 Camoufox 浏览器边递归抓取子话题。
+`zhihu-ques` / `zhihu-ques-batch` 通过官方 API（`api/v4/questions/{qid}/answers`）抓取问题下全部回答并生成 EPUB；`zhihu-topic` / `zhihu-topic-batch` 通过官方 API（`api/v5.1/topics/{tid}/feeds/new_question/v2`）抓取话题下的问题 id 列表；`zhihu-topics` 通过官方 API（`api/v3/topics/{tid}/children`）递归抓取子话题。三者都需要签名请求头（`x-zse-93` / `x-zse-96`，算法见 `doc/zhihu_sign.md`），Cookie 缺省用 `browser_cookie3` 从 Firefox/Chrome 浏览器提取，也可用 `-c` 显式传入。
 
 ```bash
 # 抓取单个问题下全部回答，生成 EPUB（自动从浏览器取 Cookie）
@@ -325,4 +325,4 @@ bdt exp-whole-site example.db > urls.txt
 
 - 绝大多数下载命令输出到**当前工作目录**（EPUB、txt、md、JSONL、`out/` 等），可用 `-o/--out`、`-d/--dir`、`-s/--save-path` 等参数指定输出位置。
 - 使用代理的公共参数 `-p/--proxy`，如 `http://127.0.0.1:7890`；`freembook` 的 `-p` 支持用 `;` 分隔多个代理轮换。
-- 需要浏览器环境的命令（知乎 `zhihu-topics`、Pixabay、Anna's Archive 单本下载）基于 Camoufox，首次运行会自动下载浏览器内核；`zhihu-ques` / `zhihu-topic` 系列已改用官方 API + 签名，不依赖浏览器。抓取时可用全局 `-H` 打开可见窗口观察行为。
+- 需要浏览器环境的命令（Pixabay、Anna's Archive 单本下载）基于 Camoufox，首次运行会自动下载浏览器内核；知乎 `zhihu-ques` / `zhihu-topic` / `zhihu-topics` 系列已全部改用官方 API + 签名，不依赖浏览器。抓取时可用全局 `-H` 打开可见窗口观察行为。

@@ -2,7 +2,6 @@ import re
 import time
 import traceback
 from os import path
-from pyquery import PyQuery as pq
 from EpubCrawler.util import request_retry
 from EpubCrawler.img import process_img
 from EpubCrawler.config import config as cralwer_config
@@ -13,18 +12,37 @@ from .util import *
 from .ext_cookie import extract_cookies
 from . import zhihu_sign
 
-# 获取整个页面 HTML
-def get_html(page):
-    return page.content()
+# 知乎话题 API 基础 URL 与请求头
+ZH_TOPIC_INFO_API = 'https://www.zhihu.com/api/v4/topics/{tid}'
+ZH_TOPIC_QUES_API = 'https://www.zhihu.com/api/v5.1/topics/{tid}/feeds/new_question/v2'
+ZH_TOPIC_QUES_LIMIT = 20
+ZH_TOPIC_CHILDREN_API = 'https://www.zhihu.com/api/v3/topics/{tid}/children'
 
-def get_sub_tids(html):
-    rt = pq(html)
-    el_topics = rt('.TopicRelativeBoard-item').eq(-1).find('a')
-    tids = [
-        pq(el).attr('href').split('/')[-1]
-        for el in el_topics
-    ]
-    return tids
+
+def zh_fetch_topic_children(tid, cookie):
+    """分页获取话题的直接子话题 tid，空页表示结束。"""
+    children = []
+    offset = 0
+    limit = 50
+    while True:
+        url = ZH_TOPIC_CHILDREN_API.format(tid=tid) + f'?offset={offset}&limit={limit}'
+        r = request_retry('GET', url, headers=zh_topic_headers(cookie, tid, url), check_status=False, retry=10, timeout=15)
+        if r.status_code == 403:
+            raise RuntimeError(f'子话题 API 返回 403（可能需要登录 Cookie 或触发风控），tid={tid}')
+        r.raise_for_status()
+        d = r.json()
+        data = d.get('data', [])
+        if not data:
+            break
+        children.extend(str(item['id']) for item in data if item.get('id'))
+        nxt = d.get('paging', {}).get('next', '')
+        m = re.search(r'offset=(\d+)', nxt)
+        if not m:
+            break
+        offset = int(m.group(1))
+        time.sleep(1)   # 控制频率，避免触发风控
+    return children
+
 
 def zhihu_topic_batch_sele(args):
     fname = args.fname
@@ -281,45 +299,53 @@ def zhihu_ques_sele(args):
 
 def zhihu_all_topics_sele(args):
     root_tid = args.root
+    cookie = get_zh_cookie(args)
+    if not cookie:
+        print('缺少知乎 Cookie')
+        return
+    if not zhihu_sign.get_dc0_from_cookie(cookie):
+        print('Cookie 缺少 d_c0，无法签名')
+        return
+
     res_fname = f'zhihu_all_topics_{root_tid}.txt'
     rec_fname = f'zhihu_all_topics_{root_tid}_rec.txt'
 
     ofile = open(res_fname, 'a', encoding='utf8')
     rec_file = open(rec_fname, 'a+', encoding='utf8')
-    if rec_file.tell() != 0:
-        rec_file.seek(0, 0)
-        rec = rec_file.read().split('\n')
-        rec = [l for l in rec if l]
-        # if rec and rec[-1] == '-1': 
-        #     rec = rec[:-1]
-        #     rec_file.seek(1, -3)
-        vis = set(rec)
-        pop_count = rec.count('-1')
-        rec = [tid for tid in rec if tid != '-1'][pop_count:]
-        q = deque(rec)
-    else:
-        vis = set()
-        q = deque([root_tid])
-        rec_file.write(root_tid + '\n')
-    with camou_create_driver(args.no_headless) as (browser, context, page):
-        set_driver_cookie(context, args.cookie, 'zhihu.com')
-        page.goto(f'https://www.zhihu.com/topic/{root_tid}', wait_until='domcontentloaded', timeout=30_000)
+    try:
+        if rec_file.tell() != 0:
+            rec_file.seek(0, 0)
+            rec = rec_file.read().split('\n')
+            rec = [l for l in rec if l]
+            vis = set(rec)
+            pop_count = rec.count('-1')
+            rec = [tid for tid in rec if tid != '-1'][pop_count:]
+            q = deque(rec)
+        else:
+            vis = set([root_tid])
+            q = deque([root_tid])
+            rec_file.write(root_tid + '\n')
+
         while q:
             tid = q.popleft()
             print(f'tid: {tid}')
             ofile.write(tid + '\n')
-            url = f'https://www.zhihu.com/topic/{tid}'
-            page.goto(url, wait_until='domcontentloaded', timeout=30_000)
-            subs = get_sub_tids(get_html(page))
+            try:
+                subs = zh_fetch_topic_children(tid, cookie)
+            except RuntimeError as e:
+                print(e)
+                continue
             rec_file.write('-1\n')
             for s in subs:
                 if s not in vis:
                     vis.add(s)
                     q.append(s)
                     rec_file.write(s + '\n')
-            page.wait_for_timeout(500)
-    ofile.close()
-    rec_file.close()
+            rec_file.flush()
+            time.sleep(1)
+    finally:
+        ofile.close()
+        rec_file.close()
 
     
 
@@ -345,7 +371,7 @@ def reg_subparser(subparsers):
     zhihu_topic_batch_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
     zhihu_topic_batch_parser.set_defaults(func=zhihu_topic_batch_sele)
 
-    zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="通过 **Camoufox** 爬取知乎子话题")
+    zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="通过官方 API 递归抓取知乎子话题")
     zhihu_topics_parser.add_argument("root", help="根话题 tid")
-    zhihu_topics_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie")
+    zhihu_topics_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
     zhihu_topics_parser.set_defaults(func=zhihu_all_topics_sele)
