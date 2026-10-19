@@ -173,18 +173,20 @@ def get_zh_cookie(args):
     return ''
 
 
-def zh_ans_headers(cookie, qid):
-    return {
+def zh_ans_headers(cookie, qid, url):
+    dc0 = zhihu_sign.get_dc0_from_cookie(cookie)
+    hdrs = zhihu_sign.make_headers(url, dc0)
+    hdrs.update({
         'User-Agent': ZH_UA,
         'Referer': f'https://www.zhihu.com/question/{qid}',
         'Accept': 'application/json, text/plain, */*',
         'Cookie': cookie,
-    }
+    })
+    return hdrs
 
 
 def zh_fetch_answers(qid, cookie):
     """分页抓取某问题下的全部回答，返回 (答案列表, 问题标题)。"""
-    hdrs = zh_ans_headers(cookie, qid)
     answers = []
     title = None
     offset = 0
@@ -192,7 +194,7 @@ def zh_fetch_answers(qid, cookie):
     while True:
         url = f'{ZH_ANS_API.format(qid=qid)}?include={ZH_INCLUDE}&limit={limit}&offset={offset}'
         print(url)
-        r = request_retry('GET', url, headers=hdrs, check_status=False, retry=10, timeout=15)
+        r = request_retry('GET', url, headers=zh_ans_headers(cookie, qid, url), check_status=False, retry=10, timeout=15)
         if r.status_code == 403:
             # 未登录 / 风控：尝试用问题页判断是否存在
             raise RuntimeError(f'API 返回 403（可能需要登录 Cookie），qid={qid}')
@@ -221,7 +223,8 @@ def zh_answer_content(ans, cookie):
     if ans.get('content_need_truncated'):
         aid = ans['id']
         url = f'https://www.zhihu.com/api/v4/answers/{aid}?include=content'
-        r = request_retry('GET', url, headers=zh_ans_headers(cookie, ans.get('question', {}).get('id', '')), retry=10, timeout=15)
+        qid = ans.get('question', {}).get('id', '')
+        r = request_retry('GET', url, headers=zh_ans_headers(cookie, qid, url), retry=10, timeout=15)
         if r.status_code == 200:
             content = r.json().get('content', content)
     return content
