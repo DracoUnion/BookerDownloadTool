@@ -44,13 +44,13 @@ def zh_fetch_topic_children(tid, cookie):
     return children
 
 
-def zhihu_topic_batch_sele(args):
+def zhihu_topic_batch(args):
     fname = args.fname
     tids = open(fname, encoding='utf8').read().split('\n')
     tids = [t for t in tids if t]
     for t in tids:
         args.tid = t
-        try: zhihu_topic_sele(args)
+        try: zhihu_topic(args)
         except KeyboardInterrupt:
             raise
         except: traceback.print_exc()
@@ -122,7 +122,7 @@ def zh_fetch_topic_qids(tid, cookie):
     return qids
 
 
-def zhihu_topic_sele(args):
+def zhihu_topic(args):
     tid = args.tid
     cookie = get_zh_cookie(args)
     if not cookie:
@@ -147,13 +147,13 @@ def zhihu_topic_sele(args):
     open(fname, 'w', encoding='utf8').write('\n'.join(qids) + '\n')
     print(f'共 {len(qids)} 个问题，写入 {fname}')
 
-def zhihu_ques_batch_sele(args):
+def zhihu_ques_batch(args):
     fname = args.fname
     qids = open(fname, encoding='utf8').read().split('\n')
     qids = [q for q in qids if q]
     for q in qids:
         args.qid = q
-        try: zhihu_ques_sele(args)
+        try: zhihu_ques(args)
         except KeyboardInterrupt:
             raise
         except: traceback.print_exc()
@@ -264,7 +264,7 @@ def zh_articles(answers, cookie, qid, title):
     return articles
 
 
-def zhihu_ques_sele(args):
+def zhihu_ques(args):
     cralwer_config['optiMode'] = 'thres'
     cralwer_config['imgSrc'] = ['data-original', 'src']
     qid = args.qid
@@ -297,7 +297,7 @@ def zhihu_ques_sele(args):
         )
     gen_epub(articles, imgs)
 
-def zhihu_all_topics_sele(args):
+def zhihu_all_topics(args):
     root_tid = args.root
     cookie = get_zh_cookie(args)
     if not cookie:
@@ -354,24 +354,24 @@ def reg_subparser(subparsers):
     zhihu_ques_parser = subparsers.add_parser("zhihu-ques", help="通过官方 API 爬取知乎问题下的回答")
     zhihu_ques_parser.add_argument("qid", help="问题 id")
     zhihu_ques_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
-    zhihu_ques_parser.set_defaults(func=zhihu_ques_sele)
+    zhihu_ques_parser.set_defaults(func=zhihu_ques)
 
     zhihu_ques_batch_parser = subparsers.add_parser("zhihu-ques-batch", help="通过官方 API 爬取知乎问题下的回答")
     zhihu_ques_batch_parser.add_argument("fname", help="qid 列表文件名")
     zhihu_ques_batch_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
-    zhihu_ques_batch_parser.set_defaults(func=zhihu_ques_batch_sele)
+    zhihu_ques_batch_parser.set_defaults(func=zhihu_ques_batch)
 
     zhihu_topic_parser = subparsers.add_parser("zhihu-topic", help="通过官方 API 爬取知乎话题下的问题")
     zhihu_topic_parser.add_argument("tid", help="话题 tid")
     zhihu_topic_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
-    zhihu_topic_parser.set_defaults(func=zhihu_topic_sele)
+    zhihu_topic_parser.set_defaults(func=zhihu_topic)
 
     zhihu_topic_batch_parser = subparsers.add_parser("zhihu-topic-batch", help="通过官方 API 爬取知乎话题下的问题")
     zhihu_topic_batch_parser.add_argument("fname", help="tid 列表文件名")
     zhihu_topic_batch_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
-    zhihu_topic_batch_parser.set_defaults(func=zhihu_topic_batch_sele)
+    zhihu_topic_batch_parser.set_defaults(func=zhihu_topic_batch)
 
     zhihu_topics_parser = subparsers.add_parser("zhihu-topics", help="通过官方 API 递归抓取知乎子话题")
     zhihu_topics_parser.add_argument("root", help="根话题 tid")
     zhihu_topics_parser.add_argument("-c", "--cookie", default='', help="知乎 Cookie（默认从 Firefox/Chrome 浏览器提取）")
-    zhihu_topics_parser.set_defaults(func=zhihu_all_topics_sele)
+    zhihu_topics_parser.set_defaults(func=zhihu_all_topics)
