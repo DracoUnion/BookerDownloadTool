@@ -185,15 +185,6 @@ def annas_dedup(args):
     open(args.flist, 'w', encoding='utf8').write('\n'.join(li))
     print('done...')
 
-def main():
-
-
-
-    args = parser.parse_args()
-    args.func(args)
-
-if __name__ == '__main__': main()
-
 def reg_subparser(subparsers):
     dl_annas_parser = subparsers.add_parser("annas", help="下载文件")
     dl_annas_parser.add_argument("hash", help="文件哈希")
