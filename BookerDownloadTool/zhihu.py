@@ -131,15 +131,8 @@ def zhihu_topic(args):
     if not zhihu_sign.get_dc0_from_cookie(cookie):
         print(f'话题 [tid={tid}] Cookie 缺少 d_c0，无法签名')
         return
-    try:
-        title = zh_fetch_topic_title(tid, cookie)
-        qids = zh_fetch_topic_qids(tid, cookie)
-    except FileNotFoundError:
-        print(f'话题 [tid={tid}] 不存在')
-        return
-    except RuntimeError as e:
-        print(e)
-        return
+    title = zh_fetch_topic_title(tid, cookie)
+    qids = zh_fetch_topic_qids(tid, cookie)
     if not qids:
         print(f'话题 [tid={tid}] 无新问题')
         return
@@ -312,40 +305,32 @@ def zhihu_all_topics(args):
 
     ofile = open(res_fname, 'a', encoding='utf8')
     rec_file = open(rec_fname, 'a+', encoding='utf8')
-    try:
-        if rec_file.tell() != 0:
-            rec_file.seek(0, 0)
-            rec = rec_file.read().split('\n')
-            rec = [l for l in rec if l]
-            vis = set(rec)
-            pop_count = rec.count('-1')
-            rec = [tid for tid in rec if tid != '-1'][pop_count:]
-            q = deque(rec)
-        else:
-            vis = set([root_tid])
-            q = deque([root_tid])
-            rec_file.write(root_tid + '\n')
+    if rec_file.tell() != 0:
+        rec_file.seek(0, 0)
+        rec = rec_file.read().split('\n')
+        rec = [l for l in rec if l]
+        vis = set(rec)
+        pop_count = rec.count('-1')
+        rec = [tid for tid in rec if tid != '-1'][pop_count:]
+        q = deque(rec)
+    else:
+        vis = set([root_tid])
+        q = deque([root_tid])
+        rec_file.write(root_tid + '\n')
 
-        while q:
-            tid = q.popleft()
-            print(f'tid: {tid}')
-            ofile.write(tid + '\n')
-            try:
-                subs = zh_fetch_topic_children(tid, cookie)
-            except RuntimeError as e:
-                print(e)
-                continue
-            rec_file.write('-1\n')
-            for s in subs:
-                if s not in vis:
-                    vis.add(s)
-                    q.append(s)
-                    rec_file.write(s + '\n')
-            rec_file.flush()
-            time.sleep(1)
-    finally:
-        ofile.close()
-        rec_file.close()
+    while q:
+        tid = q.popleft()
+        print(f'tid: {tid}')
+        ofile.write(tid + '\n')
+        subs = zh_fetch_topic_children(tid, cookie)
+        rec_file.write('-1\n')
+        for s in subs:
+            if s not in vis:
+                vis.add(s)
+                q.append(s)
+                rec_file.write(s + '\n')
+        rec_file.flush()
+        time.sleep(1)
 
     
 
