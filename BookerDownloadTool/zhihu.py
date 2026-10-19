@@ -263,14 +263,7 @@ def zhihu_ques(args):
     qid = args.qid
     cookie = get_zh_cookie(args)
 
-    try:
-        answers, title = zh_fetch_answers(qid, cookie)
-    except FileNotFoundError:
-        print(f'问题 [qid={qid}] 不存在')
-        return
-    except RuntimeError as e:
-        print(e)
-        return
+    answers, title = zh_fetch_answers(qid, cookie)
     if not answers:
         print(f'问题 [qid={qid}] 无回答')
         return
