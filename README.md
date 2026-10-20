@@ -321,9 +321,12 @@ bdt twitter -k gpt -l en --since 2024-06-01 --until 2024-06-30 --limit 500
 
 # 把浏览器里已登录 x.com 的 cookie 导出为 cookies.json
 bdt twitter -E cookies.json --browser chrome
+
+# 不提供登录参数时，自动从本机浏览器提取 cookie（优先 firefox → chrome → edge）
+bdt twitter -k openai
 ```
 
-`twitter` 基于 Scweet v5（`pip install scweet`）。需先配置登录态（`-c/--cookies-file`、`-t/--auth-token` 或 `--inline-cookies` 三选一），X 通常强制登录。结果保存为 CSV（默认）或 JSON。
+`twitter` 基于 Scweet v5（`pip install scweet`）。登录态三选一（`-c/--cookies-file`、`-t/--auth-token`、`--inline-cookies`）；**均未提供时**自动通过 `browser_cookie3` 从本机浏览器（优先 firefox→chrome→edge，可用 `-b/--browser` 指定单一浏览器）提取已登录 x.com 的 cookie，找不到则退回匿名尝试。结果保存为 CSV（默认）或 JSON。
 
 ---
 
