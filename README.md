@@ -50,6 +50,7 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `YUQUE_COOKIE` | 语雀（`yuque`/`batch-yuque`） |
 | `FEISHU_COOKIE` | 飞书（`feishu`/`feishu-all`） |
 | `GH_TOKEN` | GitHub（`gh-repo-fetch`） |
+| `XHS_COOKIE` | 小红书（`xhs`，可选；缺省自动从本机浏览器 Cookie 提取） |
 
 > 爬知乎乎、语雀、飞书、飞书等站点时，Cookie 里通常必须带上登录态的 Cookie 才能抓取完整内容。
 
@@ -81,6 +82,8 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `hkrnws-fetch` / `hkrnws-range` | 抓取 hckrnews 某天 / 某日期区间链接 | txt |
 | `pixabay` | 按关键词批量下载 Pixabay 图片 | 图片文件 |
 | `annas` / `annas-batch` / `annas-fetch` / `annas-dedup` | Anna's Archive 单本下载 / 批量 / 搜索 / 去重 | 文件 / JSONL |
+| `xhs` | 搜索小红书笔记，保存全量文本与图片 | md / 图片 |
+| `twitter` | 用 Scweet 抓取 Twitter/X 关键词推文 | csv / json |
 | `ext-cookies` | 从本机浏览器导出指定域名的 Cookie | 标准输出 |
 
 ---
@@ -291,6 +294,36 @@ bdt ext-cookies chrome zhihu.com
 ```
 
 支持浏览器：`chrome, chromium, opera, opera_gx, brave, edge, vivaldi, firefox, librewolf, safari, lynx, w3m, arc`。导出的 Cookie 可作为其他命令的 `-c` 参数或环境变量使用。
+
+### 小红书
+
+```bash
+# 搜索关键词，抓 1 页（每页 20 条），保存到 ./xhs/<关键词>/（自动含全量文字与图片）
+bdt xhs 考研
+
+# 抓 5 页、每页 50 条，保存到指定目录
+bdt xhs 考研 -p 5 -n 50 -o xhs_data
+
+# 不下载图片；显式提供 Cookie（含 a1 / web_session）
+bdt xhs 考研 -p 2 --no-img -c "a1=...; web_session=..."
+```
+
+Cookie 默认自动从本机浏览器提取 `xiaohongshu.com` 的会话（`-b` 指定浏览器，默认 `chrome`）；也可用 `-c/--cookie` 或 `XHS_COOKIE` 环境变量显式提供。每篇笔记保存为 `<note_id>.md`（YAML 元信息 + 正文）与 `imgs/` 下的图片。
+
+### Twitter
+
+```bash
+# 用 cookies.json 里的账号登录抓取关键词 openai
+bdt twitter -k openai -c cookies.json
+
+# 用 auth_token 登录，指定时间范围与语言，最多 500 条
+bdt twitter -k gpt -l en --since 2024-06-01 --until 2024-06-30 --limit 500
+
+# 把浏览器里已登录 x.com 的 cookie 导出为 cookies.json
+bdt twitter -E cookies.json --browser chrome
+```
+
+`twitter` 基于 Scweet v5（`pip install scweet`）。需先配置登录态（`-c/--cookies-file`、`-t/--auth-token` 或 `--inline-cookies` 三选一），X 通常强制登录。结果保存为 CSV（默认）或 JSON。
 
 ---
 

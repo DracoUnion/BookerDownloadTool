@@ -12,3 +12,6 @@ pandas
 sqlalchemy
 browser_cookie3
 arxiv
+scweet
+httpx
+xhshow

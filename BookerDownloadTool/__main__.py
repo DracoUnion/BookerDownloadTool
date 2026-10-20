@@ -3,7 +3,7 @@ from . import __version__
 from . import (
     annas, arxiv, discuz, dl_gh_book, ext_cookie, feishu, freembook,
     gh, hkrnws, lightnovel, links, medium, pic, uqer, webarchive,
-    whole_site, wenku, wx, yuque, zhihu, zsxq,
+    whole_site, wenku, wx, yuque, zhihu, zsxq, twitter, xhs,
 )
 
 
@@ -35,6 +35,8 @@ def main():
     wenku.reg_subparser(subparsers)
     annas.reg_subparser(subparsers)
     ext_cookie.reg_subparser(subparsers)
+    twitter.reg_subparser(subparsers)
+    xhs.reg_subparser(subparsers)
 
     args = parser.parse_args()
     args.func(args)
