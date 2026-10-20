@@ -74,6 +74,8 @@ def _load_cookies(args):
 
     # 均未显式提供：从本机浏览器（browser_cookie3）提取 x.com 登录态
     cookies = extract_cookies_multi_browsers('x.com')
+    if not cookies:
+        raise SystemExit('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录 X')
     if "auth_token" not in cookies:
         print(f"[警告] Cookie 中不包含 auth_token")
 
