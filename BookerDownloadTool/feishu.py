@@ -336,13 +336,19 @@ def tr_download_single(uid, wid, idx, l, args):
         img_fname = path.join('img', name)
         open(img_fname, 'wb').write(img)
 
+def get_feishu_cookies(args):
+    if args.cookie:
+        return args.cookie
+
+    cookies = extract_cookies_multi_browsers('feishu.com')
+    cookies = cookie_dict_to_str(args.cookie)
+    if not cookies:
+        raise SystemExit('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录飞书')
+    return cookies
+
+
 def download_feishu_all(args):
-    if not args.cookie:
-        args.cookie = extract_cookies_multi_browsers('feishu.com')
-        args.cookie = cookie_dict_to_str(args.cookie)
-        if not args.cookie:
-            print('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录飞书')
-            return
+    args.cookie = get_feishu_cookies(args)
     proc_cfg['headers'] |= {
         'Cookie': args.cookie,
     }
@@ -373,8 +379,7 @@ def download_feishu_all(args):
         
 
 def download_feishu(args):
-    if not args.cookie:
-        raise ValueError('请设置 Cookie')
+    args.cookie = get_feishu_cookies(args)
     proc_cfg['headers'] |= {
         'Cookie': args.cookie,
     }
