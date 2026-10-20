@@ -163,10 +163,11 @@ def get_zh_cookie(args):
         return args.cookie
     # 从浏览器提取（Chrome 解密失败时降级到 Firefox）
     cookies = extract_cookies_multi_browsers('zhihu.com')
+    cookie_str = cookie_dict_to_str(cookies)
+    if not cookie_str:
+        raise SystemExit('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录知乎')
     print(f"[INFO] 已从本机浏览器提取登录 Cookie: "
         f"{sorted(cookies)}")
-    cookie_str = cookie_dict_to_str(cookies)
-    
     return cookie_str
 
 
