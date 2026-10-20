@@ -17,6 +17,7 @@ from EpubCrawler.config import config as crconf
 from typing import List, Tuple, Dict, Any
 from .process_img_md import process_img_md
 from .process_img_md import config as proc_cfg
+from .ext_cookie import extract_cookies_multi_browsers
 
 def parse_attribs(attribs_str: str) -> List[Tuple[List[int], int]]:
     """
@@ -337,7 +338,10 @@ def tr_download_single(uid, wid, idx, l, args):
 
 def download_feishu_all(args):
     if not args.cookie:
-        raise ValueError('请设置 Cookie')
+        args.cookie = extract_cookies_multi_browsers('feishu.com')
+        if not args.cookie:
+            print('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录飞书')
+            return
     proc_cfg['headers'] |= {
         'Cookie': args.cookie,
     }
