@@ -118,3 +118,5 @@ Thumbs.db
 # 小红书 APK 反编译中间产物（1.5G，不入库）
 _xhs_decompile/
 _xhs_data/
+tweets/
+xhs/
