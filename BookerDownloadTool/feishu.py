@@ -339,6 +339,7 @@ def tr_download_single(uid, wid, idx, l, args):
 def download_feishu_all(args):
     if not args.cookie:
         args.cookie = extract_cookies_multi_browsers('feishu.com')
+        args.cookie = cookie_dict_to_str(args.cookie)
         if not args.cookie:
             print('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录飞书')
             return
