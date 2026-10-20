@@ -37,61 +37,13 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from .util import cookie_str_to_dict
+from .ext_cookie import extract_cookies_multi_browsers
 
 
-# ---------------------------------------------------------------------------
-# 已登录浏览器 Cookie 导出小工具（可选）
-# ---------------------------------------------------------------------------
-# 自动提取时尝试的浏览器优先级（火狐 → Chrome → Edge）
-BROWSER_PRIORITY = ["firefox", "chrome", "edge"]
 
 
-def _browser_jar(browser: str):
-    """获取 browser_cookie3 的 cookie jar；返回 None 表示不支持/导入失败。"""
-    try:
-        import browser_cookie3 as bc
-    except ImportError:
-        sys.exit("[错误] 需要 browser_cookie3: pip install browser_cookie3")
 
-    getter = {
-        "firefox": bc.firefox, "chrome": bc.chrome, "edge": bc.edge,
-        "chromium": bc.chromium, "brave": bc.brave, "opera_gx": bc.opera_gx,
-    }.get(browser)
-    if getter is None:
-        sys.exit(f"[错误] 暂不支持的浏览器: {browser!r}"
-                 "（支持 firefox/chrome/edge/chromium/brave/opera_gx）")
-    return getter()
-
-
-def _get_browser_cookies(browser: str) -> dict:
-    """从本机浏览器提取 x.com / twitter.com 的指定 cookie（映射对象格式）。
-
-    最少需要 auth_token；ct0/twid/guest_id 一并带上更稳。
-    """
-    jar = _browser_jar(browser)
-    wanted = {"auth_token", "ct0", "twid", "guest_id"}
-    cookies = {}
-    for c in jar:
-        if c.domain and ("x.com" in c.domain or "twitter.com" in c.domain) and c.name in wanted:
-            cookies[c.name] = c.value
-    return cookies
-
-
-def extract_cookies(browser: str, outfile: str) -> None:
-    """把浏览器中已登录 x.com 的 cookie 导出到 outfile (映射对象格式)。
-
-    仅支持 Chromium 系浏览器（Chrome/Edge/Brave 等）。
-    要求: pip install browser_cookie3
-    """
-    cookies = _get_browser_cookies(browser)
-
-    if "auth_token" not in cookies:
-        sys.exit("[错误] 未在浏览器中找到 x.com 的 auth_token。请先在该浏览器登录 x.com 后再试。")
-
-    Path(outfile).write_text(
-        json.dumps(cookies, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    print(f"[OK] 已导出 cookie 到 {outfile}: {sorted(cookies)}")
 
 
 # ---------------------------------------------------------------------------
@@ -111,59 +63,29 @@ def _load_cookies(args):
     浏览器 cookie 默认按 firefox → chrome → edge 顺序尝试，成功即止；
     显式指定 --browser 时只尝试该浏览器。
     """
-    sources = [bool(args.cookies_file), bool(args.auth_token), bool(args.inline_cookies)]
-    if sum(sources) > 1:
-        sys.exit("[错误] -c / -t / --inline-cookies 三者最多选一个。")
-
-    if args.cookies_file:
-        p = Path(args.cookies_file)
-        if not p.is_file():
-            sys.exit(f"[错误] cookies 文件不存在: {p}")
-        return {"cookies_file": str(p)}
 
     if args.auth_token:
         return {"auth_token": args.auth_token}
-
-    if args.inline_cookies:
-        raw = args.inline_cookies.strip()
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            payload = raw
-        return {"cookies": payload}
+    if args.cookie:
+        cookies = cookie_str_to_dict(args.cookie)
+        if "auth_token" not in cookies:
+            print(f"[警告] Cookie 中不包含 auth_token")
+        return {"cookies": cookies}
 
     # 均未显式提供：从本机浏览器（browser_cookie3）提取 x.com 登录态
-    browsers = [args.browser] if args.browser else BROWSER_PRIORITY
-    for browser in browsers:
-        try:
-            browser_cookies = _get_browser_cookies(browser)
-        except SystemExit:
-            raise
-        except Exception as exc:
-            print(f"[警告] {browser} 浏览器 Cookie 提取失败: {exc}")
-            continue
+    cookies = extract_cookies_multi_browsers('x.com')
+    if "auth_token" not in cookies:
+        print(f"[警告] Cookie 中不包含 auth_token")
 
-        if "auth_token" not in browser_cookies:
-            print(f"[警告] {browser} 浏览器中未找到 x.com 的 auth_token，尝试下一个")
-            continue
-
-        print(f"[INFO] 已从本机 {browser} 浏览器提取登录 Cookie: "
-              f"{sorted(browser_cookies)}")
-        return {"cookies": browser_cookies}
-
-    print("[警告] 未在任何浏览器中找到 x.com 的 auth_token，将以匿名方式尝试。"
-          "X 通常强制登录，匿名大概率抓不到。")
-    return {}
+    print(f"[INFO] 已从本机浏览器提取登录 Cookie: "
+          f"{sorted(cookies)}")
+    return {"cookies": cookies}
 
 
 # ---------------------------------------------------------------------------
 # 抓取主流程
 # ---------------------------------------------------------------------------
 def twitter_fetch(args):
-    # 辅助模式：导出浏览器 cookie 后直接退出
-    if args.extract_cookies:
-        extract_cookies(args.browser or "chrome", args.extract_cookies)
-        return
 
     # 校验并补全日期
     if args.since:
@@ -276,55 +198,13 @@ def twitter_fetch(args):
         print(f"  [{ts}] @{user}: {text}")
 
 
-# ---------------------------------------------------------------------------
-# 参数解析（供 `python twitter.py` 独立运行）
-# ---------------------------------------------------------------------------
-def parse_args(argv=None):
-    parser = argparse.ArgumentParser(
-        description="使用 Scweet v5 抓取 Twitter/X 指定关键词的推文并保存到本地。",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
-    )
-    auth = parser.add_argument_group("登录授权（三选一，推荐 cookies-file 或 auth-token）")
-    auth.add_argument("--cookies-file", "-c", default=None, help="cookies.json 文件路径")
-    auth.add_argument("--auth-token", "-t", default=None, help="直接给定 auth_token 值，ct0 自动引导")
-    auth.add_argument("--inline-cookies", default=None, help="内联 JSON cookie 字符串")
-
-    parser.add_argument("--keywords", "-k", nargs="+", required=True, help="关键词，可多个")
-    parser.add_argument("--since", default=None, help="起始日期 YYYY-MM-DD，默认最近 30 天")
-    parser.add_argument("--until", default=None, help="结束日期 YYYY-MM-DD，默认今天")
-
-    parser.add_argument("--lang", "-l", default=None, help="语言过滤，如 zh / en")
-    parser.add_argument("--minlikes", type=int, default=None, help="点赞数下限")
-    parser.add_argument("--minreplies", type=int, default=None, help="回复数下限")
-    parser.add_argument("--minretweets", type=int, default=None, help="转推数下限")
-    parser.add_argument("--from-account", default=None, help="只看某账号发出的推文")
-    parser.add_argument("--hashtag", default=None, help="仅含某话题标签")
-    parser.add_argument("--display-type", default="Top", choices=["Top", "Latest"], help="结果排序")
-    parser.add_argument("--limit", type=int, default=None, help="最多抓取条数")
-
-    parser.add_argument("--max-empty-pages", type=int, default=None, help="连续空页停止阈值")
-    parser.add_argument("--db", default=None, help="Scweet 状态数据库路径")
-    parser.add_argument("--outdir", "-o", default="./tweets", help="结果保存目录，默认 ./tweets")
-    parser.add_argument("--proxy", default=None, help="代理地址")
-    parser.add_argument("--save", action="store_true", help="同时让 Scweet 自己把结果落盘")
-    parser.add_argument("--save-format", default="csv", choices=["csv", "json", "both"], help="--save 时的落盘格式")
-
-    parser.add_argument("--extract-cookies", "-E", metavar="FILE", default=None,
-                        help="把浏览器中已登录 x.com 的 cookie 导出到指定文件并退出")
-    parser.add_argument("--browser", default=None,
-                        choices=["firefox", "chrome", "edge", "chromium", "brave", "opera_gx"],
-                        help="提取 cookie 的浏览器；缺省按 firefox→chrome→edge 自动尝试，"
-                             "与 -E 共用时默认 chrome")
-    return parser.parse_args(argv)
 
 
 def reg_subparser(subparsers):
     p = subparsers.add_parser("twitter", help="抓取 Twitter/X 关键词推文")
     p.add_argument("-k", "--keywords", nargs="+", required=True, help="关键词，可多个")
-    p.add_argument("-c", "--cookies-file", default=None, help="cookies.json 文件路径")
     p.add_argument("-t", "--auth-token", default=None, help="auth_token 值，ct0 自动引导")
-    p.add_argument("--inline-cookies", default=None, help="内联 JSON cookie 字符串")
+    p.add_argument("-c", "--cookie", default=None, help="内联 JSON cookie 字符串")
     p.add_argument("--since", default=None, help="起始日期 YYYY-MM-DD，默认最近 30 天")
     p.add_argument("--until", default=None, help="结束日期 YYYY-MM-DD，默认今天")
     p.add_argument("-l", "--lang", default=None, help="语言过滤")
@@ -341,18 +221,4 @@ def reg_subparser(subparsers):
     p.add_argument("--proxy", default=None, help="代理地址")
     p.add_argument("--save", action="store_true", help="同时让 Scweet 自己把结果落盘")
     p.add_argument("--save-format", default="csv", choices=["csv", "json", "both"], help="--save 时的落盘格式")
-    p.add_argument("-E", "--extract-cookies", metavar="FILE", default=None,
-                   help="把浏览器中已登录 x.com 的 cookie 导出到指定文件并退出")
-    p.add_argument("--browser", default=None,
-                   choices=["firefox", "chrome", "edge", "chromium", "brave", "opera_gx"],
-                   help="提取 cookie 的浏览器；缺省按 firefox→chrome→edge 自动尝试，"
-                        "与 -E 共用时默认 chrome")
     p.set_defaults(func=twitter_fetch)
-
-
-def main(argv=None):
-    twitter_fetch(parse_args(argv))
-
-
-if __name__ == "__main__":
-    main()
