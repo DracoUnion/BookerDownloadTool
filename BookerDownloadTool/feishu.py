@@ -340,7 +340,7 @@ def get_feishu_cookies(args):
     if args.cookie:
         return args.cookie
 
-    cookies = extract_cookies_multi_browsers('feishu.com')
+    cookies = extract_cookies_multi_browsers('feishu.cn')
     cookies = cookie_dict_to_str(args.cookie)
     if not cookies:
         raise SystemExit('获取 Cookie 失败，请提供 Cookie 或在浏览器中登录飞书')
