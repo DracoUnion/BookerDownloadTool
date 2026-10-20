@@ -417,6 +417,8 @@ def load_xhs_cookies(args):
         raise SystemExit(
             "[错误] 未获取到 xiaohongshu.com 的 Cookie。\n"
             "       请在 Chrome 登录小红书后重试，或手动提供 -c \"a1=..; web_session=..\"")
+    print(f"[INFO] 已从本机浏览器提取登录 Cookie: "
+          f"{sorted(cookies)}")
     return cookies
 
 
