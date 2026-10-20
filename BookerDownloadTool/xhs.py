@@ -25,7 +25,7 @@ from pathlib import Path
 
 import httpx
 
-from .ext_cookie import extract_cookies
+from .ext_cookie import extract_cookies_multi_browsers
 from .util import cookie_str_to_dict, fname_escape
 
 # ---------------------------------------------------------------------------
@@ -404,22 +404,15 @@ class XhsClient:
 # ---------------------------------------------------------------------------
 # Cookie 获取
 # ---------------------------------------------------------------------------
-def load_cookies(args):
+def load_xhs_cookies(args):
     """优先 browser_cookie3 取本浏览器 xiaohongshu.com cookie；
     失败或显式给 -c/--cookie 时用明文 Cookie 串。
     """
     if args.cookie:
-        cookies = cookie_str_to_dict(args.cookie)
-        if cookies:
-            return cookies
-        print(f"[警告] 无法解析 -c Cookie 串，回退到浏览器提取")
+        return cookie_str_to_dict(args.cookie)
+    print(f"[警告] 无法解析 -c Cookie 串，回退到浏览器提取")
 
-    try:
-        cookies = extract_cookies(args.browser, "xiaohongshu.com")
-    except Exception as exc:
-        print(f"[警告] 浏览器 Cookie 提取失败: {exc}")
-        cookies = {}
-
+    cookies = extract_cookies_multi_browsers("xiaohongshu.com")
     if not cookies:
         raise SystemExit(
             "[错误] 未获取到 xiaohongshu.com 的 Cookie。\n"
@@ -497,7 +490,7 @@ def xhs_search(args):
     outdir = args.outdir
     Path(outdir).mkdir(parents=True, exist_ok=True)
 
-    cookies = load_cookies(args)
+    cookies = load_xhs_cookies(args)
     if not cookies.get("a1"):
         print("[警告] Cookie 缺少 a1（签名输入），签名可能失败")
     if not cookies.get("web_session"):
@@ -528,11 +521,8 @@ def reg_subparser(subparsers):
     xhs_parser.add_argument("-p", "--pages", type=int, default=1, help="抓取页数，默认 1")
     xhs_parser.add_argument("-n", "--page-size", type=int, default=20, help="每页条数，默认 20")
     xhs_parser.add_argument("-o", "--outdir", default="xhs", help="保存目录，默认 ./xhs")
-    xhs_parser.add_argument("-c", "--cookie", default=os.environ.get("XHS_COOKIE"),
-                            help="小红书 Cookie 串（含 a1 / web_session），默认取 $XHS_COOKIE；缺省则用浏览器 Cookie")
-    xhs_parser.add_argument("-b", "--browser", default="chrome",
-                            choices=["chrome", "chromium", "edge", "brave", "firefox", "opera_gx"],
-                            help="浏览器 Cookie 提取来源，默认 chrome")
+    xhs_parser.add_argument("-c", "--cookie",
+                            help="小红书 Cookie 串（含 a1 / web_session）；缺省则用浏览器 Cookie")
     xhs_parser.add_argument("--sort", default="general", choices=["general", "default"],
                             help="搜索结果排序，默认 general")
     xhs_parser.add_argument("--note-type", type=int, default=0,

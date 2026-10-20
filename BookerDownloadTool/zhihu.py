@@ -9,7 +9,7 @@ from datetime import datetime
 from GenEpub import gen_epub
 from collections import deque
 from .util import *
-from .ext_cookie import extract_cookies
+from .ext_cookie import extract_cookies_multi_browsers
 from . import zhihu_sign
 
 # 知乎话题 API 基础 URL 与请求头
@@ -162,15 +162,7 @@ def get_zh_cookie(args):
     if args.cookie:
         return args.cookie
     # 从浏览器提取（Chrome 解密失败时降级到 Firefox）
-    for br in ['firefox', 'chrome', 'edge']:
-        try:
-            ck = cookie_dict_to_str(extract_cookies(br, 'zhihu.com'))
-            if ck:
-                print(f'从 {br} 提取到知乎 Cookie')
-                return ck
-        except Exception as e:
-            print(f'{br} Cookie 提取失败: {e!r}')
-    return ''
+    return cookie_dict_to_str(extract_cookies_multi_browsers('zhihu.com'))
 
 
 def zh_ans_headers(cookie, qid, url):

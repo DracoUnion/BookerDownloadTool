@@ -1,6 +1,18 @@
 import browser_cookie3 as bc
 from .util import  cookie_dict_to_str
 
+def extract_cookies_multi_browsers(
+        domain,
+        browsers=('firefox', 'chrome', 'edge'),
+    ):
+    for br in browsers:
+        try:
+            ck = extract_cookies(br, domain)
+            if ck: return ck
+        except:
+            pass
+    return {}
+
 def extract_cookies(browser, domain):
     assert browser in [f.__name__ for f in bc.all_browsers]
     jar = getattr(bc, browser)()

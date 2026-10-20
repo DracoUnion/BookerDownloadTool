@@ -23,7 +23,26 @@ default_hdrs = {
 
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36'
 
+# Chrome 124 的 Sec-CH-UA 客户端提示头 —— 与下方伪造的 Chrome/124 UA 对齐，
+# 覆盖 Playwright headless 自带的 "HeadlessChrome" brand（BrowserScan/APIVoid 均会检测）。
+BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+CLIENT_HINTS = {
+    'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not;A=Brand";v="24"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-ch-ua-platform-version': '"10.0.0"',
+    'sec-ch-ua-full-version-list': '"Chromium";v="124.0.6367.91", "Google Chrome";v="124.0.6367.91", "Not;A=Brand";v="24.0.0.0"',
+    'sec-ch-ua-arch': '"x86"',
+    'sec-ch-ua-bitness': '"64"',
+    'sec-ch-ua-wow64': '?0',
+}
+
 DIR = path.dirname(path.abspath(__file__))
+
+def read_js(name):
+    """读取脚本文件内容（add_init_script 需要的是 JS 源码，不是路径）。"""
+    with open(path.join(DIR, name), encoding='utf-8') as f:
+        return f.read()
 
 d = lambda name: path.join(path.dirname(__file__), name)
 
@@ -145,13 +164,14 @@ def camou_create_driver(headless=True, timeout=30_000):
     }
     with Camoufox(**opts) as browser:
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            user_agent=BROWSER_UA,
             viewport={"width":1200,"height":640},
             locale="zh-CN",
-            timezone_id="Asia/Shanghai"
+            timezone_id="Asia/Shanghai",
+            extra_http_headers=CLIENT_HINTS,
         )
-        context.add_init_script(d('patch_env_mock_wasm.js'))
-        context.add_init_script(d('stealth.min.js'))
+        context.add_init_script(read_js('patch_env_mock_wasm.js'))
+        context.add_init_script(read_js('stealth.min.js'))
         page = context.new_page()
         page.set_default_timeout(timeout)
         page.set_default_navigation_timeout(timeout)
@@ -203,13 +223,14 @@ def float2hhmmss(num):
 
 def plrt_new_context(browser):
     context =  browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            user_agent=BROWSER_UA,
             viewport={"width":1200,"height":640},
             locale="zh-CN",
-            timezone_id="Asia/Shanghai"
+            timezone_id="Asia/Shanghai",
+            extra_http_headers=CLIENT_HINTS,
         )
-    context.add_init_script(d('patch_env_mock_wasm.js'))
-    context.add_init_script(d('stealth.min.js'))
+    context.add_init_script(read_js('patch_env_mock_wasm.js'))
+    context.add_init_script(read_js('stealth.min.js'))
     return context
 
 def plrt_new_browser(plrt, headless=True):
