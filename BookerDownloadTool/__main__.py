@@ -1,4 +1,5 @@
 import argparse
+import sys
 from . import __version__
 from . import (
     annas, arxiv, discuz, dl_gh_book, ext_cookie, feishu, freembook,
@@ -8,6 +9,9 @@ from . import (
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(prog="BookerDownloadTool", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-v", "--version", action="version", version=f"PYBP version: {__version__}")
     parser.add_argument("-H", "--no-headless", action="store_false")
