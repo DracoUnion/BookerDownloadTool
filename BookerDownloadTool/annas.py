@@ -96,7 +96,7 @@ def annas_fetch(args):
                 f'{qry_ext}{qry_cont}{qry_lang}{qry_yr}'
             )
             print(url)
-            html = plrt_get_html_retry(page, url, '.header-inner-top')
+            html = plrt_get_html_retry(page, url, '.header-inner-top', args.retry)
             rt = pq(html)
             el_links = rt.find('a.text-lg[href^="/md5/"]')
             if not el_links: break
@@ -118,7 +118,7 @@ def download_annas(args):
         hash_ = args.hash
         url = f'https://{HOST}/md5/{hash_}'
         # html = request_retry('GET', url).text
-        html = plrt_get_html_retry(page, url, '.text-gray-800')
+        html = plrt_get_html_retry(page, url, '.text-gray-800', args.retry)
         rt = pq(html)
         title = rt.find('div.font-semibold:nth-child(4)') \
             .text().strip().replace(' 🔍', '')
@@ -142,7 +142,7 @@ def download_annas(args):
         url = pq(random.choice(el_links_li)).children('a').attr('href')
         url = f'https://{HOST}{url}'
         # url = f'https://{HOST}/slow_download/{hash_}/0/{idx}'
-        html = plrt_get_html_retry(page, url, '.bg-gray-200')
+        html = plrt_get_html_retry(page, url, '.bg-gray-200', args.retry)
         rt = pq(html)
         link = rt.find('.bg-gray-200').eq(0).text().strip()
         r = request_retry('GET', link, headers=dft_hdr, stream=True, timeout=(60, 600))
@@ -189,6 +189,7 @@ def reg_subparser(subparsers):
     dl_annas_parser = subparsers.add_parser("annas", help="下载文件")
     dl_annas_parser.add_argument("hash", help="文件哈希")
     dl_annas_parser.add_argument("-H", "--headless", action='store_true', help="无头模式")
+    dl_annas_parser.add_argument("-r", "--retry", type=int, default=10, help="重试")
     dl_annas_parser.set_defaults(func=download_annas)
 
     annas_batch_parser = subparsers.add_parser("annas-batch", help="下载文件")
@@ -196,20 +197,21 @@ def reg_subparser(subparsers):
     annas_batch_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
     annas_batch_parser.add_argument("-s", "--site", default='annas', choices=['slow', 'bt', 'lgli'],  help="站点")
     annas_batch_parser.add_argument("-st", "--start", type=int, default=0,  help="起始")
+    annas_batch_parser.add_argument("-r", "--retry", type=int, default=10, help="重试")
     # annas_batch_parser.add_argument("-H", "--headless", action='store_true', help="无头模式")
     annas_batch_parser.set_defaults(func=annas_batch)
 
     annas_fetch_parser = subparsers.add_parser("annas-fetch", help="下载文件")
-    annas_fetch_parser.add_argument("-s", "--start", type=int, default=1, help="起始页")
+    annas_fetch_parser.add_argument("-st", "--start", type=int, default=1, help="起始页")
     annas_fetch_parser.add_argument("query", help="查询关键词")
     annas_fetch_parser.add_argument("ofname", help="输出文件名")
-    annas_fetch_parser.add_argument("-e", "--end", type=int, default=1_000_000, help="结束页码")
-    annas_fetch_parser.add_argument("-r", "--sort", default='newest', help="排序方式")
+    annas_fetch_parser.add_argument("-ed", "--end", type=int, default=1_000_000, help="结束页码")
+    annas_fetch_parser.add_argument("-sr", "--sort", default='newest', help="排序方式")
     annas_fetch_parser.add_argument("-c", "--content", default=[], nargs='+', help="内容")
     annas_fetch_parser.add_argument("-l", "--lang", default=[], nargs='+', help="语言")
     annas_fetch_parser.add_argument("-x", "--ext", default=[], nargs='+', help="扩展名")
     # annas_fetch_parser.add_argument("-H", "--headless", action='store_true', help="无头模式")
-    annas_fetch_parser.add_argument("-R", "--retry", type=int, default=10, help="重试")
+    annas_fetch_parser.add_argument("-r", "--retry", type=int, default=10, help="重试")
     annas_fetch_parser.add_argument("-y", "--year", type=int, help="年份")
     annas_fetch_parser.set_defaults(func=annas_fetch)
 
