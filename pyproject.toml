@@ -50,6 +50,7 @@ dependencies = [
     "scweet",
     "httpx",
     "xhshow",
+    "websocket-client",
 ]
 
 [project.urls]
