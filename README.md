@@ -36,8 +36,27 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | --- | --- |
 | `-v, --version` | 显示版本号 |
 | `-H, --no-headless` | 关闭无头模式，**显示**浏览器窗口（便于调试；默认是无头运行） |
+| `-m, --model` | 模型名称（默认 `OPENAI_CHAT_MODEL` 环境变量，缺省 `gpt-3.5-turbo`） |
+| `-k, --key` | OpenAI API Key（默认 `OPENAI_API_KEY` 环境变量） |
+| `--host` | API 地址（默认 `OPENAI_BASE_URL` 环境变量；注意本工具没有 `-H, --host` 短选项） |
+| `-r, --retry` | LLM 调用重试次数（默认 1000000） |
+| `-tm, --temp` | 温度（默认 1） |
+| `-tp, --top-p` | top-p |
+| `-fp, --frequency-penalty` | 频率惩罚 |
+| `-pp, --presence-penalty` | 存在惩罚 |
+| `-mt, --max-tokens` | 最大 token 数 |
+| `--emb` | Embedding 模型路径（默认 `EMB_MODEL_PATH` 环境变量，缺省 `moka-ai/m3e-base`） |
+| `-vm, --vmodel` | 视觉模型名称（默认 `OPENAI_VIS_MODEL` 环境变量） |
+| `-im, --tti-model` | 文生图模型名称（默认 `OPENAI_TTI_MODEL` 环境变量） |
+| `-ua, --user-agent` | HTTP User-Agent 请求头 |
+| `-st, --stream` | 流式输出模式 |
+| `-eb, --extra-body` | 额外请求体 |
+| `-ct, --conn-timeout` | 连接超时秒数（默认 60） |
+| `-rt, --read-timeout` | 读取超时秒数（默认 120） |
+| `-rr, --repetition-regex` | 重复检测正则 |
+| `-nt, --no-think` | 关闭思考模式 |
 
-> 注意：`annas` 子命令内部的 `-H, --headless` 含义相反（打开无头模式），不要混淆。
+> 注意：`annas` 子命令内部的 `-H, --headless` 含义相反（打开无头模式），`wx-summary` 子命令内部的 `-H, --host` 是 API 地址，不要与全局 `-H, --no-headless` 混淆。通用 OpenAI 参数需放在子命令**之前**（如 `bdt -m gpt-4o bili-ai-proj ...`）。
 
 ## Cookie 环境变量
 
@@ -85,6 +104,9 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `xhs` | 搜索小红书笔记，保存全量文本与图片 | md / 图片 |
 | `twitter` | 用 Scweet 抓取 Twitter/X 关键词推文 | csv / json |
 | `ext-cookies` | 从本机浏览器导出指定域名的 Cookie | 标准输出 |
+| `bili-ai-proj` | B站搜索 AI 应用并精选精品应用（需 LLM） | md |
+| `zhihu-radar` | 抓取知乎首页推荐流，判断回答是否违背核心观点并拟定大纲（需 LLM） | md / yaml |
+| `wx-summary` | 读取微信 AI 相关群消息并总结核心观点（需 LLM，Windows） | md |
 
 ---
 

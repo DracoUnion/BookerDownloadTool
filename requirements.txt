@@ -16,3 +16,9 @@ scweet
 httpx
 xhshow
 websocket-client
+openai
+pyyaml
+pydantic
+json_repair
+ctx-compact
+pywin32; sys_platform == 'win32'
