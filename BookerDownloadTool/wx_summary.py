@@ -608,39 +608,6 @@ def reg_subparser(subparsers):
                      help='并行总结线程数（默认 4）')
     pmt.add_argument('--max-per-group', type=int, default=1500,
                      help='单群最多取多少条消息（默认 1500，防超长）')
-    pmt.add_argument('-m', '--model',
-                     default=os.environ.get('OPENAI_CHAT_MODEL', 'gpt-3.5-turbo'),
-                     help='模型名称')
-    pmt.add_argument('-k', '--key',
-                     default=os.environ.get('OPENAI_API_KEY'),
-                     help='OpenAI API Key')
-    pmt.add_argument('-H', '--host',
-                     default=os.environ.get('OPENAI_BASE_URL'),
-                     help='API 地址')
-    pmt.add_argument('-r', '--retry', type=int, default=10,
-                     help='LLM 调用重试次数')
-    pmt.add_argument('-tm', '--temp', type=float, default=1, help='温度')
-    pmt.add_argument('-tp', '--top-p', type=float, help='top-p')
-    pmt.add_argument('-fp', '--frequency-penalty', type=float,
-                     help='频率惩罚')
-    pmt.add_argument('-pp', '--presence-penalty', type=float,
-                     help='存在惩罚')
-    pmt.add_argument('-mt', '--max-tokens', type=int, default=None,
-                     help='最大 token 数')
-    pmt.add_argument('-ua', '--user-agent',
-                     default='claude-cli/2.1.41 (external, cli)',
-                     help='HTTP User-Agent 请求头')
-    pmt.add_argument('-st', '--stream', action='store_true',
-                     help='流式输出模式')
-    pmt.add_argument('-ct', '--conn-timeout', type=int, default=60,
-                     help='连接超时秒数')
-    pmt.add_argument('-rt', '--read-timeout', type=int, default=120,
-                     help='读取超时秒数')
-    pmt.add_argument('-rr', '--repetition-regex', default='',
-                     help='重复检测正则')
-    pmt.add_argument('-eb', '--extra-body', help='额外请求体')
-    pmt.add_argument('-nt', '--no-think', action='store_true',
-                     help='关闭思考模式')
     pmt.add_argument('--keep-dec', action='store_true',
                      help='保留解密临时目录不清理')
     pmt.add_argument('--output', default='./wx-summary-report.md',
