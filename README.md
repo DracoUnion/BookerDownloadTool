@@ -49,12 +49,12 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `-vm, --vmodel` | 视觉模型名称（默认 `OPENAI_VIS_MODEL` 环境变量） |
 | `-im, --tti-model` | 文生图模型名称（默认 `OPENAI_TTI_MODEL` 环境变量） |
 | `-ua, --user-agent` | HTTP User-Agent 请求头 |
-| `-st, --stream` | 流式输出模式 |
+| `-ST, --no-stream` | 关闭流式输出模式 |
 | `-eb, --extra-body` | 额外请求体 |
 | `-ct, --conn-timeout` | 连接超时秒数（默认 60） |
 | `-rt, --read-timeout` | 读取超时秒数（默认 120） |
 | `-rr, --repetition-regex` | 重复检测正则 |
-| `-nt, --no-think` | 关闭思考模式 |
+| `-TN, --no-think` | 关闭思考模式 |
 
 > 注意：`annas` 子命令内部的 `-H, --headless` 含义相反（打开无头模式），`wx-summary` 子命令内部的 `-H, --host` 是 API 地址，不要与全局 `-H, --no-headless` 混淆。通用 OpenAI 参数需放在子命令**之前**（如 `bdt -m gpt-4o bili-ai-proj ...`）。
 

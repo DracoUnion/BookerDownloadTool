@@ -156,5 +156,4 @@ def reg_subparser(subparsers):
         "-s", "--sleep", type=float, default=1.5,
         help="相邻关键词请求间隔秒数，默认 1.5",
     )
-    bili_parser.add_argument("-D", "--debug", action='store_true', help="调试模式")
     bili_parser.set_defaults(func=bili_ai_proj_handle)

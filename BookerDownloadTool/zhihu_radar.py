@@ -216,5 +216,4 @@ def reg_subparser(subparsers):
         '-n', '--batch', type=int, default=10,
         help='单次大模型调用判断的条目数，默认 10',
     )
-    zh.add_argument('-D', '--debug', action='store_true', help='调试模式')
     zh.set_defaults(func=zhihu_radar)

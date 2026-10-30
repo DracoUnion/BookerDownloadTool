@@ -612,5 +612,4 @@ def reg_subparser(subparsers):
                      help='保留解密临时目录不清理')
     pmt.add_argument('--output', default='./wx-summary-report.md',
                      help='报告输出路径')
-    pmt.add_argument('-D', '--debug', action='store_true', help='调试模式')
     pmt.set_defaults(func=wx_summary_handle)
