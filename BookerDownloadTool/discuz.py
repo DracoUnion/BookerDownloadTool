@@ -90,10 +90,11 @@ def md5(s):
         .md5(s.encode('utf-8')) \
         .hexdigest()
      
-def download_art(url, articles, imgs, cookie):
+def download_art(url, articles, imgs, encoding, cookie):
     hdrs = default_hdrs.copy()
     hdrs['Cookie'] = cookie
-    html = request_retry('GET', url, headers=hdrs).text
+    html = request_retry('GET', url, headers=hdrs) \
+        .content.decode(encoding, 'ignore')
     contents = get_contents(html)
     for c in contents:
         c = process_img(
@@ -106,18 +107,20 @@ def download_art(url, articles, imgs, cookie):
             'content': c
         })
      
-def get_info_by_tid(host, tid, is_all, cookie):
+def get_info_by_tid(host, tid, is_all, encoding, cookie):
     hdrs = default_hdrs.copy()
     hdrs['Cookie'] = cookie
     if is_all:
         uid = "0"
     else:
         url = f'https://{host}/forum.php?mod=viewthread&tid={tid}'
-        html = request_retry('GET', url, headers=hdrs).text
+        html = request_retry('GET', url, headers=hdrs) \
+            .content.decode(encoding, 'ignore')
         uid = get_uid(html)
         if not uid: return
     url = f'https://{host}/forum.php?mod=viewthread&tid={tid}&page=1000000&authorid={uid}'
-    html = request_retry('GET', url, headers=hdrs).text
+    html = request_retry('GET', url, headers=hdrs) \
+        .content.decode(encoding, 'ignore')
     info = get_info(html)
     info['uid'] = uid
     info['time'] = get_last_time(html)
@@ -139,7 +142,7 @@ def download_dz(args):
     try: os.mkdir(odir)
     except: pass
  
-    info = get_info_by_tid(host, tid, args.all, cookie)
+    info = get_info_by_tid(host, tid, args.all, args.encoding, cookie)
     if not info:
         print(f'{tid} 不存在')
         return
@@ -177,7 +180,7 @@ def download_dz(args):
     for i in range(1, info['pages'] + 1):
         print(f'page: {i}')
         url = f'https://{host}/forum.php?mod=viewthread&tid={tid}&page={i}&authorid={uid}'
-        download_art(url, articles, imgs, cookie)
+        download_art(url, articles, imgs, args.encoding, cookie)
      
     total = sum(len(v) for _, v in imgs.items())
     hecto_mb = 100 * 1024 * 1024
@@ -230,7 +233,7 @@ def get_tids(html):
     root = pq(html)
     el_links = root(selectors['link'])
     links = [pq(l).attr('href') for l in el_links]
-    links = [re.search(r'tid=(\d+)', l).group(1) for l in links]
+    links = [re.search(r'(?:tid=|thread-)(\d+)', l).group(1) for l in links]
     return links
      
 def batch_dz(args):
@@ -260,7 +263,8 @@ def fetch_dz(args):
     for i in range(st, ed + 1):
         print(f'page: {i}')
         url = f'https://{host}/forum.php?mod=forumdisplay&fid={fid}&page={i}'
-        html = request_retry('GET', url, headers=hdrs).text
+        html = request_retry('GET', url, headers=hdrs) \
+            .content.decode(args.encoding, 'ignore')
         tids = get_tids(html)
         if len(tids) == 0: break
         for t in tids:
@@ -275,30 +279,33 @@ def reg_subparser(subparsers):
     dl_dz_parser = subparsers.add_parser("dz", help="下载 Discuz 单个帖子")
     dl_dz_parser.add_argument("host", help="主机: <域名>:<端口>/<路径>")
     dl_dz_parser.add_argument("tid", help="帖子 id")
-    dl_dz_parser.add_argument("-s", "--start", help="起始日期")
-    dl_dz_parser.add_argument("-e", "--end", help="结束日期")
+    dl_dz_parser.add_argument("-st", "--start", help="起始日期")
+    dl_dz_parser.add_argument("-ed", "--end", help="结束日期")
     dl_dz_parser.add_argument("-c", "--cookie", default="", help="Discuz 论坛 Cookie")
     dl_dz_parser.add_argument("-a", "--all", action='store_true', help="是否抓取全部回复")
     dl_dz_parser.add_argument("-l", "--exi-list", default='exi_dz.json', help="已存在文件名 JSON")
     dl_dz_parser.add_argument("-o", "--out", default='out', help="输出目录")
+    dl_dz_parser.add_argument("-ec", "--encoding", default='utf-8', help="编码")
     dl_dz_parser.set_defaults(func=download_dz)
 
     fetch_parser = subparsers.add_parser("fetch-dz", help="抓取 Discuz tid")
     fetch_parser.add_argument("fname", help="包含 tid 的文件名")
     fetch_parser.add_argument("host",  help="主机: <域名>:<端口>/<路径>")
     fetch_parser.add_argument("fid", help="版块 id")
-    fetch_parser.add_argument("-s", "--start", type=int, default=1, help="起始页码")
-    fetch_parser.add_argument("-e", "--end", type=int, default=10000000, help="结束页码")
+    fetch_parser.add_argument("-st", "--start", type=int, default=1, help="起始页码")
+    fetch_parser.add_argument("-ed", "--end", type=int, default=10000000, help="结束页码")
     fetch_parser.add_argument("-c", "--cookie", default="", help="论坛 Cookie")
+    fetch_parser.add_argument("-ec", "--encoding", default='utf-8', help="编码")
     fetch_parser.set_defaults(func=fetch_dz)
 
     batch_parser = subparsers.add_parser("batch-dz", help="批量下载")
     batch_parser.add_argument("fname", help="文件名")
-    batch_parser.add_argument("-s", "--start", help="起始日期")
-    batch_parser.add_argument("-e", "--end", help="结束日期")
+    batch_parser.add_argument("-st", "--start", help="起始日期")
+    batch_parser.add_argument("-ed", "--end", help="结束日期")
     batch_parser.add_argument("-c", "--cookie", default="", help="论坛 Cookie")
     batch_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
     batch_parser.add_argument("-a", "--all", action='store_true', help="是否抓取全部回复")
     batch_parser.add_argument("-l", "--exi-list", default='exi_dz.json', help="已存在文件名 JSON")
     batch_parser.add_argument("-o", "--out", default='out', help="输出目录")
+    batch_parser.add_argument("-ec", "--encoding", default='utf-8', help="编码")
     batch_parser.set_defaults(func=batch_dz)
