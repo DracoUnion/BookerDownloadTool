@@ -262,7 +262,8 @@ def fetch_dz(args):
     hdrs['Cookie'] = args.cookie
     for i in range(st, ed + 1):
         print(f'page: {i}')
-        url = f'https://{host}/forum.php?mod=forumdisplay&fid={fid}&page={i}'
+        url = f'https://{host}/forum.php?mod=forumdisplay' + \
+              f'&fid={fid}&page={i}&orderby=dateline'
         html = request_retry('GET', url, headers=hdrs) \
             .content.decode(args.encoding, 'ignore')
         tids = get_tids(html)
