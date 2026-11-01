@@ -165,6 +165,9 @@ def camou_create_driver(headless=True, timeout=30_000):
         "locale": "en-US",
         "os": ("windows",),
         "exclude_addons": [DefaultAddons.UBO],
+        "config": {
+            "privacy.resistFingerprinting.letterboxing": False,
+        },
     }
     with Camoufox(**opts) as browser:
         context = browser.new_context(
