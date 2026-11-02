@@ -102,6 +102,7 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `pixabay` | 按关键词批量下载 Pixabay 图片 | 图片文件 |
 | `annas` / `annas-batch` / `annas-fetch` / `annas-dedup` | Anna's Archive 单本下载 / 批量 / 搜索 / 去重 | 文件 / JSONL |
 | `xhs` | 搜索小红书笔记，保存全量文本与图片 | md / 图片 |
+| `kaggle` | 抓取 Kaggle 比赛笔记本（slug）并导出 | EPUB |
 | `twitter` | 用 Scweet 抓取 Twitter/X 关键词推文 | csv / json |
 | `ext-cookies` | 从本机浏览器导出指定域名的 Cookie | 标准输出 |
 | `bili-ai-proj` | B站搜索 AI 应用并精选精品应用（需 LLM） | md |

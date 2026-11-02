@@ -19,6 +19,7 @@ websocket-client
 openai
 pyyaml
 pydantic
+markdown
 json_repair
 ctx-compact
 pywin32; sys_platform == 'win32'
