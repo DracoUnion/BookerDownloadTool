@@ -5,7 +5,7 @@ from . import __version__
 from . import (
     annas, arxiv, bili_ai_proj, discuz, dl_gh_book, ext_cookie, feishu,
     freembook, gh, hkrnws, kaggle, lightnovel, links, medium, pic, uqer,
-    webarchive, whole_site, wenku, wx, wx_summary, yuque, zhihu,
+    webarchive, weibo, whole_site, wenku, wx, wx_summary, yuque, zhihu,
     zhihu_radar, zsxq, twitter, xhs,
 )
 
@@ -69,6 +69,7 @@ def main():
     kaggle.reg_subparser(subparsers)
     ext_cookie.reg_subparser(subparsers)
     twitter.reg_subparser(subparsers)
+    weibo.reg_subparser(subparsers)
     xhs.reg_subparser(subparsers)
 
     bili_ai_proj.reg_subparser(subparsers)
