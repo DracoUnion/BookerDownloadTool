@@ -40,7 +40,7 @@ from pathlib import Path
 
 import httpx
 
-from .util import cookie_str_to_dict
+from .util import cookie_str_to_dict, posts_to_md, md_body
 from .ext_cookie import extract_cookies_multi_browsers
 
 # ---------------------------------------------------------------------------
@@ -178,6 +178,62 @@ def _mblog_date(mblog):
     if raw.startswith("昨天"):
         return now - timedelta(days=1)
     return None
+
+
+def _mblog_md_section(mblog, idx):
+    """把一条博文渲染为 Markdown 段落（以 "## " 二级标题开头）。"""
+    user = mblog.get("user") or {}
+    screen = user.get("screen_name") or "未知用户"
+    lines = [f"## {idx}. @{screen}", ""]
+
+    meta = []
+    ts = _mblog_date(mblog)
+    meta.append("发布：" + (ts.strftime("%Y-%m-%d %H:%M:%S") if ts else "未知"))
+    mid = mblog.get("mblogid") or mblog.get("bid")
+    if mid:
+        meta.append(f"链接：https://m.weibo.cn/detail/{mid}")
+
+    counts = []
+    for label, key in (("转发", "reposts_count"), ("评论", "comments_count"),
+                       ("点赞", "attitudes_count")):
+        value = mblog.get(key)
+        if isinstance(value, (int, float)) or (isinstance(value, str) and value.isdigit()):
+            counts.append(f"{label}：{value}")
+    if counts:
+        meta.append(" ｜ ".join(counts))
+    lines.extend(f"- {m}" for m in meta)
+    lines.append("")
+
+    text = _clean_text(mblog)
+    if text:
+        lines.append(md_body(text))
+        lines.append("")
+
+    if isinstance(mblog.get("retweeted_status"), dict):
+        rt = mblog["retweeted_status"]
+        rt_user = ((rt.get("user") or {}).get("screen_name") or "未知用户")
+        rt_text = md_body(_clean_text(rt))
+        quote = f"> 转发自 @{rt_user}"
+        if rt_text:
+            quote += "：\n> " + "\n> ".join(rt_text.splitlines())
+        lines.append(quote)
+        lines.append("")
+        if not mblog.get("pics"):
+            mblog = rt
+
+    for pic in mblog.get("pics") or []:
+        if not isinstance(pic, dict):
+            continue
+        large = pic.get("large")
+        if isinstance(large, dict):
+            url = large.get("url") or pic.get("url")
+        else:
+            url = large or pic.get("url")
+        if url:
+            lines.append(f"![图]({url})")
+            lines.append("")
+
+    return "\n".join(lines).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -368,20 +424,35 @@ def weibo_fetch(args):
     safe_key = "".join(ch if ch.isalnum() or ch in "_-" else "_" for ch in key_part)
     since_part = args.since or "all"
     until_part = args.until or "all"
+    base_name = f"weibos_{safe_key}_{since_part}_{until_part}"
 
     try:
         import pandas as pd
         df = pd.DataFrame(all_mblogs)
-        filename = f"weibos_{safe_key}_{since_part}_{until_part}.csv"
+        filename = base_name + ".csv"
         df.to_csv(outdir / filename, index=False, encoding="utf-8-sig")
         print(f"[OK] 共抓取 {len(all_mblogs)} 条博文，已保存: {outdir / filename}")
     except ImportError:
-        filename = f"weibos_{safe_key}_{since_part}_{until_part}.json"
+        filename = base_name + ".json"
         (outdir / filename).write_text(
             json.dumps(all_mblogs, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         print(f"[OK] 共抓取 {len(all_mblogs)} 条博文（未装 pandas，改用 json）: "
               f"{outdir / filename}")
+
+    # 额外输出一份 Markdown，便于人读
+    sections = [_mblog_md_section(m, i + 1) for i, m in enumerate(all_mblogs)]
+    meta_lines = [
+        f"关键词：{'、'.join(args.keywords)}",
+        f"时间范围：{args.since or '不限'} ~ {args.until or '不限'}",
+        f"条数：{len(all_mblogs)}",
+    ]
+    md_name = base_name + ".md"
+    (outdir / md_name).write_text(
+        posts_to_md(f"微博博文：{args.keywords[0]}", meta_lines, sections),
+        encoding="utf-8",
+    )
+    print(f"[OK] 已同时保存 Markdown: {outdir / md_name}")
 
     # 预览前几条
     print("\n[预览] 前 5 条：")

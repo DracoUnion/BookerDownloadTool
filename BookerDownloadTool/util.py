@@ -361,6 +361,48 @@ def read_text(fname: str) -> str:
         text = ""
     return text
 
+def md_body(text: str) -> str:
+    """转义正文每行开头的 Markdown 块级标记，使其按原文呈现。
+
+    避免帖子正文中的 "# 标题"、"- 列表"、"1. 有序"、"> 引用"、"---"、代码围栏
+    被渲染成文档结构。
+    """
+    out = []
+    for line in text.splitlines():
+        body = line.lstrip()
+        indent = line[:len(line) - len(body)]
+        if re.match(r'#{1,6}\s', body):
+            body = '\\' + body
+        elif re.match(r'[-+*]\s', body):
+            body = '\\' + body
+        elif re.match(r'>', body):
+            body = '\\' + body
+        elif re.match(r'\d+[.)]\s', body):
+            body = re.sub(r'^(\d+)([.)])', r'\1\\\2', body)
+        elif body.startswith('```') or re.fullmatch(r'([-*_])\1{2,}', body.strip()):
+            body = '\\' + body
+        out.append(indent + body)
+    return '\n'.join(out)
+
+
+def posts_to_md(title: str, meta_lines, sections) -> str:
+    """把帖子列表渲染为单个 Markdown 文档。
+
+    Args:
+        title:      文档一级标题。
+        meta_lines: 头部元信息行（不含 "- " 前缀），如 "关键词：openai"。
+        sections:   每篇帖子的 Markdown 段落，均以 "## " 二级标题开头。
+    """
+    lines = [f'# {title}', '']
+    lines.extend(f'- {m}' for m in meta_lines)
+    lines += ['', '---', '']
+    for i, sec in enumerate(sections):
+        if i:
+            lines += ['', '---', '']
+        lines.append(sec.rstrip())
+    return '\n'.join(lines) + '\n'
+
+
 def write_yaml_model(fname: str, obj) -> None:
     """将对象（含 pydantic 模型/列表）以 YAML 形式写入 fname。"""
     if isinstance(obj, BaseModel):

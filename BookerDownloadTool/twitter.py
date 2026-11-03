@@ -37,7 +37,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from .util import cookie_str_to_dict
+from .util import cookie_str_to_dict, posts_to_md, md_body
 from .ext_cookie import extract_cookies_multi_browsers
 
 
@@ -82,6 +82,52 @@ def _load_cookies(args):
     print(f"[INFO] 已从本机浏览器提取登录 Cookie: "
           f"{sorted(cookies)}")
     return {"cookies": cookies}
+
+
+# ---------------------------------------------------------------------------
+# Markdown 渲染
+# ---------------------------------------------------------------------------
+def _tweet_md_section(t, idx):
+    """把一条推文渲染为 Markdown 段落（以 "## " 二级标题开头）。"""
+    user = t.get("user") or {}
+    screen = user.get("screen_name") or "未知用户"
+    name = user.get("name")
+    header = f"## {idx}. @{screen}"
+    if name:
+        header += f"（{name}）"
+    lines = [header, ""]
+
+    meta = []
+    if t.get("timestamp"):
+        meta.append(f"发布：{t['timestamp']}")
+    if t.get("tweet_url"):
+        meta.append(f"链接：{t['tweet_url']}")
+
+    counts = []
+    for label, key in (("点赞", "likes"), ("转发", "retweets"),
+                       ("评论", "comments"), ("浏览", "views")):
+        value = t.get(key)
+        if isinstance(value, int):
+            counts.append(f"{label}：{value}")
+    if counts:
+        meta.append(" ｜ ".join(counts))
+    lines.extend(f"- {m}" for m in meta)
+    lines.append("")
+
+    text = (t.get("text") or "").strip()
+    if text:
+        lines.append(md_body(text))
+        lines.append("")
+
+    media = t.get("media") if isinstance(t.get("media"), dict) else {}
+    for url in media.get("image_links") or []:
+        lines.append(f"![图]({url})")
+        lines.append("")
+    for url in media.get("video_links") or []:
+        lines.append(f"[视频]({url})")
+        lines.append("")
+
+    return "\n".join(lines).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -177,19 +223,36 @@ def twitter_fetch(args):
     key_part = "_".join(args.keywords)
     safe_key = "".join(ch if ch.isalnum() or ch in "_-" else "_" for ch in key_part)
     lang_part = args.lang or "all"
+    base_name = f"tweets_{safe_key}_{since}_{until}_{lang_part}"
 
     try:
         import pandas as pd
         df = pd.DataFrame(unique)
-        filename = f"tweets_{safe_key}_{since}_{until}_{lang_part}.csv"
+        filename = base_name + ".csv"
         df.to_csv(outdir / filename, index=False, encoding="utf-8-sig")
         print(f"[OK] 共抓取 {len(unique)} 条推文，已保存: {outdir / filename}")
     except ImportError:
-        filename = f"tweets_{safe_key}_{since}_{until}_{lang_part}.json"
+        filename = base_name + ".json"
         (outdir / filename).write_text(
             json.dumps(unique, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         print(f"[OK] 共抓取 {len(unique)} 条推文（未装 pandas，改用 json）: {outdir / filename}")
+
+    # 额外输出一份 Markdown，便于人读
+    sections = [_tweet_md_section(t, i + 1) for i, t in enumerate(unique)]
+    meta_lines = [
+        f"关键词：{'、'.join(args.keywords)}",
+        f"时间范围：{since} ~ {until}",
+        f"语言：{args.lang or '不限'}",
+        f"排序：{args.display_type}",
+        f"条数：{len(unique)}",
+    ]
+    md_name = base_name + ".md"
+    (outdir / md_name).write_text(
+        posts_to_md(f"推特推文：{args.keywords[0]}", meta_lines, sections),
+        encoding="utf-8",
+    )
+    print(f"[OK] 已同时保存 Markdown: {outdir / md_name}")
 
     # 预览前几条
     print("\n[预览] 前 5 条：")

@@ -103,8 +103,8 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `annas` / `annas-batch` / `annas-fetch` / `annas-dedup` | Anna's Archive 单本下载 / 批量 / 搜索 / 去重 | 文件 / JSONL |
 | `xhs` | 搜索小红书笔记，保存全量文本与图片 | md / 图片 |
 | `kaggle` | 抓取 Kaggle 比赛笔记本（slug）并导出，无需 API Key（复用浏览器内部接口） | EPUB |
-| `twitter` | 用 Scweet 抓取 Twitter/X 关键词推文 | csv / json |
-| `weibo` | 用微博移动端搜索 API 抓取关键词博文 | csv / json |
+| `twitter` | 用 Scweet 抓取 Twitter/X 关键词推文 | csv / json / md |
+| `weibo` | 用微博移动端搜索 API 抓取关键词博文 | csv / json / md |
 | `ext-cookies` | 从本机浏览器导出指定域名的 Cookie | 标准输出 |
 | `bili-ai-proj` | B站搜索 AI 应用并精选精品应用（需 LLM） | md |
 | `zhihu-radar` | 抓取知乎首页推荐流，判断回答是否违背核心观点并拟定大纲（需 LLM） | md / yaml |
@@ -350,7 +350,7 @@ bdt twitter -E cookies.json --browser chrome
 bdt twitter -k openai
 ```
 
-`twitter` 基于 Scweet v5（`pip install scweet`）。登录态三选一（`-c/--cookies-file`、`-t/--auth-token`、`--inline-cookies`）；**均未提供时**自动通过 `browser_cookie3` 从本机浏览器（优先 firefox→chrome→edge，可用 `-b/--browser` 指定单一浏览器）提取已登录 x.com 的 cookie，找不到则退回匿名尝试。结果保存为 CSV（默认）或 JSON。
+`twitter` 基于 Scweet v5（`pip install scweet`）。登录态三选一（`-c/--cookies-file`、`-t/--auth-token`、`--inline-cookies`）；**均未提供时**自动通过 `browser_cookie3` 从本机浏览器（优先 firefox→chrome→edge，可用 `-b/--browser` 指定单一浏览器）提取已登录 x.com 的 cookie，找不到则退回匿名尝试。结果保存为 CSV（默认）或 JSON，并同时输出一份 Markdown（含正文、链接与图片）。
 
 ### 微博
 
@@ -368,7 +368,7 @@ bdt weibo -k 特斯拉 -c "SUB=xxx; SUBP=yyy"
 bdt weibo -k 新能源 --since 2024-01-01 --until 2024-06-30
 ```
 
-`weibo` 基于微博移动端搜索接口 `m.weibo.cn/api/container/getIndex`（API 参考 [jackwener/weibo-cli](https://github.com/jackwener/weibo-cli)），按关键词翻页抓取并去重。登录态优先取 `-c/--cookie` 内联 Cookie，否则自动从本机浏览器提取 `weibo.com` / `weibo.cn` 的 Cookie；均未提供时匿名抓取（结果可能不完整）。结果保存为 CSV（默认）或 JSON，文件名形如 `weibos_{关键词}_{起始}_{结束}.csv`。
+`weibo` 基于微博移动端搜索接口 `m.weibo.cn/api/container/getIndex`（API 参考 [jackwener/weibo-cli](https://github.com/jackwener/weibo-cli)），按关键词翻页抓取并去重。登录态优先取 `-c/--cookie` 内联 Cookie，否则自动从本机浏览器提取 `weibo.com` / `weibo.cn` 的 Cookie；均未提供时匿名抓取（结果可能不完整）。结果保存为 CSV（默认）或 JSON，并同时输出一份 Markdown（含正文、链接与图片），文件名形如 `weibos_{关键词}_{起始}_{结束}.csv`。
 
 ---
 
