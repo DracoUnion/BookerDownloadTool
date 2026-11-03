@@ -434,6 +434,9 @@ def kernel_to_article(meta, blob):
 # ---------------------------------------------------------------------------
 
 def fetch_kaggle(args):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+
     crawler_config['optiMode'] = 'none'
     crawler_config['imgSrc'] = ['data-src', 'src']
 
@@ -444,32 +447,43 @@ def fetch_kaggle(args):
         return
 
     refs = refs[:args.num]
-    articles, imgs = [], {}
-    for i, item in enumerate(refs, 1):
+    jobs = max(1, getattr(args, 'threads', None) or 8)
+
+    imgs = {}
+    articles = []
+    done, lock = 0, threading.Lock()
+
+    def fetch_one(item):
+        """拉取单个笔记本 + 渲染 + 抓图，返回 article（失败返回 None）。"""
+        nonlocal done
         ref = item['ref']
         user, slug = ref.split('/', 1)
-        print(f'[{i}/{len(refs)}] 拉取 {ref}')
+        article = None
         try:
+            print(f'拉取 {ref}')
             data = pull_kernel(
                 user, slug, retry=args.retry, proxy=args.proxy)
             article = kernel_to_article(
                 data.get('metadata'), data.get('blob'))
+            article['content'] = process_img(
+                article['content'], imgs,
+                img_prefix='../Images/',
+                page_url=f'{KAGGLE_WEB}/code/{ref}',
+            )
         except KeyboardInterrupt:
             raise
         except Exception:
             traceback.print_exc()
-            continue
+        with lock:
+            done += 1
+            print(f'[{done}/{len(refs)}] 完成 {ref}')
+        return article
 
-        page_url = f'{KAGGLE_WEB}/code/{ref}'
-        try:
-            article['content'] = process_img(
-                article['content'], imgs,
-                img_prefix='../Images/',
-                page_url=page_url,
-            )
-        except Exception:
-            traceback.print_exc()
-        articles.append(article)
+    print(f'并发拉取 {len(refs)} 个笔记本（线程数 {jobs}）')
+    with ThreadPoolExecutor(max_workers=jobs) as ex:
+        for article in ex.map(fetch_one, refs):
+            if article is not None:
+                articles.append(article)
 
     if not articles:
         print('没有成功获取任何笔记本')
@@ -488,7 +502,9 @@ def reg_subparser(subparsers):
     parser.add_argument(
         "-o", "--out", help="输出 EPUB 路径（默认 Kaggle <slug>.epub）")
     parser.add_argument(
-        "-n", "--num", type=int, default=20, help="最多导出的笔记本数量 (默认 20)")
+        "-n", "--num", type=int, default=100_000_000, help="最多导出的笔记本数量 (默认全部)")
+    parser.add_argument(
+        "-t", "--threads", type=int, default=8, help="并发拉取线程数 (默认 8)")
     parser.add_argument(
         "-c", "--cookie", default='',
         help="浏览器抓包得到的 Cookie 字符串（默认自动读取本机浏览器/匿名会话）")
