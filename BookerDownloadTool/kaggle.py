@@ -2,98 +2,157 @@
 """Kaggle 比赛笔记本抓取与 EPUB 生成。
 
 流程：
-  1. 访问 https://www.kaggle.com/competitions/<slug>/code 对应的官方接口，
-     列出比赛下的全部公开笔记本（需要 Kaggle API 凭据）。
+  1. 复用浏览器（抓包得到）的网页内部接口，列出比赛下的全部公开笔记本。
+     列表接口即浏览器「Code」页实际调用的
+     https://www.kaggle.com/api/i/kernels.KernelsService/ListKernels。
   2. 用 kernels/pull 接口逐个拉取笔记本源码（.ipynb）。
   3. 把 markdown / 代码 / 输出（含图片）渲染成 HTML 章节。
   4. 抓取正文图片，调用 GenEpub 生成 EPUB。
 
-说明：Kaggle 网页接口对匿名请求会返回 reCAPTCHA 挑战，列表接口必须带
-Kaggle API 凭据（https://www.kaggle.com/settings -> API -> Create New Token，
-把 kaggle.json 放到 ~/.kaggle/ 或设置 KAGGLE_USERNAME/KAGGLE_KEY）。
+说明：本子命令不要求 Kaggle API 凭据（username/key）。网页内部接口只需要一套
+会话 Cookie（ka_sessionid / XSRF-TOKEN / CLIENT-TOKEN），按下面的优先级获取：
+  1. -c/--cookie 显式传入从浏览器抓包得到的 Cookie 字符串；
+  2. 从本机浏览器（已登录或已访问过 kaggle.com）自动提取；
+  3. 都没有时自动访问一次比赛页面，领取一套匿名会话（公开比赛无需登录）。
 kernels/pull 本身公开可用，因此也可用 -f/--file 或 --url 直接指定笔记本。
 """
-import os
 import re
 import json
 import html
 import time
 import base64
 import traceback
-from os import path
+
+import requests
 
 from EpubCrawler.img import process_img
 from EpubCrawler.config import config as crawler_config
 from GenEpub import gen_epub
 
-from .util import fname_escape
+from .util import fname_escape, cookie_str_to_dict
+from .ext_cookie import extract_cookies_multi_browsers
 
-KAGGLE_API = 'https://www.kaggle.com/api/v1'
-KERNELS_LIST_URL = KAGGLE_API + '/kernels/list'
-KERNELS_PULL_URL = KAGGLE_API + '/kernels/pull'
 KAGGLE_WEB = 'https://www.kaggle.com'
-# 官方 API 客户端的 UA。注意不要用完整的 Chrome UA：Kaggle 的 WAF 会把它当成
-# 未完成 reCAPTCHA 的浏览器请求并返回挑战页，而 API UA 可以正常拿到 JSON。
-UA = 'kaggle-api/1.6.17'
+KAGGLE_API = KAGGLE_WEB + '/api/v1'   # 公开 REST 接口（kernels/pull 无需凭据）
+KAGGLE_I = KAGGLE_WEB + '/api/i'      # 网页内部接口（浏览器抓包得到的那套）
+KERNELS_LIST_PATH = '/kernels.KernelsService/ListKernels'
+GET_COMPETITION_PATH = '/competitions.CompetitionService/GetCompetition'
+KERNELS_PULL_URL = KAGGLE_API + '/kernels/pull'
+# 内部接口用浏览器 UA；公开 REST 接口用官方客户端 UA（避免 WAF 判定为浏览器请求）。
+UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+      '(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36')
+API_UA = 'kaggle-api/1.6.17'
 PAGE_SIZE = 100
 RE_KERNEL_URL = re.compile(r'kaggle\.com/code/([^/?#]+)/([^/?#]+)')
 
 
 # ---------------------------------------------------------------------------
-# 凭据 / 请求
+# 会话 / 请求
 # ---------------------------------------------------------------------------
 
-def read_kaggle_auth(args):
-    """读取 Kaggle API 凭据：命令行 > 环境变量 > ~/.kaggle/kaggle.json。
+def _proxies(proxy):
+    return {'http': proxy, 'https': proxy} if proxy else None
 
-    返回 (username, key)，没有配置时返回 None。
+
+def new_session(args, slug):
+    """创建带 Kaggle 会话 Cookie 的 requests.Session。
+
+    Cookie 优先级：-c/--cookie > 本机浏览器 > 自动领取匿名会话。整个流程不需要
+    Kaggle API 凭据，等价于浏览器抓包后原样复用内部接口。
     """
-    username = (getattr(args, 'kg_user', '') or
-                os.environ.get('KAGGLE_USERNAME') or
-                os.environ.get('KAGGLE_USER') or '')
-    key = (getattr(args, 'kg_key', '') or
-           os.environ.get('KAGGLE_KEY') or '')
-    if username and key:
-        return username, key
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': UA,
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Origin': KAGGLE_WEB,
+    })
 
-    cfg = path.expanduser(path.join('~', '.kaggle', 'kaggle.json'))
-    if path.isfile(cfg):
+    cookies = cookie_str_to_dict(getattr(args, 'cookie', '') or '') \
+        if getattr(args, 'cookie', '') else {}
+    if cookies:
+        print('[INFO] 使用 --cookie 提供的 Kaggle Cookie')
+    else:
         try:
-            data = json.load(open(cfg, encoding='utf8'))
-            if data.get('username') and data.get('key'):
-                return data['username'], data['key']
+            cookies = extract_cookies_multi_browsers('kaggle.com') or {}
         except Exception:
             traceback.print_exc()
-    return None
+            cookies = {}
+        if cookies:
+            print(f'[INFO] 已从本机浏览器提取 Kaggle Cookie: {sorted(cookies)}')
+
+    for name, value in cookies.items():
+        session.cookies.set(name, value, domain='.kaggle.com')
+
+    # 缺会话/防伪 Cookie 时访问一次比赛页面，让服务端下发一套匿名会话。
+    if not cookies or 'XSRF-TOKEN' not in session.cookies:
+        page_url = f'{KAGGLE_WEB}/competitions/{slug}/code'
+        try:
+            session.get(page_url, timeout=30, proxies=_proxies(args.proxy))
+            print('[INFO] 已访问比赛页面获取/刷新 Kaggle 会话 Cookie')
+        except Exception:
+            traceback.print_exc()
+
+    if 'XSRF-TOKEN' not in session.cookies:
+        raise SystemExit(
+            '无法获取 Kaggle 会话 Cookie。请先在浏览器打开 https://www.kaggle.com '
+            '（并登录），或用 -c/--cookie 传入抓包得到的 Cookie 字符串。')
+    return session
 
 
-def kaggle_request(method, url, auth=None, params=None, retry=5,
-                   timeout=30, proxy=None):
-    """带 Kaggle API 认证的请求（自动重试）。
+def kaggle_i_post(session, api_path, payload, retry=5, timeout=30, proxy=None):
+    """调用网页内部 API（与浏览器抓包到的 ListKernels 等请求一致）。
 
-    即使没有凭据也发送一个占位的 Basic 认证头：Kaggle 对匿名 API 请求会返回
-    reCAPTCHA 页面，而带认证头的请求会返回正常的 JSON（kernels/pull 不校验凭据）。
+    使用 JSON 编码，携带会话 Cookie 与 X-XSRF-TOKEN 请求头；自动重试。
     """
-    import requests
+    url = KAGGLE_I + api_path
+    last_ex = None
+    for i in range(retry):
+        try:
+            hdrs = {'X-XSRF-TOKEN': session.cookies.get('XSRF-TOKEN', '')}
+            r = session.post(
+                url, json=payload, headers=hdrs,
+                timeout=timeout, proxies=_proxies(proxy),
+            )
+            if r.status_code == 200 and 'json' in r.headers.get('content-type', ''):
+                return r.json()
+            if r.status_code == 200 and 'recaptcha' in r.text[:3000].lower():
+                last_ex = RuntimeError('被 Kaggle reCAPTCHA 拦截')
+            else:
+                last_ex = RuntimeError(
+                    f'HTTP {r.status_code}: {r.text[:300]}')
+            print(f'{api_path} retry {i}: {last_ex}')
+        except KeyboardInterrupt:
+            raise
+        except Exception as ex:
+            last_ex = ex
+            print(f'{api_path} retry {i}: {ex}')
+        time.sleep(2 + i * 2)
+    raise last_ex
 
-    username, key = auth if auth else ('anonymous', 'none')
-    token = base64.b64encode(f'{username}:{key}'.encode('utf8')).decode('ascii')
+
+def kaggle_request(method, url, params=None, retry=5, timeout=30, proxy=None):
+    """调用公开 REST 接口（自动重试）。
+
+    即使没有凭据也发送一个占位的 Basic 认证头：Kaggle 对匿名 API 请求可能返回
+    reCAPTCHA 页面，而带认证头的请求会返回正常 JSON（kernels/pull 不校验凭据）。
+    """
+    token = base64.b64encode(b'anonymous:none').decode('ascii')
     hdrs = {
-        'User-Agent': UA,
+        'User-Agent': API_UA,
         'Accept': 'application/json',
         'Authorization': 'Basic ' + token,
     }
-    proxies = {'http': proxy, 'https': proxy} if proxy else None
     last_ex = None
     for i in range(retry):
         try:
             r = requests.request(
                 method, url, params=params, headers=hdrs,
-                timeout=timeout, proxies=proxies,
+                timeout=timeout, proxies=_proxies(proxy),
             )
             if r.status_code == 200 and 'json' in r.headers.get('content-type', ''):
                 return r.json()
-            if r.status_code == 200 and 'recaptcha' in r.text[:3000]:
+            if r.status_code == 200 and 'recaptcha' in r.text[:3000].lower():
                 last_ex = RuntimeError('被 Kaggle reCAPTCHA 拦截')
             else:
                 last_ex = RuntimeError(
@@ -124,25 +183,65 @@ def parse_kernel_ref(text):
     return None
 
 
-def list_competition_kernels(slug, auth, retry=5, proxy=None):
-    """分页列出比赛下的全部公开笔记本，返回 [{'ref': 'user/slug', 'title': ...}]。"""
-    if not auth:
-        raise SystemExit(
-            '列出比赛笔记本需要 Kaggle API 凭据。请设置 KAGGLE_USERNAME/KAGGLE_KEY，'
-            f'或把 kaggle.json 放到 {path.expanduser("~/.kaggle/kaggle.json")}；'
-            '也可以先用 -f refs.txt / --url 指定笔记本。')
+def _list_request_body(competition_id, page, page_size, sort_by):
+    """构建 ListKernels 内部接口的请求体（与浏览器抓包得到的结构一致）。"""
+    return {
+        'kernelFilterCriteria': {
+            'search': '',
+            'listRequest': {
+                'competitionId': competition_id,
+                'sortBy': sort_by,
+                'pageSize': page_size,
+                'group': 'EVERYONE',
+                'page': page,
+                'modelIds': [],
+                'modelInstanceIds': [],
+                'excludeKernelIds': [],
+                'tagIds': '',
+                'excludeResultsFilesOutputs': False,
+                'wantOutputFiles': False,
+                'excludeNonAccessedDatasources': True,
+            },
+        },
+        'detailFilterCriteria': {
+            'deletedAccessBehavior': 'RETURN_NOTHING',
+            'unauthorizedAccessBehavior': 'RETURN_NOTHING',
+            'excludeResultsFilesOutputs': False,
+            'wantOutputFiles': False,
+            'kernelIds': [],
+            'outputFileTypes': [],
+            'includeInvalidDataSources': False,
+        },
+    }
+
+
+def get_competition_id(slug, session, retry=5, proxy=None):
+    """把比赛 slug 转成内部的数字 id。"""
+    data = kaggle_i_post(
+        session, GET_COMPETITION_PATH, {'competitionName': slug},
+        retry=retry, proxy=proxy,
+    )
+    if isinstance(data, dict) and isinstance(data.get('id'), (int, str)):
+        return data['id']
+    raise RuntimeError(f'无法解析比赛 id: {data!r}')
+
+
+def list_competition_kernels(slug, session, sort_by='HOTNESS', retry=5,
+                             proxy=None, page_size=PAGE_SIZE, limit=None):
+    """分页列出比赛下的全部公开笔记本，返回 [{'ref': 'user/slug', 'title': ...}]。
+
+    走网页内部接口 ListKernels，只需要会话 Cookie，不需要 Kaggle API 凭据。
+    limit 给定后，获取到足够的 ref 就提前停止。
+    """
+    competition_id = get_competition_id(slug, session, retry=retry, proxy=proxy)
+    print(f'比赛 {slug} 的内部 id 为 {competition_id}')
 
     refs, seen = [], set()
     page = 1
     while True:
-        data = kaggle_request(
-            'GET', KERNELS_LIST_URL, auth=auth,
-            params={
-                'competition': slug,
-                'page': page,
-                'pageSize': PAGE_SIZE,
-                'sortBy': 'voteCount',
-            },
+        data = kaggle_i_post(
+            session, KERNELS_LIST_PATH,
+            _list_request_body(competition_id, page, page_size, sort_by),
             retry=retry, proxy=proxy,
         )
         if isinstance(data, dict):
@@ -154,20 +253,24 @@ def list_competition_kernels(slug, auth, retry=5, proxy=None):
         for it in data:
             ref = it.get('ref') or ''
             if not ref:
-                author, kslug = it.get('author'), it.get('slug')
-                if author and kslug:
-                    ref = f'{author}/{kslug}'
+                author = it.get('author') or {}
+                kslug = it.get('currentUrlSlug') or it.get('slug') or ''
+                user = author.get('userName') if isinstance(author, dict) else author
+                if user and kslug:
+                    ref = f'{user}/{kslug}'
             if ref and ref not in seen:
                 seen.add(ref)
                 refs.append({'ref': ref, 'title': it.get('title', '')})
         print(f'已获取 {len(refs)} 个笔记本（page {page}）')
-        if len(data) < PAGE_SIZE:
+        if len(data) < page_size:
+            break
+        if limit and len(refs) >= limit:
             break
         page += 1
     return refs
 
 
-def resolve_kernel_refs(args):
+def resolve_kernel_refs(args, session=None):
     """按 --file / --url / 比赛 slug 的顺序解析笔记本 ref。"""
     refs, seen = [], set()
 
@@ -196,16 +299,18 @@ def resolve_kernel_refs(args):
             print(f'忽略无法解析的 URL: {item}')
 
     if not refs:
-        auth = read_kaggle_auth(args)
+        if session is None:
+            session = new_session(args, args.slug)
         refs = list_competition_kernels(
-            args.slug, auth, retry=args.retry, proxy=args.proxy)
+            args.slug, session, sort_by=args.sort,
+            retry=args.retry, proxy=args.proxy, limit=args.num)
     return refs
 
 
-def pull_kernel(user, slug, auth=None, retry=5, proxy=None):
+def pull_kernel(user, slug, retry=5, proxy=None):
     """拉取单个笔记本，返回 (metadata, blob)。"""
     return kaggle_request(
-        'GET', KERNELS_PULL_URL, auth=auth,
+        'GET', KERNELS_PULL_URL,
         params={'userName': user, 'kernelSlug': slug},
         retry=retry, proxy=proxy,
     )
@@ -332,8 +437,8 @@ def fetch_kaggle(args):
     crawler_config['optiMode'] = 'none'
     crawler_config['imgSrc'] = ['data-src', 'src']
 
-    auth = read_kaggle_auth(args)
-    refs = resolve_kernel_refs(args)
+    # 只有需要按比赛列出笔记本时才建立会话；-f/--url 直接指定时无需 Cookie。
+    refs = resolve_kernel_refs(args, session=None)
     if not refs:
         print('没有找到任何笔记本')
         return
@@ -346,8 +451,7 @@ def fetch_kaggle(args):
         print(f'[{i}/{len(refs)}] 拉取 {ref}')
         try:
             data = pull_kernel(
-                user, slug, auth=auth,
-                retry=args.retry, proxy=args.proxy)
+                user, slug, retry=args.retry, proxy=args.proxy)
             article = kernel_to_article(
                 data.get('metadata'), data.get('blob'))
         except KeyboardInterrupt:
@@ -386,9 +490,11 @@ def reg_subparser(subparsers):
     parser.add_argument(
         "-n", "--num", type=int, default=20, help="最多导出的笔记本数量 (默认 20)")
     parser.add_argument(
-        "--kg-user", default='', help="Kaggle 用户名（默认读环境变量/kaggle.json）")
+        "-c", "--cookie", default='',
+        help="浏览器抓包得到的 Cookie 字符串（默认自动读取本机浏览器/匿名会话）")
     parser.add_argument(
-        "--kg-key", default='', help="Kaggle API Key（默认读环境变量/kaggle.json）")
+        "--sort", default='HOTNESS',
+        help="网页笔记本排序方式（默认 HOTNESS，如 DATE_CREATED/VOTE_COUNT）")
     parser.add_argument(
         "-f", "--file", help="笔记本 ref 列表文件（每行 owner/slug 或 Kaggle URL）")
     parser.add_argument(
