@@ -385,24 +385,6 @@ def md_body(text: str) -> str:
     return '\n'.join(out)
 
 
-def posts_to_md(title: str, meta_lines, sections) -> str:
-    """把帖子列表渲染为单个 Markdown 文档。
-
-    Args:
-        title:      文档一级标题。
-        meta_lines: 头部元信息行（不含 "- " 前缀），如 "关键词：openai"。
-        sections:   每篇帖子的 Markdown 段落，均以 "## " 二级标题开头。
-    """
-    lines = [f'# {title}', '']
-    lines.extend(f'- {m}' for m in meta_lines)
-    lines += ['', '---', '']
-    for i, sec in enumerate(sections):
-        if i:
-            lines += ['', '---', '']
-        lines.append(sec.rstrip())
-    return '\n'.join(lines) + '\n'
-
-
 def write_yaml_model(fname: str, obj) -> None:
     """将对象（含 pydantic 模型/列表）以 YAML 形式写入 fname。"""
     if isinstance(obj, BaseModel):

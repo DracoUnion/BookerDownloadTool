@@ -40,7 +40,7 @@ from pathlib import Path
 
 import httpx
 
-from .util import cookie_str_to_dict, posts_to_md, md_body
+from .util import cookie_str_to_dict, md_body, fname_escape
 from .ext_cookie import extract_cookies_multi_browsers
 
 # ---------------------------------------------------------------------------
@@ -180,11 +180,11 @@ def _mblog_date(mblog):
     return None
 
 
-def _mblog_md_section(mblog, idx):
-    """把一条博文渲染为 Markdown 段落（以 "## " 二级标题开头）。"""
+def _mblog_md_doc(mblog):
+    """把一条博文渲染为独立的 Markdown 文档。"""
     user = mblog.get("user") or {}
     screen = user.get("screen_name") or "未知用户"
-    lines = [f"## {idx}. @{screen}", ""]
+    lines = [f"# @{screen}", ""]
 
     meta = []
     ts = _mblog_date(mblog)
@@ -233,7 +233,7 @@ def _mblog_md_section(mblog, idx):
             lines.append(f"![图]({url})")
             lines.append("")
 
-    return "\n".join(lines).strip()
+    return "\n".join(lines).strip() + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -440,19 +440,12 @@ def weibo_fetch(args):
         print(f"[OK] 共抓取 {len(all_mblogs)} 条博文（未装 pandas，改用 json）: "
               f"{outdir / filename}")
 
-    # 额外输出一份 Markdown，便于人读
-    sections = [_mblog_md_section(m, i + 1) for i, m in enumerate(all_mblogs)]
-    meta_lines = [
-        f"关键词：{'、'.join(args.keywords)}",
-        f"时间范围：{args.since or '不限'} ~ {args.until or '不限'}",
-        f"条数：{len(all_mblogs)}",
-    ]
-    md_name = base_name + ".md"
-    (outdir / md_name).write_text(
-        posts_to_md(f"微博博文：{args.keywords[0]}", meta_lines, sections),
-        encoding="utf-8",
-    )
-    print(f"[OK] 已同时保存 Markdown: {outdir / md_name}")
+    # 额外输出：每条帖子一个独立 Markdown 文件
+    for i, mblog in enumerate(all_mblogs, 1):
+        mid = _mblog_key(mblog) or f"post_{i}"
+        md_path = outdir / f"{fname_escape(mid)}.md"
+        md_path.write_text(_mblog_md_doc(mblog), encoding="utf-8")
+    print(f"[OK] 已同时保存 {len(all_mblogs)} 个 Markdown 文件到: {outdir}")
 
     # 预览前几条
     print("\n[预览] 前 5 条：")

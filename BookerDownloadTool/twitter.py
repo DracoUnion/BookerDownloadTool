@@ -37,7 +37,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from .util import cookie_str_to_dict, posts_to_md, md_body
+from .util import cookie_str_to_dict, md_body, fname_escape
 from .ext_cookie import extract_cookies_multi_browsers
 
 
@@ -87,13 +87,13 @@ def _load_cookies(args):
 # ---------------------------------------------------------------------------
 # Markdown 渲染
 # ---------------------------------------------------------------------------
-def _tweet_md_section(t, idx):
-    """把一条推文渲染为 Markdown 段落（以 "## " 二级标题开头）。"""
+def _tweet_md_doc(t):
+    """把一条推文渲染为独立的 Markdown 文档。"""
     user = t.get("user") or {}
     screen = user.get("screen_name") or "未知用户"
     name = user.get("name")
-    header = f"## {idx}. @{screen}"
-    if name:
+    header = f"# @{screen}"
+    if name and name != screen:
         header += f"（{name}）"
     lines = [header, ""]
 
@@ -127,7 +127,7 @@ def _tweet_md_section(t, idx):
         lines.append(f"[视频]({url})")
         lines.append("")
 
-    return "\n".join(lines).strip()
+    return "\n".join(lines).strip() + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -238,21 +238,12 @@ def twitter_fetch(args):
         )
         print(f"[OK] 共抓取 {len(unique)} 条推文（未装 pandas，改用 json）: {outdir / filename}")
 
-    # 额外输出一份 Markdown，便于人读
-    sections = [_tweet_md_section(t, i + 1) for i, t in enumerate(unique)]
-    meta_lines = [
-        f"关键词：{'、'.join(args.keywords)}",
-        f"时间范围：{since} ~ {until}",
-        f"语言：{args.lang or '不限'}",
-        f"排序：{args.display_type}",
-        f"条数：{len(unique)}",
-    ]
-    md_name = base_name + ".md"
-    (outdir / md_name).write_text(
-        posts_to_md(f"推特推文：{args.keywords[0]}", meta_lines, sections),
-        encoding="utf-8",
-    )
-    print(f"[OK] 已同时保存 Markdown: {outdir / md_name}")
+    # 额外输出：每条帖子一个独立 Markdown 文件
+    for i, t in enumerate(unique, 1):
+        tid = t.get("tweet_id") or t.get("id") or f"tweet_{i}"
+        md_path = outdir / f"{fname_escape(str(tid))}.md"
+        md_path.write_text(_tweet_md_doc(t), encoding="utf-8")
+    print(f"[OK] 已同时保存 {len(unique)} 个 Markdown 文件到: {outdir}")
 
     # 预览前几条
     print("\n[预览] 前 5 条：")
