@@ -16,6 +16,10 @@ scweet
 httpx
 xhshow
 websocket-client
+ddddocr
+numpy
+opencv-python
+tqdm
 openai
 pyyaml
 pydantic
