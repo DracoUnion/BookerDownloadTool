@@ -20,8 +20,7 @@ import cv2
 import numpy as np
 import ddddocr
 
-from .util import request_retry, fname_escape, to_kebab
-from .cdp import cdp_create_driver, CdpPage
+from .util import plrt_create_driver, request_retry, fname_escape, to_kebab
 
 HOST = 'annas-archive.gl'
 
@@ -93,13 +92,34 @@ def recognize_captcha(img_data):
     return ocr.classification(processed_bytes)
 
 
-def is_captcha_challenge(page: CdpPage, el_chk: str):
+def wait_for_iframe_selector(page, iframe_sel: str, el_sel: str, timeout_ms=50_000):
+    """轮询等待 iframe 内的元素出现，等价于 page.wait_for_selector()。"""
+    expr = f'''
+        (() => {{
+            const iframe = document.querySelector('{iframe_sel}');
+            if (!iframe) return false;
+            const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+            return !!innerDoc.querySelector('{el_sel}');
+        }})()
+    '''
+    deadline = time.time() + timeout_ms / 1000.0
+    while time.time() < deadline:
+        try:
+            if page.evaluate(expr):
+                return True
+        except Exception:
+            pass
+        time.sleep(0.5)
+    raise TimeoutError(f'等待 iframe 内选择器超时（{timeout_ms}ms）：{el_sel}')
+
+
+def is_captcha_challenge(page, el_chk: str):
     """判断当前页面是否被 DDoS-Guard 拦住。"""
     page.wait_for_selector(selectors['captcha_iframe'] + ', ' + el_chk)
     return bool(page.evaluate(_DDOS_DETECT_JS))
 
 
-def wait_for_captcha_img(page: CdpPage):
+def wait_for_captcha_img(page):
     """轮询验证码图片地址，等待图片加载为 data URL。"""
     while True:
         img_url = page.evaluate(f'''
@@ -114,13 +134,11 @@ def wait_for_captcha_img(page: CdpPage):
         time.sleep(0.5)
 
 
-def wait_for_captcha_clear(page: CdpPage, el_chk: str, timeout_ms=600_000):
+def wait_for_captcha_clear(page, el_chk: str, timeout_ms=600_000):
     """识别并提交验证码，然后刷新页面等待验证通过。"""
     print('等待验证码模块加载...')
-    page.wait_for_iframe_selector(
-        selectors['captcha_iframe'],
-        selectors['captcha_div'],
-    )
+    page.wait_for_selector(selectors['captcha_iframe'], timeout=timeout_ms)
+    wait_for_iframe_selector(page, selectors['captcha_iframe'], selectors['captcha_div'])
     time.sleep(1)
 
     print('点击人机验证按钮...')
@@ -134,10 +152,7 @@ def wait_for_captcha_clear(page: CdpPage, el_chk: str, timeout_ms=600_000):
     time.sleep(1)
 
     print('等待验证码图片加载...')
-    page.wait_for_iframe_selector(
-        selectors['captcha_iframe'],
-        selectors['captcha_img'],
-    )
+    wait_for_iframe_selector(page, selectors['captcha_iframe'], selectors['captcha_img'])
     img_url = wait_for_captcha_img(page)
     print('img_url: ' + img_url[:50] + '...')
     img_data = base64.b64decode(img_url[len('data:image/png;base64,'):])
@@ -159,27 +174,28 @@ def wait_for_captcha_clear(page: CdpPage, el_chk: str, timeout_ms=600_000):
 
 # ─────────────────────────── 页面抓取与重试 ───────────────────────────
 
-def cdp_get_html(page: CdpPage, url: str, el_chk: str = None,
-                 ddos_timeout_ms=600_000, label='', headless=False) -> str:
+def plrt_get_html(page, url: str, el_chk: str = None, ddos_timeout_ms=600_000,
+                  label='', headless=False) -> str:
     """导航页面，必要时自动识别并提交 DDoS-Guard 验证码。"""
     page.goto(url)
+    page.wait_for_load_state('domcontentloaded')
     while is_captcha_challenge(page, el_chk):
         wait_for_captcha_clear(page, el_chk, ddos_timeout_ms)
     if el_chk:
-        page.wait_for_selector(el_chk)
-    return page.html()
+        page.wait_for_selector(el_chk, timeout=50_000)
+    return page.content()
 
 
-def cdp_get_html_retry(page: CdpPage, url: str, el_chk: str = None, retry: int = 10,
-                       ddos_timeout_ms=600_000, label='', headless=False) -> str:
+def plrt_get_html_retry(page, url: str, el_chk: str = None, retry: int = 10,
+                        ddos_timeout_ms=600_000, label='', headless=False) -> str:
     """带重试的页面抓取；每次重试都会重新导航并处理验证码。"""
     for i in range(retry):
         try:
-            return cdp_get_html(page, url, el_chk, ddos_timeout_ms, label, headless)
+            return plrt_get_html(page, url, el_chk, ddos_timeout_ms, label, headless)
         except KeyboardInterrupt:
             raise
         except Exception:
-            print(f'cdp_get_html retry #{i + 1}')
+            print(f'plrt_get_html retry #{i + 1}')
             traceback.print_exc()
             if i == retry - 1:
                 raise
@@ -226,7 +242,7 @@ def annas_fetch(args):
     # &content=book_unknown&ext=pdf&ext=epub&lang=en&display=&q=tarot
     headless = getattr(args, 'headless', False)
     ddos_timeout_ms = getattr(args, 'ddos_timeout', 600) * 1000
-    with cdp_create_driver(headless) as page:
+    with plrt_create_driver(headless) as (browser, context, page):
         f = open(args.ofname, 'a', encoding='utf8')
         qry_ext = ''.join(f'&ext={e}' for e in args.ext)
         qry_cont = ''.join(f'&content={c}' for c in args.content)
@@ -239,8 +255,8 @@ def annas_fetch(args):
                 f'{qry_ext}{qry_cont}{qry_lang}{qry_yr}'
             )
             print(url)
-            html = cdp_get_html_retry(page, url, '.header-inner-top', args.retry,
-                                      ddos_timeout_ms, f'search:{i}', headless)
+            html = plrt_get_html_retry(page, url, '.header-inner-top', args.retry,
+                                       ddos_timeout_ms, f'search:{i}', headless)
             rt = pq(html)
             el_links = rt.find('a.text-lg[href^="/md5/"]')
             if not el_links:
@@ -262,11 +278,11 @@ def annas_fetch(args):
 def download_annas(args):
     headless = getattr(args, 'headless', False)
     ddos_timeout_ms = getattr(args, 'ddos_timeout', 600) * 1000
-    with cdp_create_driver(headless) as page:
+    with plrt_create_driver(headless) as (browser, context, page):
         hash_ = args.hash
         url = f'https://{HOST}/md5/{hash_}'
-        html = cdp_get_html_retry(page, url, '.text-gray-800', args.retry,
-                                  ddos_timeout_ms, f'md5:{hash_}', headless)
+        html = plrt_get_html_retry(page, url, '.text-gray-800', args.retry,
+                                   ddos_timeout_ms, f'md5:{hash_}', headless)
         rt = pq(html)
         title = rt.find('div.font-semibold:nth-child(4)') \
             .text().strip().replace(' 🔍', '')
@@ -288,8 +304,8 @@ def download_annas(args):
         url = pq(random.choice(el_links_li)).children('a').attr('href')
         url = f'https://{HOST}{url}'
         # url = f'https://{HOST}/slow_download/{hash_}/0/{idx}'
-        html = cdp_get_html_retry(page, url, '.bg-gray-200', args.retry,
-                                  ddos_timeout_ms, f'slow:{hash_}', headless)
+        html = plrt_get_html_retry(page, url, '.bg-gray-200', args.retry,
+                                   ddos_timeout_ms, f'slow:{hash_}', headless)
         rt = pq(html)
         link = rt.find('.bg-gray-200').eq(0).text().strip()
         r = request_retry('GET', link, headers=dft_hdr, stream=True,
