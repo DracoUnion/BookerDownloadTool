@@ -186,6 +186,7 @@ def whole_site(args):
         print('\n'.join(urls))
         ofile.write('\n'.join(urls) + '\n')
     ofile.close()
+    print(name + '.txt')
     '''
     while q:
         # 取出指定数量的链接
