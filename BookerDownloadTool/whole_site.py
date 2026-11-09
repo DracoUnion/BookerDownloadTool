@@ -143,6 +143,8 @@ def whole_site(args):
 
     site = args.site
     dbname = args.db
+    if not dbname:
+        dbname = re.sub(r'[^\w\-\.]', '-', site) + '.db'
     if not dbname.endswith('.db'):
         print('数据库文件扩展名必须是 DB')
         return
@@ -227,7 +229,7 @@ def exp_whole_site(args):
 def reg_subparser(subparsers):
     whole_site_parser = subparsers.add_parser("whole-site", help="爬取整站 URL")
     whole_site_parser.add_argument("site", help="站点 URL")
-    whole_site_parser.add_argument("db", help="数据库文件名")
+    whole_site_parser.add_argument("--db", help="数据库文件名")
     whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="重试次数")
     whole_site_parser.add_argument("-p", "--proxy", help="代理")
     whole_site_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
