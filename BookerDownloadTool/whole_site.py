@@ -142,12 +142,9 @@ def whole_site(args):
     global lock_get
 
     site = args.site
-    dbname = args.db
-    if not dbname:
-        dbname = re.sub(r'[^\w\-\.]', '-', site) + '.db'
-    if not dbname.endswith('.db'):
-        print('数据库文件扩展名必须是 DB')
-        return
+    name = args.name
+    if not name:
+        name = re.sub(r'[^\w\-\.]', '-', site)
     pres = urlparse(site)
     hdrs['Referer'] = f'{pres.scheme}://{pres.hostname}'
     if args.proxy: 
@@ -156,7 +153,7 @@ def whole_site(args):
         hdrs['Cookie'] = args.cookie
     
     # 创建数据库
-    Session = get_session_maker(dbname)
+    Session = get_session_maker(name + '.db')
     Base.metadata.create_all(Session.kw['bind'])
 
     # 初始化数据库
@@ -181,6 +178,14 @@ def whole_site(args):
     for tr in trs:
         tr.join()
     
+    ofile = open(name + '.txt', 'w', encoding='utf8')
+    cnt = sess.query(UrlRecord).count()
+    for i in range(0, cnt, args.batch_size):
+        recs = sess.query(UrlRecord).offset(i).limit(args.batch_size)
+        urls = [r.url for r in recs]
+        print('\n'.join(urls))
+        ofile.write('\n'.join(urls) + '\n')
+    ofile.close()
     '''
     while q:
         # 取出指定数量的链接
@@ -206,30 +211,10 @@ def whole_site(args):
                 rec_file.write(n + '\n')
     '''
 
-def exp_whole_site(args):
-    dbname = args.db
-    if not dbname.endswith('.db'):
-        print('请提供 DB 文件')
-        return
-
-    # 创建数据库
-    Session = get_session_maker(dbname)
-    Base.metadata.create_all(Session.kw['bind'])
-    
-    sess = Session()
-    ofile = open(dbname[:-3] + '.txt', 'w', encoding='utf8')
-    cnt = sess.query(UrlRecord).count()
-    for i in range(0, cnt, args.batch_size):
-        recs = sess.query(UrlRecord).offset(i).limit(args.batch_size)
-        urls = [r.url for r in recs]
-        print('\n'.join(urls))
-        ofile.write('\n'.join(urls) + '\n')
-    ofile.close()
-
 def reg_subparser(subparsers):
     whole_site_parser = subparsers.add_parser("whole-site", help="爬取整站 URL")
     whole_site_parser.add_argument("site", help="站点 URL")
-    whole_site_parser.add_argument("--db", help="数据库文件名")
+    whole_site_parser.add_argument("-n", "--name", help="数据库及输出文件名（不带扩展名）")
     whole_site_parser.add_argument("-r", "--retry", type=int, default=10, help="重试次数")
     whole_site_parser.add_argument("-p", "--proxy", help="代理")
     whole_site_parser.add_argument("-t", "--threads", type=int, default=8, help="线程数")
@@ -237,9 +222,12 @@ def reg_subparser(subparsers):
     whole_site_parser.add_argument("-B", "--nonblank", help="非空元素选择器，为空则校验失败")
     whole_site_parser.add_argument("--re", help="匹配链接的正则")
     whole_site_parser.add_argument("--qs", action='store_true', help="是否考虑 query string")
+    whole_site_parser.add_argument("-bs", "--batch-size", type=int, default=1000, help="数据库文件名")
     whole_site_parser.set_defaults(func=whole_site)
 
+    '''
     exp_whole_site_parser = subparsers.add_parser("exp-whole-site", help="导出整站 URL")
     exp_whole_site_parser.add_argument("db", help="数据库文件名")
     exp_whole_site_parser.add_argument("-s", "--batch-size", type=int, default=1000, help="数据库文件名")
     exp_whole_site_parser.set_defaults(func=exp_whole_site)
+    '''
