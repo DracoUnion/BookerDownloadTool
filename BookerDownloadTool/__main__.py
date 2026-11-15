@@ -3,10 +3,9 @@ import os
 import sys
 from . import __version__
 from . import (
-    annas, arxiv, bili_ai_proj, discuz, dl_gh_book, ext_cookie, feishu,
+    annas, arxiv, discuz, dl_gh_book, ext_cookie, feishu,
     freembook, gh, hkrnws, kaggle, lightnovel, links, medium, pic, so, uqer,
-    webarchive, weibo, whole_site, wenku, wx, wx_summary, yuque, zhihu,
-    zhihu_radar, zsxq, twitter, xhs,
+    webarchive, weibo, whole_site, wenku, wx, yuque, zhihu, zsxq, twitter, xhs,
 )
 
 
@@ -72,10 +71,6 @@ def main():
     weibo.reg_subparser(subparsers)
     xhs.reg_subparser(subparsers)
     so.reg_subparser(subparsers)
-
-    bili_ai_proj.reg_subparser(subparsers)
-    zhihu_radar.reg_subparser(subparsers)
-    wx_summary.reg_subparser(subparsers)
 
     args = parser.parse_args()
     args.func(args)
