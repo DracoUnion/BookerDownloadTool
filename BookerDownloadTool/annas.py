@@ -20,7 +20,13 @@ import cv2
 import numpy as np
 import ddddocr
 
-from .util import plrt_create_driver, request_retry, fname_escape, to_kebab
+from .util import (
+    plrt_create_driver, 
+    camou_create_driver, 
+    request_retry, 
+    fname_escape, 
+    to_kebab
+)
 
 HOST = 'annas-archive.gl'
 
@@ -242,7 +248,8 @@ def annas_fetch(args):
     # &content=book_unknown&ext=pdf&ext=epub&lang=en&display=&q=tarot
     headless = getattr(args, 'headless', False)
     ddos_timeout_ms = getattr(args, 'ddos_timeout', 600) * 1000
-    with plrt_create_driver(headless) as (browser, context, page):
+    create_driver = camou_create_driver if args.camou else plrt_create_driver
+    with create_driver(headless) as (browser, context, page):
         f = open(args.ofname, 'a', encoding='utf8')
         qry_ext = ''.join(f'&ext={e}' for e in args.ext)
         qry_cont = ''.join(f'&content={c}' for c in args.content)
@@ -278,7 +285,8 @@ def annas_fetch(args):
 def download_annas(args):
     headless = getattr(args, 'headless', False)
     ddos_timeout_ms = getattr(args, 'ddos_timeout', 600) * 1000
-    with plrt_create_driver(headless) as (browser, context, page):
+    create_driver = camou_create_driver if args.camou else plrt_create_driver
+    with create_driver(headless) as (browser, context, page):
         hash_ = args.hash
         url = f'https://{HOST}/md5/{hash_}'
         html = plrt_get_html_retry(page, url, '.text-gray-800', args.retry,
@@ -367,6 +375,7 @@ def reg_subparser(subparsers):
     annas_batch_parser.add_argument("--ddos-timeout", type=int, default=600,
                                     help="验证码识别最长等待秒数")
     annas_batch_parser.add_argument("-H", "--headless", action='store_true', help="无头模式")
+    annas_batch_parser.add_argument("--camou", action='store_true', help="是否采用 Camoufox")
     annas_batch_parser.set_defaults(func=annas_batch)
 
     annas_fetch_parser = subparsers.add_parser("annas-fetch", help="下载文件")
@@ -383,9 +392,11 @@ def reg_subparser(subparsers):
                                     help="验证码识别最长等待秒数")
     annas_fetch_parser.add_argument("-y", "--year", type=int, help="年份")
     annas_fetch_parser.add_argument("-H", "--headless", action='store_true', help="无头模式")
+    annas_fetch_parser.add_argument("--camou", action='store_true', help="是否采用 Camoufox")
     annas_fetch_parser.set_defaults(func=annas_fetch)
 
     annas_dedup_parser = subparsers.add_parser("annas-dedup", help="去重文件")
     annas_dedup_parser.add_argument("flist", help="JSONL 列表文件")
     annas_dedup_parser.add_argument("-s", "--sim", type=float, default=0.8, help="相似度")
+    annas_dedup_parser.add_argument("--camou", action='store_true', help="是否采用 Camoufox")
     annas_dedup_parser.set_defaults(func=annas_dedup)
