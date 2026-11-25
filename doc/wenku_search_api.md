@@ -162,6 +162,14 @@ User-Agent: Mozilla/5.0 ... Chrome/124.0.0.0 Safari/537.36
 
 ```bash
 bdt wenku-fetch 人工智能                    # 写入 人工智能.txt
-bdt wenku-fetch 人工智能 -n 3 -o links.txt  # 抓 3 页
+bdt wenku-fetch 人工智能 -n 3 -o ids.txt     # 抓 3 页
 bdt wenku-fetch 人工智能 --format 2 --type 3   # 只要 pdf 且免费
+```
+
+- `BookerDownloadTool/wenku_batch.py`：单文件函数式实现——读取上述 doc_id 列表，复用 `wenku.py` 的
+  `fetch_doc_info` / `build_page_url` / `_download_page` 多线程批量合成 PDF。
+
+```bash
+bdt wenku-batch ids.txt -d out              # 批量下载
+bdt wenku-batch ids.txt -d out -s 1 -e 3    # 每个文档只取前 3 页
 ```

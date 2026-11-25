@@ -83,6 +83,7 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `ln` / `batch-ln` / `fetch-ln` | 下载 / 批量下载 / 按日期抓取 wenku8 轻小说 | EPUB / id 列表 |
 | `wenku` | 下载百度文库预览文档 | PDF |
 | `wenku-fetch` | 搜索百度文库文档，保存结果文档 ID | txt |
+| `wenku-batch` | 按 doc_id 列表批量下载百度文库文档 | PDF |
 | `zhihu-ques` / `zhihu-ques-batch` | 抓取知乎问题下的回答 | EPUB |
 | `zhihu-topic` / `zhihu-topic-batch` / `zhihu-topics` | 抓取知乎话题下的问题、递归抓取子话题 | id 列表 |
 | `dz` / `fetch-dz` / `batch-dz` | 下载 Discuz 论坛帖子 / 抓取 tid / 批量下载 | EPUB / id 列表 |
@@ -199,6 +200,22 @@ bdt wenku-fetch 人工智能 --format 2 --type 3
 `--type`（0 不限 / 1 VIP专享 / 3 免费 / 4 精品）、`--sort`（0 最高相关 / 1 最新上线 / 2 最多下载 / 3 最高评分）。
 抓取结果缓存在 `.wenku-fetch-cache/`（已在 .gitignore 中忽略），用 `--refresh` 强制刷新、`--no-cache` 关闭缓存。
 输出的 doc_id 可直接配合 `bdt wenku <doc_id>` 下载预览文档。
+
+`wenku-batch` 读取 `wenku-fetch` 输出的 doc_id 列表，多线程批量下载预览 PDF（复用 `wenku` 的接口与页面下载逻辑）：
+
+```bash
+# 下载 ids.txt 中的全部文档到 out 目录（默认 4 个文档并发、每个文档 4 页并发）
+bdt wenku-batch ids.txt -d out
+
+# 每个文档只取前 3 页，便于快速验证；8 个文档并发
+bdt wenku-batch ids.txt -d out -s 1 -e 3 --threads 8
+
+# 强制覆盖已下载的 PDF（默认跳过已存在的文件）
+bdt wenku-batch ids.txt -d out --overwrite
+```
+
+输入文件每行一个 doc_id（也兼容 `/view/<doc_id>.html` 完整链接），空行、`#` 注释行与非法行会被忽略并自动去重。
+单个文档失败不影响其它文档，最后输出「成功 / 跳过 / 失败」汇总。
 
 ### Discuz 论坛
 
