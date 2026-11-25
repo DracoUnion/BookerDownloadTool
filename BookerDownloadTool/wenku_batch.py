@@ -105,7 +105,7 @@ def download_doc(doc_id: str, args) -> dict:
     headers = default_hdrs.copy()
     headers['Referer'] = f'https://wenku.baidu.com/view/{doc_id}.html'
 
-    info = fetch_doc_info(doc_id, headers=headers, proxy=args.proxy, retry=args.retries)
+    info = fetch_doc_info(doc_id, headers=headers, proxy=args.proxy, retry=args.retry)
     pages, note = pick_page_range(info, args.start, args.end)
     if note:
         print_locked(f'提示：{doc_id} {note}')
@@ -123,7 +123,7 @@ def download_doc(doc_id: str, args) -> dict:
         futures = {
             pool.submit(
                 _download_page, page, build_page_url(info, page),
-                headers, args.proxy, args.retries,
+                headers, args.proxy, args.retry,
             ): page
             for page in pages
         }
@@ -170,7 +170,7 @@ def wenku_batch(args) -> dict:
 
     os.makedirs(args.dir, exist_ok=True)
     stats = Counter()
-    with ThreadPoolExecutor(max_workers=args.threads) as pool:
+    with ThreadPoolExecutor(max_workers=args.file_threads) as pool:
         futures = {pool.submit(download_doc, doc_id, args): doc_id for doc_id in doc_ids}
         for future in as_completed(futures):
             doc_id = futures[future]
@@ -206,10 +206,10 @@ def reg_subparser(subparsers):
     p.add_argument('-d', '--dir', default='.', help='输出目录，默认当前目录')
     p.add_argument('-s', '--start', type=int, default=1, help='起始页（从 1 开始），默认 1')
     p.add_argument('-e', '--end', type=int, help='结束页，默认至文档可预览的末页')
-    p.add_argument('--threads', type=int, default=4, help='并发下载的文档数，默认 4')
-    p.add_argument('--page-threads', type=int, default=4,
+    p.add_argument('-ft', '--file-threads', type=int, default=4, help='并发下载的文档数，默认 4')
+    p.add_argument('-pt', '--page-threads', type=int, default=4,
                    help='单个文档内并发下载的页数，默认 4（总并发数约为两者之积）')
-    p.add_argument('--proxy', default='', help='HTTP/HTTPS 代理地址')
-    p.add_argument('--retries', type=int, default=10, help='每页重试次数，默认 10')
-    p.add_argument('--overwrite', action='store_true', help='覆盖已存在的 PDF（默认跳过）')
+    p.add_argument('-pr', '--proxy', default='', help='HTTP/HTTPS 代理地址')
+    p.add_argument('-r', '--retry', type=int, default=10, help='每页重试次数')
+    p.add_argument('-ow', '--overwrite', action='store_true', help='覆盖已存在的 PDF（默认跳过）')
     p.set_defaults(func=wenku_batch_handle)
