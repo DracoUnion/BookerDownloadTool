@@ -158,9 +158,7 @@ User-Agent: Mozilla/5.0 ... Chrome/124.0.0.0 Safari/537.36
 
 ## 6. 本项目实现
 
-- `BookerDownloadTool/wenku_fetch_agent.py`：调用接口、解析 `wk_doc` 卡片、按 `doc_id` 去重、本地 YAML 缓存。
-- `BookerDownloadTool/wenku_fetch_models.py`：`WenkuDoc` / `WenkuSearchResult` 模型。
-- `BookerDownloadTool/wenku_fetch.py`：编排器与命令行参数，输出文档链接（一行一个）到 `{关键词}.txt`。
+- `BookerDownloadTool/wenku_fetch.py`：单文件函数式实现——调用接口、解析 `wk_doc` 卡片、按 `doc_id` 去重、本地 YAML 缓存、输出文档 ID（一行一个）到 `{关键词}.txt`。
 
 ```bash
 bdt wenku-fetch 人工智能                    # 写入 人工智能.txt

@@ -1,4 +1,4 @@
-"""wenku-fetch 子命令：搜索百度文库文档，把结果文档链接写入文件。
+"""wenku-fetch 子命令：搜索百度文库文档，把结果文档 ID 写入文件。
 
 逆向自百度文库 PC 端搜索页前端接口 `POST /gsearch/search/newallsearch`（详见
 doc/wenku_search_api.md）。全部实现为函数，无分层（无 agent/编排器）。
@@ -253,15 +253,15 @@ def search_docs(keyword: str, pages: int = 1, page_size: int = 10,
 # ── 输出 ────────────────────────────────────────────────
 
 def write_links(res: WenkuSearchResult, output: str) -> str:
-    """把文档链接写入输出文件（一行一个链接）。"""
+    """把文档 ID 写入输出文件（一行一个 doc_id）。"""
     ofname = output or default_output_name(res.keyword)
     outdir = path.dirname(path.abspath(ofname))
     os.makedirs(outdir, exist_ok=True)
-    links = [doc.url for doc in res.docs if doc.url]
+    ids = [doc.doc_id for doc in res.docs if doc.doc_id]
     with open(ofname, 'w', encoding='utf8') as f:
-        f.write('\n'.join(links) + ('\n' if links else ''))
-    logger.info('已写入 %d 条链接：%s', len(links), ofname)
-    print(f'已保存 {len(links)} 条文档链接：{ofname}')
+        f.write('\n'.join(ids) + ('\n' if ids else ''))
+    logger.info('已写入 %d 条 doc_id：%s', len(ids), ofname)
+    print(f'已保存 {len(ids)} 条文档 ID：{ofname}')
     return ofname
 
 
@@ -321,7 +321,7 @@ def wenku_fetch_handle(args):
 def reg_subparser(subparsers):
     """在子解析器中注册 wenku-fetch 子命令。"""
     p = subparsers.add_parser(
-        'wenku-fetch', help='搜索百度文库文档，把结果文档链接保存到文件')
+        'wenku-fetch', help='搜索百度文库文档，把结果文档 ID 保存到文件')
     p.add_argument('keyword', help='搜索关键词')
     p.add_argument('-o', '--output', default='',
                    help='输出文件名，默认 {关键词}.txt')
