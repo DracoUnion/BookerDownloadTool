@@ -82,6 +82,7 @@ bdt <命令> -h   # 查看某个子命令的帮助
 | `gh-book` | 抓取 GitHub 仓库的书籍（SUMMARY.md） | EPUB |
 | `ln` / `batch-ln` / `fetch-ln` | 下载 / 批量下载 / 按日期抓取 wenku8 轻小说 | EPUB / id 列表 |
 | `wenku` | 下载百度文库预览文档 | PDF |
+| `wenku-fetch` | 搜索百度文库文档，保存结果文档链接 | txt |
 | `zhihu-ques` / `zhihu-ques-batch` | 抓取知乎问题下的回答 | EPUB |
 | `zhihu-topic` / `zhihu-topic-batch` / `zhihu-topics` | 抓取知乎话题下的问题、递归抓取子话题 | id 列表 |
 | `dz` / `fetch-dz` / `batch-dz` | 下载 Discuz 论坛帖子 / 抓取 tid / 批量下载 | EPUB / id 列表 |
@@ -179,6 +180,25 @@ bdt wenku <doc_id> -s 1 -e 5 -t 8 -d out
 ```
 
 也可以使用 `-o/--output` 指定 PDF 文件名；页面下载失败时不会生成不完整的 PDF。
+
+`wenku-fetch` 走百度文库检索接口（`POST /gsearch/search/newallsearch`，详见 `doc/wenku_search_api.md`），
+按关键词搜索文档并把文档链接一行一个地写入文件，默认输出 `{关键词}.txt`：
+
+```bash
+# 搜索“人工智能”，结果链接写入 人工智能.txt
+bdt wenku-fetch 人工智能
+
+# 抓取 3 页（每页 10 条），写入指定文件
+bdt wenku-fetch 人工智能 -n 3 -o links.txt
+
+# 只看 pdf 格式、免费文档
+bdt wenku-fetch 人工智能 --format 2 --type 3
+```
+
+筛选项与网页端一致：`--format`（0 不限 / 1 doc / 2 pdf / 3 ppt / 4 xls / 5 txt）、
+`--type`（0 不限 / 1 VIP专享 / 3 免费 / 4 精品）、`--sort`（0 最高相关 / 1 最新上线 / 2 最多下载 / 3 最高评分）。
+抓取结果缓存在 `.wenku-fetch-cache/`（已在 .gitignore 中忽略），用 `--refresh` 强制刷新、`--no-cache` 关闭缓存。
+输出的链接可直接配合 `bdt wenku <doc_id>` 下载预览文档。
 
 ### Discuz 论坛
 

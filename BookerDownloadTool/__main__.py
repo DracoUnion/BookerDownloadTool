@@ -5,7 +5,8 @@ from . import __version__
 from . import (
     annas, arxiv, discuz, dl_gh_book, ext_cookie, feishu,
     freembook, gh, hkrnws, kaggle, lightnovel, links, medium, pic, so, uqer,
-    webarchive, weibo, whole_site, wenku, wx, yuque, zhihu, zsxq, twitter, xhs,
+    webarchive, weibo, whole_site, wenku, wenku_fetch, wx, yuque, zhihu, zsxq,
+    twitter, xhs,
 )
 
 
@@ -64,6 +65,7 @@ def main():
     hkrnws.reg_subparser(subparsers)
     pic.reg_subparser(subparsers)
     wenku.reg_subparser(subparsers)
+    wenku_fetch.reg_subparser(subparsers)
     annas.reg_subparser(subparsers)
     kaggle.reg_subparser(subparsers)
     ext_cookie.reg_subparser(subparsers)

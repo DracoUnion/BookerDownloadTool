@@ -122,3 +122,6 @@ _xhs_decompile/
 _xhs_data/
 tweets/
 xhs/
+
+# 百度文库搜索子命令的本地缓存
+.wenku-fetch-cache/
